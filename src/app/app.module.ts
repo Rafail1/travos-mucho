@@ -8,7 +8,6 @@ import { CanvasModule } from './canvas/canvas.module';
 @NgModule({
   declarations: [AppComponent],
   imports: [BrowserModule, AppRoutingModule, CanvasModule],
-  providers: [],
   bootstrap: [AppComponent],
 })
 export class AppModule {}
