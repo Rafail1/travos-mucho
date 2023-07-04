@@ -1,6 +1,7 @@
 import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
 import { CanvasService } from './canvas/canvas.service';
 import { Bar } from './canvas/atoms/bar/bar';
+import { Glass } from './canvas/molecules/glass/glass';
 
 @Component({
   selector: 'app-root',
@@ -14,34 +15,19 @@ export class AppComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
     const ctx = this.canvasService.getCanvas(this.canvas.nativeElement);
-    const bar = new Bar();
-    bar.render(ctx, {
-      x: 0,
-      y: 0,
-      width: 500,
-      height: 16,
-      max: 1_000_000,
-      value: 400_000,
-      thresholds: [
-        {
-          value: 200_000,
-          fillColor: '#ff0000',
-          textColor: '#ffffff',
-          backgroundColor: '#00FF00',
-        },
-        {
-          value: 400_000,
-          fillColor: '#00ff00',
-          textColor: '#0000ff',
-          backgroundColor: '#00dd00',
-        },
-        {
-          value: 800_000,
-          fillColor: '#0000ff',
-          textColor: '#00ffff',
-          backgroundColor: '#0000dd',
-        },
-      ],
-    });
+    const glass = new Glass();
+    this.draw(ctx, glass);
+  }
+
+  draw(ctx: CanvasRenderingContext2D, glass: Glass) {
+    ctx.clearRect(0, 0, 500, 500);
+    glass.render(
+      ctx,
+      Array.from({ length: 100 }).map((_, idx) => ({
+        price: (10000 + idx).toString(),
+        value: `${Math.random() * 500000 + 500_000}`,
+      }))
+    );
+    requestAnimationFrame(() => this.draw(ctx, glass));
   }
 }

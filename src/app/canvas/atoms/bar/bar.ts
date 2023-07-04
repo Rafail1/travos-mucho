@@ -8,22 +8,23 @@ import { shortNumber } from '../../../common/utils/short-number.util';
 
 export class Bar {
   public render(ctx: CanvasRenderingContext2D, options: IBar) {
-    const {
-      fillRectWidth,
-      value,
-      abbrev,
-      backgroundColor,
-      fillColor = DEFAULT_BAR_FILL_COLOR,
-      textColor = DEFAULT_BAR_TEXT_COLOR,
-    } = this.calculate(options);
+    if (options.value) {
+      const {
+        fillRectWidth,
+        value,
+        abbrev,
+        backgroundColor,
+        shortPrice,
+        fillColor = DEFAULT_BAR_FILL_COLOR,
+        textColor = DEFAULT_BAR_TEXT_COLOR,
+      } = this.calculate(options);
 
-    ctx.fillStyle = backgroundColor || DEFAULT_BAR_BG_COLOR;
-    ctx.fillRect(options.x, options.y, options.width, options.height);
+      ctx.fillStyle = backgroundColor || DEFAULT_BAR_BG_COLOR;
+      ctx.fillRect(options.x, options.y, options.width, options.height);
 
-    ctx.fillStyle = fillColor;
-    ctx.fillRect(options.x, options.y, fillRectWidth, options.height);
+      ctx.fillStyle = fillColor;
+      ctx.fillRect(options.x, options.y, fillRectWidth, options.height);
 
-    if (value) {
       ctx.font = `${options.height - 2}px Georgia`;
       ctx.textAlign = 'left';
       ctx.textBaseline = 'middle';
@@ -32,6 +33,16 @@ export class Bar {
       ctx.fillText(
         `${value}${abbrev}`,
         options.x + 4,
+        options.y + options.height / 2
+      );
+
+      const { width } = ctx.measureText(
+        `${shortPrice.value}${shortPrice.abbrev}`
+      );
+
+      ctx.fillText(
+        `${shortPrice.value}${shortPrice.abbrev}`,
+        options.width - width - 4,
         options.y + options.height / 2
       );
     }
@@ -45,6 +56,7 @@ export class Bar {
     fillColor,
     textColor,
     backgroundColor,
+    price,
   }: IBar) {
     const fillRectWidth = Math.min(width * (value / max), width);
 
@@ -54,7 +66,14 @@ export class Bar {
       backgroundColor,
     };
 
-    return { fillRectWidth, ...currentThreshold, ...shortNumber(value) };
+    const shortPrice = shortNumber(price);
+
+    return {
+      fillRectWidth,
+      ...currentThreshold,
+      ...shortNumber(value),
+      shortPrice,
+    };
   }
 
   private calculateThreshold(thresholds: IThreshold[] = [], value: number = 0) {

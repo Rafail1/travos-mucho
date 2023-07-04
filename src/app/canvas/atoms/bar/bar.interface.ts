@@ -8,13 +8,17 @@ export interface IThreshold {
   cb?: CallbackFunctionVariadicAnyReturn;
 }
 
-export interface IBar {
-  max: number;
+export interface IBarData {
+  y: number;
+  x: number;
+  price: number;
   value: number;
+}
+
+export interface IBar extends IBarData {
+  max: number;
   width: number;
   height: number;
-  x: number;
-  y: number;
   thresholds?: Array<IThreshold>;
   fillColor?: string;
   textColor?: string;
