@@ -5,30 +5,35 @@ import {
 } from 'src/app/config/constants';
 import { shortNumber } from '../../../common/utils/short-number.util';
 import { IBarData, IThreshold } from './bar.interface';
-import { Injectable } from '@angular/core';
+import { Injectable, Inject } from '@angular/core';
+import { CANVAS_CTX } from 'src/app/app.component';
+import { ConfigService } from 'src/app/config/config';
 
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class Bar {
-  
-  constructor(private ctx: CanvasRenderingContext2D) {}
-  public render(options: IBarData) {
+  constructor(
+    @Inject(CANVAS_CTX) private ctx: CanvasRenderingContext2D,
+    private configService: ConfigService
+  ) {}
+
+  public render({ value, y, price }: IBarData) {
     const ctx = this.ctx;
-    if (options.value) {
+    const options = this.configService.getConfig('foo');
+    if (value) {
       const {
         fillRectWidth,
-        value,
-        abbrev,
+        shortValue,
         backgroundColor,
         shortPrice,
         fillColor = DEFAULT_BAR_FILL_COLOR,
         textColor = DEFAULT_BAR_TEXT_COLOR,
-      } = this.calculate(options);
+      } = this.calculate({ price, value });
 
       ctx.fillStyle = backgroundColor || DEFAULT_BAR_BG_COLOR;
-      ctx.fillRect(0, options.y, options.width, options.height);
+      ctx.fillRect(0, y, options.width, options.height);
 
       ctx.fillStyle = fillColor;
-      ctx.fillRect(0, options.y, fillRectWidth, options.height);
+      ctx.fillRect(0, y, fillRectWidth, options.height);
 
       ctx.font = `${options.height - 2}px Georgia`;
       ctx.textAlign = 'left';
@@ -36,9 +41,9 @@ export class Bar {
       ctx.fillStyle = textColor;
 
       ctx.fillText(
-        `${value}${abbrev}`,
+        `${shortValue.value}${shortValue.abbrev}`,
         4,
-        options.y + options.height / 2
+        y + options.height / 2
       );
 
       const { width } = ctx.measureText(
@@ -48,15 +53,15 @@ export class Bar {
       ctx.fillText(
         `${shortPrice.value}${shortPrice.abbrev}`,
         options.width - width - 4,
-        options.y + options.height / 2
+        y + options.height / 2
       );
     }
   }
 
-  private calculate({
-    value,
-    price,
-  }: IBarData) {
+  private calculate({ value, price }: Omit<IBarData, 'y'>) {
+    const { width, max, thresholds, fillColor, textColor, backgroundColor } =
+      this.configService.getConfig('foo');
+
     const fillRectWidth = Math.min(width * (value / max), width);
 
     const currentThreshold = this.calculateThreshold(thresholds, value) || {
@@ -70,7 +75,7 @@ export class Bar {
     return {
       fillRectWidth,
       ...currentThreshold,
-      ...shortNumber(value),
+      shortValue: shortNumber(value),
       shortPrice,
     };
   }

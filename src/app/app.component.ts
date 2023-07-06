@@ -1,27 +1,45 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { Glass } from './canvas/molecules/glass/glass';
+import {
+  Component,
+  ElementRef,
+  InjectionToken,
+  OnInit,
+  Renderer2,
+  ViewChild,
+} from '@angular/core';
+import { GlassService } from './canvas/molecules/glass/glass';
+
+let ctx: CanvasRenderingContext2D;
+export const CANVAS_CTX = new InjectionToken<CanvasRenderingContext2D>(
+  'CANVAS_CTX',
+  {
+    providedIn: 'root',
+    factory: () => ctx,
+  }
+);
 
 @Component({
   selector: 'app-root',
   template: '',
 })
 export class AppComponent implements OnInit {
-  @ViewChild('canvas', { static: true }) canvas: ElementRef<HTMLCanvasElement>;
-
-  constructor(private elRef: ElementRef, private glass: Glass) {}
+  constructor(
+    private elRef: ElementRef,
+    private glassService: GlassService,
+    private renderer: Renderer2
+  ) {}
 
   ngOnInit(): void {
-    const canvas = this.elRef.nativeElement.createElement('canvas');
+    const canvas = this.renderer.createElement('canvas');
     canvas.setAttribute('width', window.innerWidth);
     canvas.setAttribute('height', window.innerHeight);
-    const ctx = canvas.getContext('2d');
     this.elRef.nativeElement.appendChild(canvas);
-    this.draw(ctx, this.glass);
+    ctx = canvas.getContext('2d');
+    this.draw(ctx);
   }
 
-  draw(ctx: CanvasRenderingContext2D, glass: Glass) {
+  draw(ctx: CanvasRenderingContext2D) {
     ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-    glass.render(
+    this.glassService.render(
       Array.from({ length: 100 }).map((_, idx) => ({
         price: (10000 + idx).toString(),
         value: `${Math.random() * 500000 + 500_000}`,
