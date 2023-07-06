@@ -9,11 +9,11 @@ import {
 import { GlassService } from './canvas/molecules/glass/glass';
 
 let ctx: CanvasRenderingContext2D;
-export const CANVAS_CTX = new InjectionToken<CanvasRenderingContext2D>(
+export const CANVAS_CTX = new InjectionToken<() => CanvasRenderingContext2D>(
   'CANVAS_CTX',
   {
     providedIn: 'root',
-    factory: () => ctx,
+    factory: () => () => ctx,
   }
 );
 

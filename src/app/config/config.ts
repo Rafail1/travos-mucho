@@ -29,9 +29,9 @@ export class ConfigService {
         max: 1_000_000,
         width: 500,
         height: 16,
-        fillColor: 'black',
-        textColor: 'black',
-        backgroundColor: 'black',
+        fillColor: 'green',
+        textColor: 'white',
+        backgroundColor: 'yellow',
       },
     ],
   ]);

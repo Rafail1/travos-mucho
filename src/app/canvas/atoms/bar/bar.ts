@@ -12,12 +12,12 @@ import { ConfigService } from 'src/app/config/config';
 @Injectable({ providedIn: 'root' })
 export class Bar {
   constructor(
-    @Inject(CANVAS_CTX) private ctx: CanvasRenderingContext2D,
+    @Inject(CANVAS_CTX) private ctx: () => CanvasRenderingContext2D,
     private configService: ConfigService
   ) {}
 
   public render({ value, y, price }: IBarData) {
-    const ctx = this.ctx;
+    const ctx = this.ctx();
     const options = this.configService.getConfig('foo');
     if (value) {
       const {
@@ -37,13 +37,13 @@ export class Bar {
 
       ctx.font = `${options.height - 2}px Georgia`;
       ctx.textAlign = 'left';
-      ctx.textBaseline = 'middle';
+      ctx.textBaseline = 'bottom';
       ctx.fillStyle = textColor;
 
       ctx.fillText(
         `${shortValue.value}${shortValue.abbrev}`,
         4,
-        y + options.height / 2
+        y
       );
 
       const { width } = ctx.measureText(
@@ -53,7 +53,7 @@ export class Bar {
       ctx.fillText(
         `${shortPrice.value}${shortPrice.abbrev}`,
         options.width - width - 4,
-        y + options.height / 2
+        y
       );
     }
   }
