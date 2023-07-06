@@ -5,3 +5,12 @@ export const DEFAULT_SHORT_NUMBER = {
   decPlaces: 2,
   abbrev: ['k', 'm', 'b', 't'],
 };
+
+
+// width,
+// height,
+// max,
+// thresholds,
+// fillColor,
+// textColor,
+// backgroundColor,
