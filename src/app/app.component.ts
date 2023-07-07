@@ -20,6 +20,7 @@ export const CANVAS_CTX = new InjectionToken<() => CanvasRenderingContext2D>(
 @Component({
   selector: 'app-root',
   template: '',
+  styleUrls: ['app.component.scss'],
 })
 export class AppComponent implements OnInit {
   constructor(
@@ -40,7 +41,7 @@ export class AppComponent implements OnInit {
   draw(ctx: CanvasRenderingContext2D) {
     ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
     this.glassService.render(
-      Array.from({ length: 100 }).map((_, idx) => ({
+      Array.from({ length: 20 }).map((_, idx) => ({
         price: (10000 + idx).toString(),
         value: `${Math.random() * 500000 + 500_000}`,
       }))

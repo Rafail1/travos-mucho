@@ -16,56 +16,83 @@ export class Bar {
     private configService: ConfigService
   ) {}
 
-  public render({ value, y, price }: IBarData) {
+  public render({ values, y, price, spread }: IBarData) {
     const ctx = this.ctx();
     const options = this.configService.getConfig('foo');
-    if (value) {
+    if (values.length) {
       const {
         fillRectWidth,
-        shortValue,
+        shortValues,
         backgroundColor,
         shortPrice,
-        fillColor = DEFAULT_BAR_FILL_COLOR,
         textColor = DEFAULT_BAR_TEXT_COLOR,
-      } = this.calculate({ price, value });
+      } = this.calculate({ price, values });
 
       ctx.fillStyle = backgroundColor || DEFAULT_BAR_BG_COLOR;
       ctx.fillRect(0, y, options.width, options.height);
 
+      let fillColor;
+      if (values.length === 1) {
+        const type = values[0]?.type;
+        if (spread) {
+          fillColor =
+            type == 'ask'
+              ? options.fillAskSpreadColor
+              : options.fillBidSpreadColor;
+        } else {
+          fillColor =
+            type == 'ask' ? options.fillAskColor : options.fillBidColor;
+        }
+      } else {
+        fillColor = options.fillCombinedColor;
+      }
+
       ctx.fillStyle = fillColor;
       ctx.fillRect(0, y, fillRectWidth, options.height);
 
-      ctx.font = `${options.height - 2}px Georgia`;
+      ctx.font = `${options.height - 2}px Helvetica`;
       ctx.textAlign = 'left';
-      ctx.textBaseline = 'bottom';
+      ctx.textBaseline = 'middle';
       ctx.fillStyle = textColor;
 
-      ctx.fillText(
-        `${shortValue.value}${shortValue.abbrev}`,
-        4,
-        y
-      );
+      const valuesByType = shortValues
+        .sort((a, b) => a.type.localeCompare(b.type))
+        .reduce((acc, item) => {
+          acc[item.type] = `${item.value}${item.abbrev}`;
+          return acc;
+        }, {} as Record<string, string>);
+      const textY = y + options.height / 2 + 1;
+      ctx.fillText(Object.values(valuesByType).join(' | '), 4, textY);
 
-      const { width } = ctx.measureText(
+      const { width: textWidth } = ctx.measureText(
         `${shortPrice.value}${shortPrice.abbrev}`
       );
 
       ctx.fillText(
         `${shortPrice.value}${shortPrice.abbrev}`,
-        options.width - width - 4,
-        y
+        options.width - textWidth - 4,
+        textY
       );
     }
   }
 
-  private calculate({ value, price }: Omit<IBarData, 'y'>) {
-    const { width, max, thresholds, fillColor, textColor, backgroundColor } =
-      this.configService.getConfig('foo');
+  private calculate({ values, price }: Omit<IBarData, 'y'>) {
+    const {
+      width,
+      max,
+      thresholds,
+      fillAskColor,
+      fillBidColor,
+      textColor,
+      backgroundColor,
+    } = this.configService.getConfig('foo');
+    const sum = values.reduce((acc, item) => acc + item.value, 0);
 
-    const fillRectWidth = Math.min(width * (value / max), width);
+    const fillRectWidth = Math.min(width * (sum / max), width);
 
-    const currentThreshold = this.calculateThreshold(thresholds, value) || {
-      fillColor,
+    const currentThreshold = this.calculateThreshold(thresholds, sum) || {
+      fillAskColor,
+      fillBidColor,
       textColor,
       backgroundColor,
     };
@@ -75,7 +102,10 @@ export class Bar {
     return {
       fillRectWidth,
       ...currentThreshold,
-      shortValue: shortNumber(value),
+      shortValues: values.map(({ type, value }) => ({
+        ...shortNumber(value),
+        type,
+      })),
       shortPrice,
     };
   }

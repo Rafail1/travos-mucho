@@ -6,7 +6,7 @@ export class ConfigService {
     [
       'foo',
       {
-        threshold: [
+        thresholds: [
           {
             value: 200_000,
             fillColor: '#ff0000',
@@ -29,7 +29,11 @@ export class ConfigService {
         max: 1_000_000,
         width: 500,
         height: 16,
-        fillColor: '#654321',
+        fillCombinedColor: 'red',
+        fillAskSpreadColor: '#987654',
+        fillBidSpreadColor: '#456789',
+        fillAskColor: '#654321',
+        fillBidColor: '#123321',
         textColor: 'white',
         backgroundColor: '#123456',
       },

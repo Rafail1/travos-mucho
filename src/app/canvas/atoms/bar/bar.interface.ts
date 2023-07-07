@@ -10,5 +10,6 @@ export interface IThreshold {
 export interface IBarData {
   y: number;
   price: number;
-  value: number;
+  values: { type: 'ask' | 'bid'; value: number }[];
+  spread?: boolean
 }
