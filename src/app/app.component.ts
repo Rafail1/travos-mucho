@@ -45,6 +45,8 @@ export class AppComponent implements OnInit {
         value: `${Math.random() * 500000 + 500_000}`,
       }))
     );
-    // requestAnimationFrame(() => this.draw(ctx, glass));
+    setTimeout(() => {
+      requestAnimationFrame(() => this.draw(ctx));
+    }, 2000);
   }
 }
