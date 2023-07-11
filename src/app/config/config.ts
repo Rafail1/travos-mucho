@@ -1,34 +1,26 @@
 import { Injectable } from '@angular/core';
-
+export const STYLE_THEME_KEY = 'theme';
 @Injectable({ providedIn: 'root' })
 export class ConfigService {
   private configMap = new Map<string, any>([
     [
-      'foo',
+      STYLE_THEME_KEY,
       {
-        thresholds: [
-          {
-            value: 200_000,
-            fillColor: '#ff0000',
+        thresholds: {
+          big: {
+            fillAskColor: '#ff0000',
+            fillBidColor: '#ff0000',
             textColor: '#ffffff',
             backgroundColor: '#00FF00',
           },
-          {
-            value: 400_000,
-            fillColor: '#00ff00',
-            textColor: '#0000ff',
-            backgroundColor: '#00dd00',
-          },
-          {
-            value: 800_000,
-            fillColor: '#0000ff',
+          huge: {
+            fillAskColor: '#0000ff',
+            fillBidColor: '#0000ff',
             textColor: '#00ffff',
             backgroundColor: '#0000dd',
           },
-        ],
-        max: 1_000_000,
-        width: 500,
-        height: 16,
+        },
+        barHeight: 16,
         fillCombinedColor: 'red',
         fillAskSpreadColor: '#987654',
         fillBidSpreadColor: '#456789',
@@ -38,7 +30,34 @@ export class ConfigService {
         backgroundColor: '#123456',
       },
     ],
+    [
+      'foo',
+      {
+        glass: {
+          width: 500,
+          height: 700,
+          x: 0,
+          y: 0,
+        },
+        thresholds: {
+          big: 200_000,
+          huge: 800_000,
+        },
+        bars: {
+          volumeFormat: {
+            max: 1_000_000,
+            decPlaces: 2,
+            shorten: true,
+          },
+          priceFormat: {
+            decPlaces: 2,
+            shorten: false,
+          },
+        },
+      },
+    ],
   ]);
+
   public getConfig(key: string) {
     return this.configMap.get(key);
   }

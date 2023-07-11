@@ -7,9 +7,15 @@ export interface IThreshold {
   backgroundColor?: string;
 }
 
-export interface IBarData {
+export interface IBarPosition {
   y: number;
+  x: number;
+  width: number;
+  height: number;
+}
+
+export interface IBarData {
   price: number;
   values: { type: 'ask' | 'bid'; value: number }[];
-  spread?: boolean
+  spread?: boolean;
 }

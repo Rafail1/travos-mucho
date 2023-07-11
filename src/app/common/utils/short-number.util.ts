@@ -1,8 +1,8 @@
-import { DEFAULT_SHORT_NUMBER } from '../../config/constants';
+const abbrev = ['k', 'm', 'b', 't'];
 
 export function shortNumber(
   value: number,
-  { decPlaces, abbrev } = DEFAULT_SHORT_NUMBER
+  decPlaces: number = 2
 ): { value: number; abbrev?: string } {
   decPlaces = Math.pow(10, decPlaces);
 

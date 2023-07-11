@@ -1,13 +1,8 @@
-import {
-  DEFAULT_BAR_BG_COLOR,
-  DEFAULT_BAR_FILL_COLOR,
-  DEFAULT_BAR_TEXT_COLOR,
-} from 'src/app/config/constants';
-import { shortNumber } from '../../../common/utils/short-number.util';
-import { IBarData, IThreshold } from './bar.interface';
-import { Injectable, Inject } from '@angular/core';
+import { Inject, Injectable } from '@angular/core';
 import { CANVAS_CTX } from 'src/app/app.component';
-import { ConfigService } from 'src/app/config/config';
+import { ConfigService, STYLE_THEME_KEY } from 'src/app/config/config';
+import { shortNumber } from '../../../common/utils/short-number.util';
+import { IBarData, IBarPosition, IThreshold } from './bar.interface';
 
 @Injectable({ providedIn: 'root' })
 export class Bar {
@@ -16,79 +11,88 @@ export class Bar {
     private configService: ConfigService
   ) {}
 
-  public render({ values, y, price, spread }: IBarData) {
+  public render(
+    { values, price, spread }: IBarData,
+    { x, y, width, height }: IBarPosition
+  ) {
     const ctx = this.ctx();
-    const options = this.configService.getConfig('foo');
-    if (values.length) {
-      const {
-        fillRectWidth,
-        shortValues,
-        backgroundColor,
-        shortPrice,
-        textColor = DEFAULT_BAR_TEXT_COLOR,
-      } = this.calculate({ price, values });
+    const {
+      fillAskSpreadColor,
+      fillBidSpreadColor,
+      fillAskColor,
+      fillBidColor,
+      fillCombinedColor,
+    } = this.configService.getConfig(STYLE_THEME_KEY);
 
-      ctx.fillStyle = backgroundColor || DEFAULT_BAR_BG_COLOR;
-      ctx.fillRect(0, y, options.width, options.height);
-
-      let fillColor;
-      if (values.length === 1) {
-        const type = values[0]?.type;
-        if (spread) {
-          fillColor =
-            type == 'ask'
-              ? options.fillAskSpreadColor
-              : options.fillBidSpreadColor;
-        } else {
-          fillColor =
-            type == 'ask' ? options.fillAskColor : options.fillBidColor;
-        }
-      } else {
-        fillColor = options.fillCombinedColor;
-      }
-
-      ctx.fillStyle = fillColor;
-      ctx.fillRect(0, y, fillRectWidth, options.height);
-
-      ctx.font = `${options.height - 2}px Helvetica`;
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'middle';
-      ctx.fillStyle = textColor;
-
-      const valuesByType = shortValues
-        .sort((a, b) => a.type.localeCompare(b.type))
-        .reduce((acc, item) => {
-          acc[item.type] = `${item.value}${item.abbrev}`;
-          return acc;
-        }, {} as Record<string, string>);
-      const textY = y + options.height / 2 + 1;
-      ctx.fillText(Object.values(valuesByType).join(' | '), 4, textY);
-
-      const { width: textWidth } = ctx.measureText(
-        `${shortPrice.value}${shortPrice.abbrev}`
-      );
-
-      ctx.fillText(
-        `${shortPrice.value}${shortPrice.abbrev}`,
-        options.width - textWidth - 4,
-        textY
-      );
+    if (!values.length) {
+      return;
     }
+
+    const {
+      fillRectWidth,
+      shortValues,
+      backgroundColor,
+      shortPrice,
+      textColor,
+    } = this.calculate({ price, values });
+
+    ctx.fillStyle = backgroundColor;
+    ctx.fillRect(x, y, width, height);
+
+    let fillColor;
+    if (values.length === 1) {
+      const type = values[0]?.type;
+      if (spread) {
+        fillColor = type == 'ask' ? fillAskSpreadColor : fillBidSpreadColor;
+      } else {
+        fillColor = type == 'ask' ? fillAskColor : fillBidColor;
+      }
+    } else {
+      fillColor = fillCombinedColor;
+    }
+
+    ctx.fillStyle = fillColor;
+    ctx.fillRect(x, y, fillRectWidth, height);
+
+    ctx.font = `${height - 2}px Arial`;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = textColor;
+
+    const valuesByType = shortValues
+      .sort((a: any, b: any) => a.type.localeCompare(b.type))
+      .reduce((acc: any, item: any) => {
+        acc[item.type] = `${new Intl.NumberFormat().format(item.value)}${
+          item.abbrev
+        }`;
+        return acc;
+      }, {} as Record<string, string>);
+
+    const textY = y + height / 2 + 1;
+    ctx.fillText(Object.values(valuesByType).join(' / '), x + 4, textY);
+
+    const { width: textWidth } = ctx.measureText(
+      `${shortPrice.value}${shortPrice.abbrev}`
+    );
+
+    ctx.fillText(
+      `${new Intl.NumberFormat().format(shortPrice.value)}${shortPrice.abbrev}`,
+      width - textWidth - 4,
+      textY
+    );
   }
 
   private calculate({ values, price }: Omit<IBarData, 'y'>) {
     const {
-      width,
-      max,
+      glass: { width },
+      bars: { volumeFormat, priceFormat },
       thresholds,
-      fillAskColor,
-      fillBidColor,
-      textColor,
-      backgroundColor,
     } = this.configService.getConfig('foo');
-    const sum = values.reduce((acc, item) => acc + item.value, 0);
+    const { fillAskColor, fillBidColor, textColor, backgroundColor } =
+      this.configService.getConfig(STYLE_THEME_KEY);
 
-    const fillRectWidth = Math.min(width * (sum / max), width);
+    const sum = values.reduce((acc, item) => acc + item.value, 0);
+    const fillRectWidth = Math.min(width * (sum / volumeFormat.max), width);
 
     const currentThreshold = this.calculateThreshold(thresholds, sum) || {
       fillAskColor,
@@ -97,35 +101,47 @@ export class Bar {
       backgroundColor,
     };
 
-    const shortPrice = shortNumber(price);
+    let shortPrice;
+    if (priceFormat.shorten) {
+      shortPrice = shortNumber(price, priceFormat.decPlaces);
+    } else {
+      shortPrice = { value: price, abbrev: '' };
+    }
 
     return {
       fillRectWidth,
       ...currentThreshold,
-      shortValues: values.map(({ type, value }) => ({
-        ...shortNumber(value),
-        type,
-      })),
+      shortValues: values.map(({ type, value }) => {
+        if (volumeFormat.shorten) {
+          return {
+            ...shortNumber(value, volumeFormat.decPlaces),
+            type,
+          };
+        } else {
+          return { value, abbrev: '', type };
+        }
+      }),
       shortPrice,
     };
   }
 
-  private calculateThreshold(thresholds: IThreshold[] = [], value: number = 0) {
-    thresholds.sort((thresholdA, thresholdB) =>
-      thresholdA.value < thresholdB.value ? -1 : 1
-    );
-
-    let currentThreshold;
-
-    for (const threshold of thresholds) {
-      if (threshold.value > value) {
-        break;
-      }
-
-      currentThreshold = threshold;
+  private calculateThreshold(
+    thresholds: Record<string, number> = {},
+    value: number = 0
+  ) {
+    let currentThresholdTheme;
+    if (thresholds['huge'] <= value) {
+      currentThresholdTheme = 'huge';
+    } else if (thresholds['big'] <= value) {
+      currentThresholdTheme = 'big';
     }
+
     // emit event (founded threshold)
 
-    return currentThreshold;
+    return currentThresholdTheme
+      ? this.configService.getConfig(STYLE_THEME_KEY).thresholds[
+          currentThresholdTheme
+        ]
+      : null;
   }
 }

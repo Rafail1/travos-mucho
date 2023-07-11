@@ -1,18 +1,24 @@
 import { Injectable } from '@angular/core';
 import { Bar } from '../../atoms/bar/bar';
 import { IOrderBookItem } from './glass.interface';
-import { ConfigService } from 'src/app/config/config';
+import { ConfigService, STYLE_THEME_KEY } from 'src/app/config/config';
 
 @Injectable({ providedIn: 'root' })
 export class GlassService {
   private useSpread = Math.random() >= 0.5;
+  private config: any;
+  constructor(private bar: Bar, private configService: ConfigService) {
+    const { glass } = this.configService.getConfig('foo');
+    const { barHeight } = this.configService.getConfig(STYLE_THEME_KEY);
+    this.config = { glass, barHeight };
+  }
 
-  constructor(private bar: Bar, private configService: ConfigService) {}
   public render(data: Array<IOrderBookItem>) {
     let type: 'ask' | 'bid' = 'ask';
+    const { glass, barHeight } = this.config;
     data.forEach((barOptions, idx) => {
-      const { height } = this.configService.getConfig('foo');
-      const y = idx * height;
+      const y = glass.y + idx * barHeight;
+
       const values = [
         {
           type,
@@ -33,12 +39,21 @@ export class GlassService {
         }
       }
 
-      this.bar.render({
-        y,
-        values,
-        price: Number(barOptions.price),
-        spread,
-      });
+      this.bar.render(
+        {
+          values,
+          price: Number(barOptions.price),
+          spread,
+        },
+        {
+          y,
+          x: glass.x,
+          width: glass.width,
+          height: barHeight,
+        }
+      );
     });
   }
+
+  public squiz() {}
 }
