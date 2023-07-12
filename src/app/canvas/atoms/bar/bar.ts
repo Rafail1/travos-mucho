@@ -2,10 +2,12 @@ import { Inject, Injectable } from '@angular/core';
 import { CANVAS_CTX } from 'src/app/app.component';
 import { ConfigService, STYLE_THEME_KEY } from 'src/app/config/config';
 import { shortNumber } from '../../../common/utils/short-number.util';
-import { IBarData, IBarPosition, IThreshold } from './bar.interface';
+import { IBarData, IBarPosition } from './bar.interface';
+import { Subject } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class Bar {
+  private thresholdSubject = new Subject();
   constructor(
     @Inject(CANVAS_CTX) private ctx: () => CanvasRenderingContext2D,
     private configService: ConfigService
@@ -15,7 +17,46 @@ export class Bar {
     { values, price, spread }: IBarData,
     { x, y, width, height }: IBarPosition
   ) {
+    if (!values.length) {
+      return;
+    }
+
     const ctx = this.ctx();
+    const {
+      fillRectWidth,
+      backgroundColor,
+      textColor,
+      fillColor,
+      volumeText,
+      priceText,
+      textY,
+    } = this.calculateOptions({ values, price, spread, y, height });
+
+    ctx.fillStyle = backgroundColor;
+    ctx.fillRect(x, y, width, height);
+
+    ctx.fillStyle = fillColor;
+    ctx.fillRect(x, y, fillRectWidth, height);
+
+    ctx.font = `${height - 2}px Arial`;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = textColor;
+
+    ctx.fillText(volumeText, x + 4, textY);
+
+    const { width: textWidth } = ctx.measureText(priceText);
+
+    ctx.fillText(priceText, width - textWidth - 4, textY);
+  }
+
+  private calculateOptions({
+    values,
+    price,
+    spread,
+    y,
+    height,
+  }: IBarData & Pick<IBarPosition, 'y' | 'height'>) {
     const {
       fillAskSpreadColor,
       fillBidSpreadColor,
@@ -24,10 +65,6 @@ export class Bar {
       fillCombinedColor,
     } = this.configService.getConfig(STYLE_THEME_KEY);
 
-    if (!values.length) {
-      return;
-    }
-
     const {
       fillRectWidth,
       shortValues,
@@ -35,9 +72,6 @@ export class Bar {
       shortPrice,
       textColor,
     } = this.calculate({ price, values });
-
-    ctx.fillStyle = backgroundColor;
-    ctx.fillRect(x, y, width, height);
 
     let fillColor;
     if (values.length === 1) {
@@ -51,14 +85,6 @@ export class Bar {
       fillColor = fillCombinedColor;
     }
 
-    ctx.fillStyle = fillColor;
-    ctx.fillRect(x, y, fillRectWidth, height);
-
-    ctx.font = `${height - 2}px Arial`;
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = textColor;
-
     const valuesByType = shortValues
       .sort((a: any, b: any) => a.type.localeCompare(b.type))
       .reduce((acc: any, item: any) => {
@@ -67,19 +93,23 @@ export class Bar {
         }`;
         return acc;
       }, {} as Record<string, string>);
+    const volumeText = Object.values(valuesByType).join(' / ');
+
+    const priceText = `${new Intl.NumberFormat().format(shortPrice.value)}${
+      shortPrice.abbrev
+    }`;
 
     const textY = y + height / 2 + 1;
-    ctx.fillText(Object.values(valuesByType).join(' / '), x + 4, textY);
 
-    const { width: textWidth } = ctx.measureText(
-      `${shortPrice.value}${shortPrice.abbrev}`
-    );
-
-    ctx.fillText(
-      `${new Intl.NumberFormat().format(shortPrice.value)}${shortPrice.abbrev}`,
-      width - textWidth - 4,
-      textY
-    );
+    return {
+      fillRectWidth,
+      backgroundColor,
+      textColor,
+      fillColor,
+      volumeText,
+      priceText,
+      textY,
+    };
   }
 
   private calculate({ values, price }: Omit<IBarData, 'y'>) {
@@ -94,7 +124,11 @@ export class Bar {
     const sum = values.reduce((acc, item) => acc + item.value, 0);
     const fillRectWidth = Math.min(width * (sum / volumeFormat.max), width);
 
-    const currentThreshold = this.calculateThreshold(thresholds, sum) || {
+    const currentThreshold = this.calculateThreshold(
+      thresholds,
+      price,
+      sum
+    ) || {
       fillAskColor,
       fillBidColor,
       textColor,
@@ -127,6 +161,7 @@ export class Bar {
 
   private calculateThreshold(
     thresholds: Record<string, number> = {},
+    price: number,
     value: number = 0
   ) {
     let currentThresholdTheme;
@@ -136,7 +171,13 @@ export class Bar {
       currentThresholdTheme = 'big';
     }
 
-    // emit event (founded threshold)
+    if (currentThresholdTheme) {
+      this.thresholdSubject.next({
+        theme: currentThresholdTheme,
+        value,
+        price,
+      });
+    }
 
     return currentThresholdTheme
       ? this.configService.getConfig(STYLE_THEME_KEY).thresholds[
