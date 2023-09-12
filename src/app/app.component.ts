@@ -7,6 +7,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { GlassService } from './canvas/molecules/glass/glass';
+import { BackendService } from './backend/backend.service';
 
 let ctx: CanvasRenderingContext2D;
 export const CANVAS_CTX = new InjectionToken<() => CanvasRenderingContext2D>(
@@ -19,8 +20,7 @@ export const CANVAS_CTX = new InjectionToken<() => CanvasRenderingContext2D>(
 
 @Component({
   selector: 'app-root',
-  template: '',
-  styleUrls: ['app.component.scss'],
+  template: '<button (click)="getData()">getData</button>',
 })
 export class AppComponent implements OnInit {
   private width = window.innerWidth - 20;
@@ -28,7 +28,8 @@ export class AppComponent implements OnInit {
   constructor(
     private elRef: ElementRef,
     private glassService: GlassService,
-    private renderer: Renderer2
+    private renderer: Renderer2,
+    private backendService: BackendService
   ) {}
 
   ngOnInit(): void {
@@ -38,6 +39,20 @@ export class AppComponent implements OnInit {
     this.elRef.nativeElement.appendChild(canvas);
     ctx = canvas.getContext('2d');
     this.draw(ctx);
+  }
+
+  getData() {
+    this.backendService
+      .getDepth('ETHUSDT', new Date('2023-08-23 12:36:17'))
+      .subscribe((data) => {
+        console.log(data);
+      });
+
+    this.backendService
+      .getAggTrades('ETHUSDT', new Date('2023-08-23 12:36:17'))
+      .subscribe((data) => {
+        console.log(data);
+      });
   }
 
   draw(ctx: CanvasRenderingContext2D) {
