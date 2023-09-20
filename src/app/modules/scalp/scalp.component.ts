@@ -5,8 +5,8 @@ import {
   OnInit,
   Renderer2,
 } from '@angular/core';
-import { BackendService } from './modules/scalp/backend/backend.service';
-import { GlassService } from './modules/scalp/canvas/molecules/glass/glass';
+import { BackendService } from './backend/backend.service';
+import { GlassService } from './canvas/molecules/glass/glass';
 
 let ctx: CanvasRenderingContext2D;
 export const CANVAS_CTX = new InjectionToken<() => CanvasRenderingContext2D>(
@@ -18,10 +18,10 @@ export const CANVAS_CTX = new InjectionToken<() => CanvasRenderingContext2D>(
 );
 
 @Component({
-  selector: 'app-root',
+  selector: 'app-scalp',
   template: '<button (click)="getData()">getData</button>',
 })
-export class AppComponent implements OnInit {
+export class ScalpComponent implements OnInit {
   private width = window.innerWidth - 20;
   private height = window.innerHeight - 20;
   constructor(

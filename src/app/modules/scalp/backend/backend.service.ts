@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { DateService } from '../utils/date.service';
+import { DateService } from 'src/app/utils/date.service';
 
 @Injectable()
 export class BackendService {

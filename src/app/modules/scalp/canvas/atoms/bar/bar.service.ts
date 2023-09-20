@@ -1,9 +1,9 @@
 import { Inject, Injectable } from '@angular/core';
-import { CANVAS_CTX } from 'src/app/app.component';
-import { ConfigService, STYLE_THEME_KEY } from 'src/app/config/config';
-import { shortNumber } from '../../../common/utils/short-number.util';
-import { IBarData, IBarPosition } from './bar.interface';
 import { Subject } from 'rxjs';
+import { CANVAS_CTX } from 'src/app/app.component';
+import { shortNumber } from 'src/app/common/utils/short-number.util';
+import { ConfigService, STYLE_THEME_KEY } from 'src/app/config/config';
+import { IBarData, IBarPosition } from './bar.interface';
 
 @Injectable({ providedIn: 'root' })
 export class BarService {
