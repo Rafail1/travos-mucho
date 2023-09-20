@@ -7,5 +7,6 @@ import { ScalpComponent } from './scalp.component';
 @NgModule({
   declarations: [ScalpComponent],
   imports: [BrowserModule, BackendModule],
+  exports: [ScalpComponent],
 })
 export class ScalpModule {}

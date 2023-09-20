@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
-import { CANVAS_CTX } from 'src/app/app.component';
 import { shortNumber } from 'src/app/common/utils/short-number.util';
 import { ConfigService, STYLE_THEME_KEY } from 'src/app/config/config';
+import { CANVAS_CTX } from '../../../scalp.component';
 import { IBarData, IBarPosition } from './bar.interface';
 
 @Injectable({ providedIn: 'root' })
@@ -117,7 +117,7 @@ export class BarService {
       glass: { width },
       bars: { volumeFormat, priceFormat },
       thresholds,
-    } = this.configService.getConfig('foo');
+    } = this.configService.getConfig('default');
     const { fillAskColor, fillBidColor, textColor, backgroundColor } =
       this.configService.getConfig(STYLE_THEME_KEY);
 

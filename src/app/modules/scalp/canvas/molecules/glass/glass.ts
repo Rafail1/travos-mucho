@@ -8,7 +8,7 @@ export class GlassService {
   private useSpread = Math.random() >= 0.5;
   private config: any;
   constructor(private bar: BarService, private configService: ConfigService) {
-    const { glass } = this.configService.getConfig('foo');
+    const { glass } = this.configService.getConfig('default');
     const { barHeight } = this.configService.getConfig(STYLE_THEME_KEY);
     this.config = { glass, barHeight };
   }
