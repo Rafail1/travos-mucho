@@ -6,7 +6,7 @@ import { IBarData, IBarPosition } from './bar.interface';
 import { Subject } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
-export class Bar {
+export class BarService {
   private thresholdSubject = new Subject();
   constructor(
     @Inject(CANVAS_CTX) private ctx: () => CanvasRenderingContext2D,

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Bar } from '../../atoms/bar/bar';
+import { BarService } from '../../atoms/bar/bar.service';
 import { IOrderBookItem } from './glass.interface';
 import { ConfigService, STYLE_THEME_KEY } from 'src/app/config/config';
 
@@ -7,7 +7,7 @@ import { ConfigService, STYLE_THEME_KEY } from 'src/app/config/config';
 export class GlassService {
   private useSpread = Math.random() >= 0.5;
   private config: any;
-  constructor(private bar: Bar, private configService: ConfigService) {
+  constructor(private bar: BarService, private configService: ConfigService) {
     const { glass } = this.configService.getConfig('foo');
     const { barHeight } = this.configService.getConfig(STYLE_THEME_KEY);
     this.config = { glass, barHeight };

@@ -28,10 +28,12 @@ export class ConfigService {
         fillBidColor: '#123321',
         textColor: 'white',
         backgroundColor: '#123456',
+        tickBuyColor: 'green',
+        tickSellColor: 'red',
       },
     ],
     [
-      'foo',
+      'default',
       {
         glass: {
           width: 500,
@@ -53,6 +55,10 @@ export class ConfigService {
             decPlaces: 2,
             shorten: false,
           },
+        },
+        tick: {
+          decPlaces: 0,
+          shorten: true,
         },
       },
     ],
