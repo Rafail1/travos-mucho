@@ -1,9 +1,10 @@
 import { NgModule } from '@angular/core';
 import { ChartComponent } from './chart.component';
-import { HighchartsChartModule } from 'highcharts-angular';
+import { HighchartsModule } from './highchart/highcharts.module';
 
 @NgModule({
   declarations: [ChartComponent],
-  imports: [HighchartsChartModule],
+  imports: [HighchartsModule],
+  exports: [ChartComponent],
 })
 export class ChartModule {}

@@ -2,6 +2,6 @@ import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-root',
-  template: '<app-highcharts></app-highcharts>',
+  template: '<app-chart></app-chart>',
 })
 export class AppComponent {}
