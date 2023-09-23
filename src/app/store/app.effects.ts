@@ -14,6 +14,7 @@ import {
 import { MarketDataService } from '../common/market-data/market-data.service';
 import { BackendService } from '../modules/backend/backend.service';
 import {
+  cleanCandlestickData,
   getAggTrades,
   getAggTradesSuccess,
   getCandlestickDataSuccess,
@@ -51,13 +52,22 @@ export class AppEffects {
       ofType(setSymbol),
       switchMap((action) => {
         const date = new Date();
-        date.setDate(date.getDate() - 1);
+        date.setDate(date.getDate() - 2);
         return this.marketDataService
           .getCandlestickData(action.symbol, date)
           .pipe(map((data) => getCandlestickDataSuccess({ data })));
       })
     )
   );
+
+  // setSymbolHood$ = createEffect(() =>
+  //   this.actions$.pipe(
+  //     ofType(setSymbol),
+  //     switchMap(() => {
+  //       return of(cleanCandlestickData());
+  //     })
+  //   )
+  // );
 
   getAggTrades$ = createEffect(() =>
     this.actions$.pipe(

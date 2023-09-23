@@ -4,6 +4,8 @@ import {
   getAggTrades,
   getDepth,
   getSymbolsSuccess,
+  getCandlestickDataSuccess,
+  cleanCandlestickData,
 } from './app.actions';
 export interface RootState {
   app: AppState;
@@ -14,6 +16,9 @@ export interface AppState {
   depth?: any;
   aggTrades?: any;
   time?: Date;
+  candlestickData?: Array<
+    Array<[number, number, number, number, number, number]>
+  >;
 }
 
 export const initialState: AppState = {};
@@ -37,5 +42,13 @@ export const appReducer = createReducer(
   on(getSymbolsSuccess, (state, { symbols }) => ({
     ...state,
     symbols,
+  })),
+  on(getCandlestickDataSuccess, (state, { data }) => ({
+    ...state,
+    candlestickData: data,
+  })),
+  on(cleanCandlestickData, (state) => ({
+    ...state,
+    candlestickData: undefined,
   }))
 );

@@ -8,3 +8,7 @@ export const selectTime = createSelector(app, (state) => state.time);
 export const selectAggTrades = createSelector(app, (state) => state.aggTrades);
 export const selectDepth = createSelector(app, (state) => state.depth);
 export const selectAllSymbols = createSelector(app, (state) => state.symbols);
+export const selectCandlestickData = createSelector(
+  app,
+  (state) => state.candlestickData
+);

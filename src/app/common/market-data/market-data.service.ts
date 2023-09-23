@@ -32,14 +32,29 @@ export class MarketDataService {
   }
 
   public getCandlestickData(symbol: string, time: Date = new Date()) {
-    return this.httpClient.get(`${this.apiUrl}/klines`, {
-      params: {
-        symbol,
-        interval: '5m',
-        startTime: time.getTime(),
-        limit: 300,
-      },
-    });
+    return this.httpClient
+      .get(`${this.apiUrl}/klines`, {
+        params: {
+          symbol,
+          interval: '5m',
+          startTime: time.getTime(),
+          limit: 800,
+        },
+      })
+      .pipe(
+        map((data: any) =>
+          data.map(([time, open, high, low, close, volume]: any) => {
+            return [
+              time,
+              Number(open),
+              Number(high),
+              Number(low),
+              Number(close),
+              Number(volume),
+            ];
+          })
+        )
+      );
   }
 
   private isAvailable({ contractType, quoteAsset, status }: any) {

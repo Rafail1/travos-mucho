@@ -34,3 +34,6 @@ export const getCandlestickDataSuccess = createAction(
   '[App Component] getCandlestickDataSuccess',
   props<{ data: any }>()
 );
+export const cleanCandlestickData = createAction(
+  '[App Component] cleanCandlestickData'
+);
