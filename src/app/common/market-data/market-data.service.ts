@@ -37,7 +37,7 @@ export class MarketDataService {
         symbol,
         interval: '5m',
         startTime: time.getTime(),
-        limit: 900,
+        limit: 300,
       },
     });
   }
