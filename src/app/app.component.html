@@ -1,0 +1,6 @@
+<app-symbol-select
+  [symbol]="symbol$ | async"
+  [symbols]="options$ | async"
+  (change)="symbolChanged($event)"
+></app-symbol-select>
+<app-chart></app-chart>

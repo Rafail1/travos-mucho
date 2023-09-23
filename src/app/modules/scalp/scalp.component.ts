@@ -5,7 +5,7 @@ import {
   OnInit,
   Renderer2,
 } from '@angular/core';
-import { BackendService } from './backend/backend.service';
+import { BackendService } from '../backend/backend.service';
 import { GlassService } from './canvas/molecules/glass/glass';
 
 let ctx: CanvasRenderingContext2D;

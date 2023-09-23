@@ -1,12 +1,16 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { EffectsModule } from '@ngrx/effects';
 import { StoreModule } from '@ngrx/store';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { BackendModule } from './modules/scalp/backend/backend.module';
-import { ScalpModule } from './modules/scalp/scalp.module';
+import { MarketDataModule } from './common/market-data/market-data.module';
+import { SymbolSelectModule } from './common/modules/symbol-select/symbol-select.module';
+import { BackendModule } from './modules/backend/backend.module';
 import { ChartModule } from './modules/chart/chart.module';
-import { reducer } from './store/app.reducer';
+import { ScalpModule } from './modules/scalp/scalp.module';
+import { AppEffects } from './store/app.effects';
+import { appReducer } from './store/app.reducer';
 
 @NgModule({
   declarations: [AppComponent],
@@ -16,7 +20,10 @@ import { reducer } from './store/app.reducer';
     BackendModule,
     ScalpModule,
     ChartModule,
-    StoreModule.forRoot({ appReducer: reducer }),
+    SymbolSelectModule,
+    MarketDataModule,
+    StoreModule.forRoot({ app: appReducer }),
+    EffectsModule.forRoot([AppEffects]),
   ],
   bootstrap: [AppComponent],
 })

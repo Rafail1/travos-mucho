@@ -1,17 +1,24 @@
 import { Action, createReducer, on } from '@ngrx/store';
-import { setSymbol, getAggTrades, getDepth } from './app.actions';
-export interface State {
-  symbol: string;
+import {
+  setSymbol,
+  getAggTrades,
+  getDepth,
+  getSymbolsSuccess,
+} from './app.actions';
+export interface RootState {
+  app: AppState;
+}
+export interface AppState {
+  symbol?: string;
+  symbols?: Array<string>;
   depth?: any;
   aggTrades?: any;
   time?: Date;
 }
 
-export const initialState: State = {
-  symbol: 'BTCUSDT',
-};
+export const initialState: AppState = {};
 
-const appReducer = createReducer(
+export const appReducer = createReducer(
   initialState,
   on(setSymbol, (state, { symbol }) => ({
     ...state,
@@ -26,9 +33,9 @@ const appReducer = createReducer(
     ...state,
     symbol,
     time,
+  })),
+  on(getSymbolsSuccess, (state, { symbols }) => ({
+    ...state,
+    symbols,
   }))
 );
-
-export function reducer(state: State | undefined, action: Action): State {
-  return appReducer(state, action);
-}
