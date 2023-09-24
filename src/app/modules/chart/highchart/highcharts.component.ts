@@ -1,14 +1,11 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import * as Highcharts from 'highcharts/highstock';
-import HC_hollowcandlestick from 'highcharts/modules/hollowcandlestick';
 import HC_draggable from 'highcharts/modules/draggable-points';
+import HC_hollowcandlestick from 'highcharts/modules/hollowcandlestick';
 import { Subject, takeUntil } from 'rxjs';
 import { RootState } from 'src/app/store/app.reducer';
-import {
-  selectCandlestickData,
-  selectSymbol,
-} from 'src/app/store/app.selectors';
+import { selectCandlestickData } from 'src/app/store/app.selectors';
 
 @Component({
   selector: 'app-highcharts',
@@ -16,7 +13,6 @@ import {
 })
 export class HighchartsComponent implements OnDestroy, OnInit {
   plotLine: Highcharts.PlotLineOrBand | undefined;
-  height = window.innerHeight / 2;
   Highcharts: typeof Highcharts = Highcharts; // required
   chartConstructor: string = 'chart'; // optional string, defaults to 'chart'
   chartOptions: Highcharts.Options = {
@@ -24,9 +20,9 @@ export class HighchartsComponent implements OnDestroy, OnInit {
       selected: 1,
     },
     chart: {
-      panKey: "shift",
+      panKey: 'shift',
       events: {
-        click: (event) => {
+        click: () => {
           if (this.chart.hoverPoint?.category) {
             this.plotLine?.destroy();
             this.plotLine = this.chart.xAxis[0].addPlotLine({
@@ -39,7 +35,6 @@ export class HighchartsComponent implements OnDestroy, OnInit {
       },
       panning: {
         enabled: true,
-        type: 'x',
       },
     },
     scrollbar: {
