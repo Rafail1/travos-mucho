@@ -16,9 +16,7 @@ export interface AppState {
   depth?: any;
   aggTrades?: any;
   time?: Date;
-  candlestickData?: Array<
-    Array<[number, number, number, number, number, number]>
-  >;
+  candlestickData?: Array<[number, number, number, number, number, number]>;
 }
 
 export const initialState: AppState = {};

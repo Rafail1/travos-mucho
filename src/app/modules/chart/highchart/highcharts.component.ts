@@ -1,18 +1,22 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import * as Highcharts from 'highcharts/highstock';
-import HC_exporting from 'highcharts/modules/exporting';
+import HC_hollowcandlestick from 'highcharts/modules/hollowcandlestick';
+import HC_draggable from 'highcharts/modules/draggable-points';
 import { Subject, takeUntil } from 'rxjs';
 import { RootState } from 'src/app/store/app.reducer';
 import {
   selectCandlestickData,
   selectSymbol,
 } from 'src/app/store/app.selectors';
+
 @Component({
   selector: 'app-highcharts',
   templateUrl: './highcharts.component.html',
 })
 export class HighchartsComponent implements OnDestroy, OnInit {
+  plotLine: Highcharts.PlotLineOrBand | undefined;
+  height = window.innerHeight / 2;
   Highcharts: typeof Highcharts = Highcharts; // required
   chartConstructor: string = 'chart'; // optional string, defaults to 'chart'
   chartOptions: Highcharts.Options = {
@@ -20,24 +24,50 @@ export class HighchartsComponent implements OnDestroy, OnInit {
       selected: 1,
     },
     chart: {
+      panKey: "shift",
       events: {
         click: (event) => {
-          console.log(event);
+          if (this.chart.hoverPoint?.category) {
+            this.plotLine?.destroy();
+            this.plotLine = this.chart.xAxis[0].addPlotLine({
+              color: '#00ff00',
+              width: 2,
+              value: Number(this.chart.hoverPoint.category),
+            });
+          }
         },
       },
+      panning: {
+        enabled: true,
+        type: 'x',
+      },
+    },
+    scrollbar: {
+      enabled: false,
     },
     plotOptions: {
-      candlestick: {
+      hollowcandlestick: {
         events: {
           click: (event) => {
-            console.log(event);
+            this.plotLine?.destroy();
+            this.plotLine = this.chart.xAxis[0].addPlotLine({
+              color: '#00ff00',
+              width: 2,
+              value: Number(event.point.category),
+            });
           },
         },
       },
     },
-
+    title: {
+      text: '',
+    },
+    legend: {
+      enabled: false,
+    },
     navigator: {
-      enabled: true,
+      enabled: false,
+      // adaptToUpdatedData: true,
     },
     xAxis: {
       type: 'datetime',
@@ -45,50 +75,54 @@ export class HighchartsComponent implements OnDestroy, OnInit {
       labels: {
         format: '{value:%m-%d %H:%M}',
       },
+      crosshair: {
+        width: 1,
+      },
+      scrollbar: {
+        enabled: true,
+      },
     },
     yAxis: [
       {
         labels: {
-          align: 'right',
-          x: -3,
+          align: 'left',
+          x: 3,
         },
         title: {
-          text: 'OHLC',
+          text: '',
         },
-        height: '60%',
-        lineWidth: 2,
+        height: '100%',
+        lineWidth: 0,
         resize: {
           enabled: true,
         },
+        opposite: true,
       },
       {
         labels: {
-          align: 'right',
-          x: -3,
+          enabled: false,
         },
         title: {
-          text: 'Volume',
+          text: '',
         },
-        top: '65%',
-        height: '35%',
+        top: '80%',
+        height: '20%',
         offset: 0,
-        lineWidth: 2,
+        lineWidth: 0,
       },
     ],
-    tooltip: {
-      split: true,
-    },
   }; // required
-  updateFlag: boolean = false; // optional boolean
-  oneToOneFlag: boolean = false; // optional boolean, defaults to false
-  runOutsideAngular: boolean = false; // optional boolean, defaults to false
+  updateFlag: boolean = true; // optional boolean
+  oneToOneFlag: boolean = true; // optional boolean, defaults to false
+  runOutsideAngular: boolean = true; // optional boolean, defaults to false
   public chartCallback: Highcharts.ChartCallbackFunction;
   private destroy$ = new Subject<void>();
   chart: Highcharts.Chart;
   chartData: Highcharts.PointOptionsType[] = [];
   chartSelected: Highcharts.SVGElement;
   constructor(private store: Store<RootState>) {
-    HC_exporting(Highcharts);
+    HC_hollowcandlestick(Highcharts);
+    HC_draggable(Highcharts);
   }
 
   ngOnInit(): void {
@@ -115,13 +149,6 @@ export class HighchartsComponent implements OnDestroy, OnInit {
         fillOpacity: '.1',
       })
       .add();
-    this.chart.addSeries({ type: 'candlestick' });
-    this.store
-      .select(selectSymbol)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((symbol) => {
-        this.chart.setTitle({ text: symbol });
-      });
 
     this.store
       .select(selectCandlestickData)
@@ -133,18 +160,39 @@ export class HighchartsComponent implements OnDestroy, OnInit {
         this.chart.series[0]?.remove();
         this.chart.series[0]?.remove();
         this.chart.addSeries({
-          type: 'candlestick',
-          data,
+          type: 'hollowcandlestick',
+          minPointLength: 0,
+          data: data.map(([time, open, high, low, close]) => [
+            time,
+            open,
+            high,
+            low,
+            close,
+          ]),
           name: 'Price',
         });
         this.chart.addSeries({
           type: 'column',
-          name: 'Volume',
           data: data.map((item) => [item[0], item[5]]),
           yAxis: 1,
+          enableMouseTracking: false,
+          states: {
+            inactive: {
+              enabled: false,
+            },
+          },
+          name: 'Volume',
+        });
+        this.plotLine?.destroy();
+        this.plotLine = this.chart.xAxis[0].addPlotLine({
+          color: '#00ff00',
+          width: 2,
+          value: data[0][0],
         });
 
-        this.chart.redraw();
+        // const catLen = this.chart.xAxis[0].categories?.length - 1;
+        // this.chart.xAxis[0].setExtremes(catLen, catLen);
+        // this.chart
       });
   }
 }

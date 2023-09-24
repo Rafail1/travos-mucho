@@ -8,6 +8,7 @@ import { init, setSymbol } from './store/app.actions';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
+  styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
   public symbol$: Observable<string | undefined>;
