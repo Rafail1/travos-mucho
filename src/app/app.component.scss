@@ -4,3 +4,25 @@ app-symbol-select {
     left: 0;
     top: 0;
 }
+
+:host {
+    display: grid;
+    grid-template-columns: 700px 300px;
+    grid-template-rows: 600px 300px;
+    grid-template-areas:
+        "scalp scalp"
+        "chart player";
+    grid-gap: 0;
+    height: 900px;
+    width: 1000px;
+    overflow: hidden;
+}
+app-chart {
+    grid-area: chart;
+}
+app-player {
+    grid-area: player;
+}
+app-scalp {
+    grid-area: scalp;
+}

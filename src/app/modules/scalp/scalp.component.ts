@@ -19,7 +19,7 @@ export const CANVAS_CTX = new InjectionToken<() => CanvasRenderingContext2D>(
 
 @Component({
   selector: 'app-scalp',
-  template: '<button (click)="getData()">getData</button>',
+  template: '',
 })
 export class ScalpComponent implements OnInit {
   private width = window.innerWidth - 20;
@@ -38,14 +38,6 @@ export class ScalpComponent implements OnInit {
     canvas.setAttribute('height', this.height);
     this.elRef.nativeElement.appendChild(canvas);
     this.ctx = canvas.getContext('2d');
-  }
-
-  getData() {
-    this.backendService
-      .getDepth('ETHUSDT', new Date('2023-08-23 12:36:17'))
-      .subscribe((data) => {
-        console.log(data);
-      });
   }
 
   draw() {
