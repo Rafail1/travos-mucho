@@ -1,0 +1,20 @@
+@import "../../../../theme.scss";
+
+:host {
+    display: block;
+}
+
+.timeline {
+    cursor: pointer;
+    height: 2px;
+    background-color: $outer-space;
+}
+
+.timeline-dot {
+    cursor: pointer;
+    background-color: $outer-space;
+    width: 0.8em;
+    height: 0.8em;
+    border-radius: 100%;
+    margin-bottom: -0.4em;
+}

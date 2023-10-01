@@ -1,0 +1,30 @@
+@import "./../../../../theme.scss";
+
+:host {
+    display: grid;
+    width: 100%;
+    height: 100%;
+    grid-template-areas: "rewind play forward";
+    align-items: center;
+    justify-content: space-around;
+}
+
+ng-icon {
+    cursor: pointer;
+    font-size: 4em;
+    color: $outer-space;
+}
+
+ng-icon:hover {
+    color: $zomp;
+}
+
+.rewind {
+    grid-area: rewind;
+}
+.play {
+    grid-area: play;
+}
+.forward {
+    grid-area: forward;
+}
