@@ -2,19 +2,29 @@
 
 :host {
     display: block;
+    position: relative;
 }
 
 .timeline {
     cursor: pointer;
-    height: 2px;
-    background-color: $outer-space;
+    height: 1em;
+    padding-top: 0.5em;
+
+    .line {
+        height: 1px;
+        background: $outer-space;
+    }
 }
 
 .timeline-dot {
     cursor: pointer;
     background-color: $outer-space;
-    width: 0.8em;
-    height: 0.8em;
-    border-radius: 100%;
-    margin-bottom: -0.4em;
+    width: 1px;
+    height: 1em;
+    position: absolute;
+}
+
+.timeline-time {
+    font-size: 0.8em;
+    margin-top: 0.5em;
 }

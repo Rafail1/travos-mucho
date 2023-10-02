@@ -5,4 +5,12 @@ import { Component } from '@angular/core';
   templateUrl: './player.component.html',
   styleUrls: ['./player.component.scss'],
 })
-export class PlayerComponent {}
+export class PlayerComponent {
+  from: Date;
+  to: Date;
+  constructor() {
+    this.from = new Date();
+    this.to = new Date();
+    this.to.setMinutes(this.to.getMinutes() + 5);
+  }
+}
