@@ -37,3 +37,7 @@ export const getCandlestickDataSuccess = createAction(
 export const cleanCandlestickData = createAction(
   '[App Component] cleanCandlestickData'
 );
+export const changeCurrentTime = createAction(
+  '[App Component] changeCurrentTime',
+  props<{ time: Date }>()
+);

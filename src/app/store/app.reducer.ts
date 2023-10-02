@@ -16,6 +16,7 @@ export interface AppState {
   depth?: any;
   aggTrades?: any;
   time?: Date;
+  currentTime?: Date;
   candlestickData?: Array<[number, number, number, number, number, number]>;
 }
 

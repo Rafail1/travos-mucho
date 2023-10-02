@@ -12,3 +12,7 @@ export const selectCandlestickData = createSelector(
   app,
   (state) => state.candlestickData
 );
+export const selectCurrentTime = createSelector(
+  app,
+  (state) => state.currentTime
+);
