@@ -5,7 +5,6 @@ import {
   OnInit,
   Renderer2,
 } from '@angular/core';
-import { BackendService } from '../backend/backend.service';
 import { GlassService } from './canvas/molecules/glass/glass';
 
 let ctx: CanvasRenderingContext2D;
@@ -28,8 +27,7 @@ export class ScalpComponent implements OnInit {
   constructor(
     private elRef: ElementRef,
     private glassService: GlassService,
-    private renderer: Renderer2,
-    private backendService: BackendService
+    private renderer: Renderer2
   ) {}
 
   ngOnInit(): void {

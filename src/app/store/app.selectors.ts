@@ -5,14 +5,12 @@ const app = (state: RootState) => state.app;
 
 export const selectSymbol = createSelector(app, (state) => state.symbol);
 export const selectTime = createSelector(app, (state) => state.time);
+export const selectTimeFrom = createSelector(app, (state) => state.timeFrom);
+export const selectTimeTo = createSelector(app, (state) => state.timeTo);
 export const selectAggTrades = createSelector(app, (state) => state.aggTrades);
 export const selectDepth = createSelector(app, (state) => state.depth);
 export const selectAllSymbols = createSelector(app, (state) => state.symbols);
 export const selectCandlestickData = createSelector(
   app,
   (state) => state.candlestickData
-);
-export const selectCurrentTime = createSelector(
-  app,
-  (state) => state.currentTime
 );

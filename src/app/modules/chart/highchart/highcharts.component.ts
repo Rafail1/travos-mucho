@@ -4,8 +4,10 @@ import * as Highcharts from 'highcharts/highstock';
 import HC_draggable from 'highcharts/modules/draggable-points';
 import HC_hollowcandlestick from 'highcharts/modules/hollowcandlestick';
 import { Subject, takeUntil } from 'rxjs';
+import { setTime, setTimeFrom, setTimeTo } from 'src/app/store/app.actions';
 import { RootState } from 'src/app/store/app.reducer';
 import { selectCandlestickData } from 'src/app/store/app.selectors';
+import { FIVE_MINUTES } from '../../player/player.component';
 
 @Component({
   selector: 'app-highcharts',
@@ -30,6 +32,10 @@ export class HighchartsComponent implements OnDestroy, OnInit {
               width: 2,
               value: Number(this.chart.hoverPoint.category),
             });
+            const time = new Date(this.chart.hoverPoint.category);
+            this.store.dispatch(setTimeFrom({ time }));
+            this.store.dispatch(setTimeTo({ time: new Date(time.getTime() + FIVE_MINUTES) }));
+            this.store.dispatch(setTime({ time }));
           }
         },
       },
@@ -50,6 +56,10 @@ export class HighchartsComponent implements OnDestroy, OnInit {
               width: 2,
               value: Number(event.point.category),
             });
+            const time = new Date(event.point.category);
+            this.store.dispatch(setTimeFrom({ time }));
+            this.store.dispatch(setTimeTo({ time: new Date(time.getTime() + FIVE_MINUTES) }));
+            this.store.dispatch(setTime({ time }));
           },
         },
       },
@@ -184,10 +194,6 @@ export class HighchartsComponent implements OnDestroy, OnInit {
           width: 2,
           value: data[0][0],
         });
-
-        // const catLen = this.chart.xAxis[0].categories?.length - 1;
-        // this.chart.xAxis[0].setExtremes(catLen, catLen);
-        // this.chart
       });
   }
 }

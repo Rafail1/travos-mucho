@@ -1,5 +1,5 @@
 <div class="timeline-dot" #dot></div>
 <div class="timeline" (click)="changeTimeline($event)">
-  <div class="line"></div>
+  <div #line class="line"></div>
 </div>
-<div class="timeline-time">{{ current$ | async | date : "HH:mm:ss" }}</div>
+<div class="timeline-time">{{ current | date : "HH:mm:ss" }}</div>

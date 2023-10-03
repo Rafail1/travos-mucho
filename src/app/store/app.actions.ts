@@ -8,6 +8,14 @@ export const setTime = createAction(
   '[App Component] setTime',
   props<{ time: Date }>()
 );
+export const setTimeFrom = createAction(
+  '[App Component] setTimeFrom',
+  props<{ time: Date }>()
+);
+export const setTimeTo = createAction(
+  '[App Component] setTimeTo',
+  props<{ time: Date }>()
+);
 export const getAggTrades = createAction(
   '[App Component] getAggTrades',
   props<{ symbol: string; time: Date }>()
@@ -32,12 +40,8 @@ export const getSymbolsSuccess = createAction(
 );
 export const getCandlestickDataSuccess = createAction(
   '[App Component] getCandlestickDataSuccess',
-  props<{ data: any }>()
+  props<{ data: Array<[number, number, number, number, number, number]> }>()
 );
 export const cleanCandlestickData = createAction(
   '[App Component] cleanCandlestickData'
-);
-export const changeCurrentTime = createAction(
-  '[App Component] changeCurrentTime',
-  props<{ time: Date }>()
 );

@@ -6,7 +6,11 @@ import {
   getSymbolsSuccess,
   getCandlestickDataSuccess,
   cleanCandlestickData,
+  setTime,
+  setTimeFrom,
+  setTimeTo,
 } from './app.actions';
+import { FIVE_MINUTES } from '../modules/player/player.component';
 export interface RootState {
   app: AppState;
 }
@@ -16,7 +20,8 @@ export interface AppState {
   depth?: any;
   aggTrades?: any;
   time?: Date;
-  currentTime?: Date;
+  timeFrom?: Date;
+  timeTo?: Date;
   candlestickData?: Array<[number, number, number, number, number, number]>;
 }
 
@@ -42,12 +47,32 @@ export const appReducer = createReducer(
     ...state,
     symbols,
   })),
-  on(getCandlestickDataSuccess, (state, { data }) => ({
-    ...state,
-    candlestickData: data,
-  })),
+  on(getCandlestickDataSuccess, (state, { data }) => {
+    const date = new Date(data[0][0]);
+    return {
+      ...state,
+      candlestickData: data,
+      time: date,
+      timeFrom: date,
+      timeTo: new Date(date.getTime() + FIVE_MINUTES),
+    };
+  }),
   on(cleanCandlestickData, (state) => ({
     ...state,
     candlestickData: undefined,
+  })),
+  on(setTime, (state, { time }) => ({
+    ...state,
+    time,
+  })),
+  on(setTimeFrom, (state, { time }) => {
+    return {
+      ...state,
+      timeFrom: time,
+    };
+  }),
+  on(setTimeTo, (state, { time }) => ({
+    ...state,
+    timeTo: time,
   }))
 );

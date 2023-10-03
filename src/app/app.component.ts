@@ -1,14 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { Store, select } from '@ngrx/store';
-import { RootState } from './store/app.reducer';
-import { Observable, map, tap } from 'rxjs';
-import { selectAllSymbols, selectSymbol } from './store/app.selectors';
+import { Observable, map } from 'rxjs';
 import { init, setSymbol } from './store/app.actions';
+import { RootState } from './store/app.reducer';
+import { selectAllSymbols, selectSymbol } from './store/app.selectors';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  styleUrls: ['./app.component.scss'],
 })
 export class AppComponent implements OnInit {
   public symbol$: Observable<string | undefined>;

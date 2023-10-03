@@ -55,7 +55,11 @@ export class AppEffects {
         date.setDate(date.getDate() - 2);
         return this.marketDataService
           .getCandlestickData(action.symbol, date)
-          .pipe(map((data) => getCandlestickDataSuccess({ data })));
+          .pipe(
+            map((data) => {
+              return getCandlestickDataSuccess({ data });
+            })
+          );
       })
     )
   );
@@ -69,29 +73,29 @@ export class AppEffects {
   //   )
   // );
 
-  getAggTrades$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(getAggTrades),
-      switchMap((action) =>
-        this.backendService.getAggTrades(action.symbol, action.time).pipe(
-          map((data: any) => getAggTradesSuccess({ trades: data })),
-          catchError(() => EMPTY)
-        )
-      )
-    )
-  );
+  // getAggTrades$ = createEffect(() =>
+  //   this.actions$.pipe(
+  //     ofType(getAggTrades),
+  //     switchMap((action) =>
+  //       this.backendService.getAggTrades(action.symbol, action.time).pipe(
+  //         map((data: any) => getAggTradesSuccess({ trades: data })),
+  //         catchError(() => EMPTY)
+  //       )
+  //     )
+  //   )
+  // );
 
-  getDepth$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(getDepth),
-      exhaustMap((action) =>
-        this.backendService.getDepth(action.symbol, action.time).pipe(
-          map((payload: any) => getDepthSuccess({ depth: payload })),
-          catchError(() => EMPTY)
-        )
-      )
-    )
-  );
+  // getDepth$ = createEffect(() =>
+  //   this.actions$.pipe(
+  //     ofType(getDepth),
+  //     exhaustMap((action) =>
+  //       this.backendService.getDepth(action.symbol, action.time).pipe(
+  //         map((payload: any) => getDepthSuccess({ depth: payload })),
+  //         catchError(() => EMPTY)
+  //       )
+  //     )
+  //   )
+  // );
 
   init$ = createEffect(() =>
     this.actions$.pipe(
