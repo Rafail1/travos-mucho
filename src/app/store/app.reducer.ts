@@ -9,8 +9,13 @@ import {
   setTime,
   setTimeFrom,
   setTimeTo,
+  forward,
+  play,
+  rewind,
 } from './app.actions';
 import { FIVE_MINUTES } from '../modules/player/player.component';
+export const REWIND_SECONDS = 1000 * 10;
+export const FORWARD_SECONDS = 1000 * 10;
 export interface RootState {
   app: AppState;
 }
@@ -74,5 +79,17 @@ export const appReducer = createReducer(
   on(setTimeTo, (state, { time }) => ({
     ...state,
     timeTo: time,
+  })),
+  on(forward, (state) => ({
+    ...state,
+    time: state.time
+      ? new Date(state.time.getTime() + FORWARD_SECONDS)
+      : state.time,
+  })),
+  on(rewind, (state) => ({
+    ...state,
+    time: state.time
+      ? new Date(state.time.getTime() - REWIND_SECONDS)
+      : state.time,
   }))
 );

@@ -7,8 +7,10 @@ import {
 } from '@ng-icons/material-icons/sharp';
 import { ButtonsComponent } from './buttons.component';
 import { ButtonsService } from './buttons.service';
+import { StoreModule } from '@ngrx/store';
 @NgModule({
   imports: [
+    StoreModule,
     NgIconsModule.withIcons({
       matPlayCircleOutline,
       matFastRewindSharp,

@@ -45,3 +45,8 @@ export const getCandlestickDataSuccess = createAction(
 export const cleanCandlestickData = createAction(
   '[App Component] cleanCandlestickData'
 );
+
+export const rewind = createAction('[App Component] rewind');
+export const play = createAction('[App Component] play');
+export const pause = createAction('[App Component] pause');
+export const forward = createAction('[App Component] forward');
