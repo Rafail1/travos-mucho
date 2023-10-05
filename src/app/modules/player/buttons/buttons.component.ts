@@ -1,6 +1,12 @@
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { rewind, play, forward, setTime } from 'src/app/store/app.actions';
+import {
+  rewind,
+  play,
+  forward,
+  setTime,
+  pause,
+} from 'src/app/store/app.actions';
 import { RootState } from 'src/app/store/app.reducer';
 
 @Component({
@@ -17,17 +23,13 @@ export class ButtonsComponent {
   public play() {
     if (!this.playing) {
       this.playing = true;
-
-      //use rx timer
-
-      // this.playingTimeoutId = setInterval(() => {
-      //   this.store.dispatch(setTime({ time: new Date() }));
-      // }, 100);
+      this.store.dispatch(play());
     }
   }
   public pause() {
     if (this.playing) {
       this.playing = false;
+      this.store.dispatch(pause());
     }
   }
   public forward() {
