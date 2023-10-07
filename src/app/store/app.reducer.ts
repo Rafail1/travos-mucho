@@ -27,12 +27,12 @@ export interface AppState {
   loadingDepth: boolean;
   loadingAggTrades: boolean;
   symbols?: Array<string>;
-  depth?: any;
-  aggTrades?: any;
   time?: Date;
   timeFrom?: Date;
   timeTo?: Date;
   playing: boolean;
+  depth?: any;
+  aggTrades?: any;
   candlestickData?: Array<[number, number, number, number, number, number]>;
 }
 
@@ -78,14 +78,15 @@ export const appReducer = createReducer(
     symbols,
   })),
   on(getCandlestickDataSuccess, (state, { data }) => {
-    const date = new Date(data[0][0]);
+    const from = new Date(data[0][0]);
+    const to = new Date(data[data.length - 1][0]);
     return {
       ...state,
       candlestickData: data,
       loadingChart: false,
-      time: date,
-      timeFrom: date,
-      timeTo: new Date(date.getTime() + FIVE_MINUTES),
+      time: from,
+      timeFrom: from,
+      timeTo: to,
     };
   }),
   on(cleanCandlestickData, (state) => ({

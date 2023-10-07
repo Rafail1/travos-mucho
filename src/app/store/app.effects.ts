@@ -27,6 +27,7 @@ import {
 } from './app.actions';
 import { RootState } from './app.reducer';
 import { selectSymbol } from './app.selectors';
+import { LoaderService } from '../modules/loader/loader.service';
 
 @Injectable()
 export class AppEffects {
@@ -64,38 +65,38 @@ export class AppEffects {
     )
   );
 
-  // setSymbolHood$ = createEffect(() =>
-  //   this.actions$.pipe(
-  //     ofType(setSymbol),
-  //     switchMap(() => {
-  //       return of(cleanCandlestickData());
-  //     })
-  //   )
-  // );
+  setSymbolHood$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(setSymbol),
+      switchMap(() => {
+        return [cleanCandlestickData()];
+      })
+    )
+  );
 
-  // getAggTrades$ = createEffect(() =>
-  //   this.actions$.pipe(
-  //     ofType(getAggTrades),
-  //     switchMap((action) =>
-  //       this.backendService.getAggTrades(action.symbol, action.time).pipe(
-  //         map((data: any) => getAggTradesSuccess({ trades: data })),
-  //         catchError(() => EMPTY)
-  //       )
-  //     )
-  //   )
-  // );
+  getAggTrades$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(getAggTrades),
+      switchMap((action) =>
+        this.loaderService.loadAggTrades(action).pipe(
+          map((data: any) => getAggTradesSuccess({ trades: data })),
+          catchError(() => EMPTY)
+        )
+      )
+    )
+  );
 
-  // getDepth$ = createEffect(() =>
-  //   this.actions$.pipe(
-  //     ofType(getDepth),
-  //     exhaustMap((action) =>
-  //       this.backendService.getDepth(action.symbol, action.time).pipe(
-  //         map((payload: any) => getDepthSuccess({ depth: payload })),
-  //         catchError(() => EMPTY)
-  //       )
-  //     )
-  //   )
-  // );
+  getDepth$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(getDepth),
+      exhaustMap((action) =>
+        this.loaderService.loadDepth(action).pipe(
+          map((payload: any) => getDepthSuccess({ depth: payload })),
+          catchError(() => EMPTY)
+        )
+      )
+    )
+  );
 
   init$ = createEffect(() =>
     this.actions$.pipe(
@@ -119,7 +120,7 @@ export class AppEffects {
   constructor(
     private actions$: Actions,
     private store: Store<RootState>,
-    private backendService: BackendService,
+    private loaderService: LoaderService,
     private marketDataService: MarketDataService
   ) {}
 }
