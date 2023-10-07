@@ -4,9 +4,10 @@ import {
   ElementRef,
   OnInit,
   ViewChild,
+  AfterViewInit,
 } from '@angular/core';
 import { Store, select } from '@ngrx/store';
-import { Observable, tap } from 'rxjs';
+import { Observable, combineLatest, filter, map, tap } from 'rxjs';
 import { setTime } from 'src/app/store/app.actions';
 import { RootState } from 'src/app/store/app.reducer';
 import {
@@ -20,34 +21,59 @@ import {
   templateUrl: './timeline.component.html',
   styleUrls: ['./timeline.component.scss'],
 })
-export class TimelineComponent implements OnInit {
+export class TimelineComponent implements OnInit, AfterViewInit {
   @ViewChild('dot') dot: ElementRef<HTMLDivElement>;
   @ViewChild('line') line: ElementRef<HTMLDivElement>;
 
   public current?: Date;
   public from?: Date;
   public to?: Date;
-  constructor(private store: Store<RootState>, private cd: ChangeDetectorRef) {}
+  private selectTime$: Observable<Date | undefined>;
+  private selectTimeFrom$: Observable<Date | undefined>;
+  private selectTimeTo$: Observable<Date | undefined>;
+  constructor(private store: Store<RootState>, private cd: ChangeDetectorRef) {
+    this.selectTime$ = this.store.pipe(select(selectTime));
+    this.selectTimeFrom$ = this.store.pipe(select(selectTimeFrom));
+    this.selectTimeTo$ = this.store.pipe(select(selectTimeTo));
+  }
 
   ngOnInit(): void {
-    this.store.pipe(select(selectTime)).subscribe((date) => {
+    this.selectTime$.subscribe((date) => {
       this.current = date;
-      this.cd.detectChanges()
+      this.cd.detectChanges();
     });
-    this.store.pipe(select(selectTimeFrom)).subscribe((time) => {
+
+    this.selectTimeFrom$.subscribe((time) => {
       if (time) {
         this.from = time;
         this.dot.nativeElement.style.left = `0px`;
       }
     });
 
-    this.store.pipe(select(selectTimeTo)).subscribe((time) => {
+    this.selectTimeTo$.subscribe((time) => {
       if (time) {
         this.to = time;
       }
     });
   }
-
+  ngAfterViewInit() {
+    combineLatest([this.selectTime$, this.selectTimeFrom$, this.selectTimeTo$])
+      .pipe(
+        map(([time, timeFrom, timeTo]) => {
+          if (time && timeFrom && timeTo) {
+            const fullLength = timeTo.getTime() - timeFrom.getTime();
+            const offsetTime = time.getTime() - timeFrom.getTime();
+            const percentage = offsetTime / fullLength;
+            const calculatedPosition =
+              this.line.nativeElement.clientWidth * percentage;
+            let offsetX = Math.max(calculatedPosition, 0);
+            offsetX = Math.min(offsetX, this.line.nativeElement.clientWidth);
+            this.dot.nativeElement.style.left = `${offsetX}px`;
+          }
+        })
+      )
+      .subscribe();
+  }
   public changeTimeline(event: MouseEvent) {
     if (!this.from || !this.to) {
       return;

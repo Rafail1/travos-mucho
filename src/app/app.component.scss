@@ -7,14 +7,14 @@ app-symbol-select {
 
 :host {
     display: grid;
-    grid-template-columns: 700px 300px;
+    grid-template-columns: 700px 500px;
     grid-template-rows: 600px 300px;
     grid-template-areas:
         "scalp scalp"
         "chart player";
     grid-gap: 0;
     height: 900px;
-    width: 1000px;
+    width: 1200px;
     overflow: hidden;
 }
 app-chart {

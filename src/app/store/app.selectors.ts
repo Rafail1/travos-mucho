@@ -14,3 +14,7 @@ export const selectCandlestickData = createSelector(
   app,
   (state) => state.candlestickData
 );
+export const selectPlaying = createSelector(
+  app,
+  (state) => state.playing
+);

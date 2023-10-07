@@ -1,12 +1,12 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Store } from '@ngrx/store';
+import { Store, select } from '@ngrx/store';
 import * as Highcharts from 'highcharts/highstock';
 import HC_draggable from 'highcharts/modules/draggable-points';
 import HC_hollowcandlestick from 'highcharts/modules/hollowcandlestick';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, map } from 'rxjs';
 import { setTime, setTimeFrom, setTimeTo } from 'src/app/store/app.actions';
 import { RootState } from 'src/app/store/app.reducer';
-import { selectCandlestickData } from 'src/app/store/app.selectors';
+import { selectCandlestickData, selectTime } from 'src/app/store/app.selectors';
 import { FIVE_MINUTES } from '../../player/player.component';
 
 @Component({
@@ -15,6 +15,7 @@ import { FIVE_MINUTES } from '../../player/player.component';
 })
 export class HighchartsComponent implements OnDestroy, OnInit {
   plotLine: Highcharts.PlotLineOrBand | undefined;
+  plotLineValue: number;
   Highcharts: typeof Highcharts = Highcharts; // required
   chartConstructor: string = 'chart'; // optional string, defaults to 'chart'
   chartOptions: Highcharts.Options = {
@@ -26,15 +27,8 @@ export class HighchartsComponent implements OnDestroy, OnInit {
       events: {
         click: () => {
           if (this.chart.hoverPoint?.category) {
-            this.plotLine?.destroy();
-            this.plotLine = this.chart.xAxis[0].addPlotLine({
-              color: '#00ff00',
-              width: 2,
-              value: Number(this.chart.hoverPoint.category),
-            });
+            this.drawPlotLine(Number(this.chart.hoverPoint.category));
             const time = new Date(this.chart.hoverPoint.category);
-            this.store.dispatch(setTimeFrom({ time }));
-            this.store.dispatch(setTimeTo({ time: new Date(time.getTime() + FIVE_MINUTES) }));
             this.store.dispatch(setTime({ time }));
           }
         },
@@ -50,15 +44,11 @@ export class HighchartsComponent implements OnDestroy, OnInit {
       hollowcandlestick: {
         events: {
           click: (event) => {
-            this.plotLine?.destroy();
-            this.plotLine = this.chart.xAxis[0].addPlotLine({
-              color: '#00ff00',
-              width: 2,
-              value: Number(event.point.category),
-            });
+            if (!this.chart.hoverPoint?.category) {
+              return;
+            }
+            this.drawPlotLine(Number(this.chart.hoverPoint.category));
             const time = new Date(event.point.category);
-            this.store.dispatch(setTimeFrom({ time }));
-            this.store.dispatch(setTimeTo({ time: new Date(time.getTime() + FIVE_MINUTES) }));
             this.store.dispatch(setTime({ time }));
           },
         },
@@ -72,7 +62,6 @@ export class HighchartsComponent implements OnDestroy, OnInit {
     },
     navigator: {
       enabled: false,
-      // adaptToUpdatedData: true,
     },
     xAxis: {
       type: 'datetime',
@@ -123,7 +112,6 @@ export class HighchartsComponent implements OnDestroy, OnInit {
   public chartCallback: Highcharts.ChartCallbackFunction;
   private destroy$ = new Subject<void>();
   chart: Highcharts.Chart;
-  chartData: Highcharts.PointOptionsType[] = [];
   chartSelected: Highcharts.SVGElement;
   constructor(private store: Store<RootState>) {
     HC_hollowcandlestick(Highcharts);
@@ -135,6 +123,16 @@ export class HighchartsComponent implements OnDestroy, OnInit {
     this.chartCallback = (chart: Highcharts.Chart) => {
       component.chart = chart;
       component.init();
+      component.store
+        .pipe(
+          select(selectTime),
+          map((time) => {
+            if (time) {
+              component.drawPlotLine(time.getTime());
+            }
+          })
+        )
+        .subscribe();
     };
   }
 
@@ -162,6 +160,12 @@ export class HighchartsComponent implements OnDestroy, OnInit {
         if (!data) {
           return;
         }
+
+        this.store.dispatch(setTimeFrom({ time: new Date(data[0][0]) }));
+        this.store.dispatch(
+          setTimeTo({ time: new Date(data[data.length - 1][0]) })
+        );
+
         this.chart.series[0]?.remove();
         this.chart.series[0]?.remove();
         this.chart.addSeries({
@@ -188,12 +192,21 @@ export class HighchartsComponent implements OnDestroy, OnInit {
           },
           name: 'Volume',
         });
-        this.plotLine?.destroy();
-        this.plotLine = this.chart.xAxis[0].addPlotLine({
-          color: '#00ff00',
-          width: 2,
-          value: data[0][0],
-        });
+        this.drawPlotLine(data[0][0]);
       });
+  }
+
+  private drawPlotLine(time: number) {
+    const value = time - (time % (1000 * 60 * 5))
+    if (this.plotLineValue && this.plotLineValue === value) {
+      return;
+    }
+    this.plotLineValue = value
+    this.plotLine?.destroy();
+    this.plotLine = this.chart.xAxis[0].addPlotLine({
+      color: '#00ff00',
+      width: 2,
+      value: this.plotLineValue,
+    });
   }
 }

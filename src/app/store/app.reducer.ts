@@ -12,10 +12,10 @@ import {
   forward,
   play,
   rewind,
+  pause,
 } from './app.actions';
 import { FIVE_MINUTES } from '../modules/player/player.component';
-export const REWIND_SECONDS = 1000 * 10;
-export const FORWARD_SECONDS = 1000 * 10;
+
 export interface RootState {
   app: AppState;
 }
@@ -27,10 +27,13 @@ export interface AppState {
   time?: Date;
   timeFrom?: Date;
   timeTo?: Date;
+  playing: boolean;
   candlestickData?: Array<[number, number, number, number, number, number]>;
 }
 
-export const initialState: AppState = {};
+export const initialState: AppState = {
+  playing: false,
+};
 
 export const appReducer = createReducer(
   initialState,
@@ -80,16 +83,41 @@ export const appReducer = createReducer(
     ...state,
     timeTo: time,
   })),
-  on(forward, (state) => ({
+  on(forward, (state, { step }) => {
+    if (!state.timeTo || !state.time) {
+      return state;
+    }
+    let time = state.time.getTime() + step;
+    if (state.timeTo.getTime() < time) {
+      time = state.timeTo.getTime();
+    }
+
+    return {
+      ...state,
+      time: new Date(time),
+    };
+  }),
+  on(rewind, (state, { step }) => {
+    if (!state.timeFrom || !state.time) {
+      return state;
+    }
+
+    let time = state.time.getTime() - step;
+    if (state.timeFrom.getTime() > time) {
+      time = state.timeFrom.getTime();
+    }
+
+    return {
+      ...state,
+      time: new Date(time),
+    };
+  }),
+  on(play, (state) => ({
     ...state,
-    time: state.time
-      ? new Date(state.time.getTime() + FORWARD_SECONDS)
-      : state.time,
+    playing: true,
   })),
-  on(rewind, (state) => ({
+  on(pause, (state) => ({
     ...state,
-    time: state.time
-      ? new Date(state.time.getTime() - REWIND_SECONDS)
-      : state.time,
+    playing: false,
   }))
 );

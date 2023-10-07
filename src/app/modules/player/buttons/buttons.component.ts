@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Store } from '@ngrx/store';
+import { Store, select } from '@ngrx/store';
 import {
   rewind,
   play,
@@ -8,6 +8,9 @@ import {
   pause,
 } from 'src/app/store/app.actions';
 import { RootState } from 'src/app/store/app.reducer';
+import { FORWARD_SECONDS, REWIND_SECONDS, STEP } from '../player.component';
+import { Observable } from 'rxjs';
+import { selectPlaying } from 'src/app/store/app.selectors';
 
 @Component({
   selector: 'app-player-buttons',
@@ -15,24 +18,20 @@ import { RootState } from 'src/app/store/app.reducer';
   styleUrls: ['./buttons.component.scss'],
 })
 export class ButtonsComponent {
-  playing = false;
-  constructor(private store: Store<RootState>) {}
+  playing$: Observable<boolean>;
+  constructor(private store: Store<RootState>) {
+    this.playing$ = this.store.pipe(select(selectPlaying));
+  }
   public rewind() {
-    this.store.dispatch(rewind());
+    this.store.dispatch(rewind({ step: REWIND_SECONDS }));
   }
   public play() {
-    if (!this.playing) {
-      this.playing = true;
-      this.store.dispatch(play());
-    }
+    this.store.dispatch(play());
   }
   public pause() {
-    if (this.playing) {
-      this.playing = false;
-      this.store.dispatch(pause());
-    }
+    this.store.dispatch(pause());
   }
   public forward() {
-    this.store.dispatch(forward());
+    this.store.dispatch(forward({ step: FORWARD_SECONDS }));
   }
 }

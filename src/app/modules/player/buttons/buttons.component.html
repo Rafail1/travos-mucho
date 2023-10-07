@@ -1,3 +1,18 @@
 <ng-icon name="matFastRewindSharp" class="rewind" (click)="rewind()"></ng-icon>
-<ng-icon name="matPlayCircleOutline" class="play" (click)="play()"></ng-icon>
-<ng-icon name="matFastForwardSharp" class="forward" (click)="forward()"></ng-icon>
+<ng-icon
+  name="matPlayCircleOutline"
+  class="play"
+  (click)="play()"
+  *ngIf="!(playing$ | async)"
+></ng-icon>
+<ng-icon
+  name="matPauseCircleOutline"
+  class="pause"
+  *ngIf="playing$ | async"
+  (click)="pause()"
+></ng-icon>
+<ng-icon
+  name="matFastForwardSharp"
+  class="forward"
+  (click)="forward()"
+></ng-icon>

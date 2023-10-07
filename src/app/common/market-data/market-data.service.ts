@@ -38,7 +38,7 @@ export class MarketDataService {
           symbol,
           interval: '5m',
           startTime: time.getTime(),
-          limit: 800,
+          limit: 288,
         },
       })
       .pipe(
