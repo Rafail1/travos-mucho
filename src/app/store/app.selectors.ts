@@ -14,7 +14,16 @@ export const selectCandlestickData = createSelector(
   app,
   (state) => state.candlestickData
 );
-export const selectPlaying = createSelector(
+export const selectPlaying = createSelector(app, (state) => state.playing);
+export const selectLoadingChart = createSelector(
   app,
-  (state) => state.playing
+  (state) => state.loadingChart
+);
+export const selectLoadingDepth = createSelector(
+  app,
+  (state) => state.loadingDepth
+);
+export const selectLoadingAggTrades = createSelector(
+  app,
+  (state) => state.loadingAggTrades
 );

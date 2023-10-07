@@ -3,10 +3,14 @@ import { Store, select } from '@ngrx/store';
 import * as Highcharts from 'highcharts/highstock';
 import HC_draggable from 'highcharts/modules/draggable-points';
 import HC_hollowcandlestick from 'highcharts/modules/hollowcandlestick';
-import { Subject, takeUntil, map } from 'rxjs';
+import { Subject, takeUntil, map, Observable } from 'rxjs';
 import { setTime, setTimeFrom, setTimeTo } from 'src/app/store/app.actions';
 import { RootState } from 'src/app/store/app.reducer';
-import { selectCandlestickData, selectTime } from 'src/app/store/app.selectors';
+import {
+  selectCandlestickData,
+  selectLoadingChart,
+  selectTime,
+} from 'src/app/store/app.selectors';
 import { FIVE_MINUTES } from '../../player/player.component';
 
 @Component({
@@ -14,6 +18,7 @@ import { FIVE_MINUTES } from '../../player/player.component';
   templateUrl: './highcharts.component.html',
 })
 export class HighchartsComponent implements OnDestroy, OnInit {
+  loading$: Observable<boolean>;
   plotLine: Highcharts.PlotLineOrBand | undefined;
   plotLineValue: number;
   Highcharts: typeof Highcharts = Highcharts; // required
@@ -116,6 +121,7 @@ export class HighchartsComponent implements OnDestroy, OnInit {
   constructor(private store: Store<RootState>) {
     HC_hollowcandlestick(Highcharts);
     HC_draggable(Highcharts);
+    this.loading$ = this.store.pipe(select(selectLoadingChart));
   }
 
   ngOnInit(): void {
@@ -142,6 +148,13 @@ export class HighchartsComponent implements OnDestroy, OnInit {
   }
 
   init() {
+    this.loading$.subscribe((loading) => {
+      if (loading) {
+        this.chart.showLoading();
+      } else {
+        this.chart.hideLoading();
+      }
+    });
     // Draw the area in the charts
     this.chartSelected = this.chart.renderer
       .rect(0, 0, 0, 0, 0)
@@ -197,11 +210,11 @@ export class HighchartsComponent implements OnDestroy, OnInit {
   }
 
   private drawPlotLine(time: number) {
-    const value = time - (time % (1000 * 60 * 5))
+    const value = time - (time % (1000 * 60 * 5));
     if (this.plotLineValue && this.plotLineValue === value) {
       return;
     }
-    this.plotLineValue = value
+    this.plotLineValue = value;
     this.plotLine?.destroy();
     this.plotLine = this.chart.xAxis[0].addPlotLine({
       color: '#00ff00',

@@ -13,6 +13,8 @@ import {
   play,
   rewind,
   pause,
+  getAggTradesSuccess,
+  getDepthSuccess,
 } from './app.actions';
 import { FIVE_MINUTES } from '../modules/player/player.component';
 
@@ -21,6 +23,9 @@ export interface RootState {
 }
 export interface AppState {
   symbol?: string;
+  loadingChart: boolean;
+  loadingDepth: boolean;
+  loadingAggTrades: boolean;
   symbols?: Array<string>;
   depth?: any;
   aggTrades?: any;
@@ -33,22 +38,39 @@ export interface AppState {
 
 export const initialState: AppState = {
   playing: false,
+  loadingChart: false,
+  loadingDepth: false,
+  loadingAggTrades: false,
 };
 
 export const appReducer = createReducer(
   initialState,
   on(setSymbol, (state, { symbol }) => ({
     ...state,
+    playing: false,
+    loadingChart: true,
     symbol,
   })),
   on(getAggTrades, (state, { symbol, time }) => ({
     ...state,
     symbol,
+    loadingAggTrades: true,
     time,
+  })),
+  on(getAggTradesSuccess, (state, { trades }) => ({
+    ...state,
+    trades,
+    loadingAggTrades: false,
+  })),
+  on(getDepthSuccess, (state, { depth }) => ({
+    ...state,
+    depth,
+    loadingDepth: false,
   })),
   on(getDepth, (state, { symbol, time }) => ({
     ...state,
     symbol,
+    loadingDepth: true,
     time,
   })),
   on(getSymbolsSuccess, (state, { symbols }) => ({
@@ -60,6 +82,7 @@ export const appReducer = createReducer(
     return {
       ...state,
       candlestickData: data,
+      loadingChart: false,
       time: date,
       timeFrom: date,
       timeTo: new Date(date.getTime() + FIVE_MINUTES),
