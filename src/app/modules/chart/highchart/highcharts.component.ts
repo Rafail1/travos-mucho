@@ -11,7 +11,6 @@ import {
   selectLoadingChart,
   selectTime,
 } from 'src/app/store/app.selectors';
-import { FIVE_MINUTES } from '../../player/player.component';
 
 @Component({
   selector: 'app-highcharts',

@@ -1,22 +1,19 @@
-import { Action, createReducer, on } from '@ngrx/store';
+import { createReducer, on } from '@ngrx/store';
 import {
-  setSymbol,
-  getAggTrades,
-  getDepth,
-  getSymbolsSuccess,
-  getCandlestickDataSuccess,
   cleanCandlestickData,
+  getAggTrades,
+  getAggTradesSuccess,
+  getCandlestickDataSuccess,
+  getDepth,
+  getDepthSuccess,
+  getSymbolsSuccess,
+  pause,
+  play,
+  setSymbol,
   setTime,
   setTimeFrom,
   setTimeTo,
-  forward,
-  play,
-  rewind,
-  pause,
-  getAggTradesSuccess,
-  getDepthSuccess,
 } from './app.actions';
-import { FIVE_MINUTES } from '../modules/player/player.component';
 
 export interface RootState {
   app: AppState;
@@ -84,7 +81,6 @@ export const appReducer = createReducer(
       ...state,
       candlestickData: data,
       loadingChart: false,
-      time: from,
       timeFrom: from,
       timeTo: to,
     };
@@ -93,10 +89,23 @@ export const appReducer = createReducer(
     ...state,
     candlestickData: undefined,
   })),
-  on(setTime, (state, { time }) => ({
-    ...state,
-    time,
-  })),
+  on(setTime, (state, { time }) => {
+    if (!state.timeTo || !state.time || !state.timeFrom) {
+      return state;
+    }
+    if (state.timeTo.getTime() < time.getTime()) {
+      time = state.timeTo;
+    }
+
+    if (state.timeFrom.getTime() > time.getTime()) {
+      time = state.timeFrom;
+    }
+
+    return {
+      ...state,
+      time,
+    };
+  }),
   on(setTimeFrom, (state, { time }) => {
     return {
       ...state,
@@ -107,35 +116,6 @@ export const appReducer = createReducer(
     ...state,
     timeTo: time,
   })),
-  on(forward, (state, { step }) => {
-    if (!state.timeTo || !state.time) {
-      return state;
-    }
-    let time = state.time.getTime() + step;
-    if (state.timeTo.getTime() < time) {
-      time = state.timeTo.getTime();
-    }
-
-    return {
-      ...state,
-      time: new Date(time),
-    };
-  }),
-  on(rewind, (state, { step }) => {
-    if (!state.timeFrom || !state.time) {
-      return state;
-    }
-
-    let time = state.time.getTime() - step;
-    if (state.timeFrom.getTime() > time) {
-      time = state.timeFrom.getTime();
-    }
-
-    return {
-      ...state,
-      time: new Date(time),
-    };
-  }),
   on(play, (state) => ({
     ...state,
     playing: true,

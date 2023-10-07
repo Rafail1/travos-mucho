@@ -26,11 +26,11 @@ export const getDepth = createAction(
 );
 export const getAggTradesSuccess = createAction(
   '[App Component] getAggTradesSuccess',
-  props<{ trades: any }>()
+  props<{ trades: any; time: Date; symbol: string }>()
 );
 export const getDepthSuccess = createAction(
   '[App Component] getDepthSuccess',
-  props<{ depth: any }>()
+  props<{ depth: any; time: Date; symbol: string }>()
 );
 
 export const init = createAction('[App Component] init');

@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { Store } from '@ngrx/store';
+import { Store, select } from '@ngrx/store';
 import { EMPTY, Observable, of } from 'rxjs';
 import {
   catchError,
+  distinctUntilChanged,
   exhaustMap,
   filter,
   map,
@@ -15,6 +16,7 @@ import { MarketDataService } from '../common/market-data/market-data.service';
 import { BackendService } from '../modules/backend/backend.service';
 import {
   cleanCandlestickData,
+  forward,
   getAggTrades,
   getAggTradesSuccess,
   getCandlestickDataSuccess,
@@ -22,28 +24,30 @@ import {
   getDepthSuccess,
   getSymbolsSuccess,
   init,
+  rewind,
   setSymbol,
   setTime,
+  setTimeFrom,
 } from './app.actions';
 import { RootState } from './app.reducer';
-import { selectSymbol } from './app.selectors';
+import { selectSymbol, selectTime } from './app.selectors';
 import { LoaderService } from '../modules/loader/loader.service';
+import { DateService } from '../utils/date.service';
 
 @Injectable()
 export class AppEffects {
   setTime$ = createEffect(() =>
     this.actions$.pipe(
       ofType(setTime),
+      map(({ time }) => this.dateService.filterTime(time)),
+      distinctUntilChanged((prev, crt) => prev.getTime() === crt.getTime()),
       withLatestFrom(
         this.store
           .select(selectSymbol)
           .pipe(filter((symbol) => symbol !== undefined)) as Observable<string>
       ),
-      switchMap(([action, symbol]) => {
-        return [
-          getAggTrades({ symbol, time: action.time }),
-          getDepth({ symbol, time: action.time }),
-        ];
+      switchMap(([time, symbol]) => {
+        return [getAggTrades({ symbol, time }), getDepth({ symbol, time })];
       })
     )
   );
@@ -77,13 +81,47 @@ export class AppEffects {
   getAggTrades$ = createEffect(() =>
     this.actions$.pipe(
       ofType(getAggTrades),
-      switchMap((action) =>
-        this.loaderService.loadAggTrades(action).pipe(
-          map((data: any) => getAggTradesSuccess({ trades: data })),
+      switchMap((action) => {
+        return this.loaderService.loadAggTrades(action).pipe(
+          map((data: any) =>
+            getAggTradesSuccess({
+              trades: data,
+              time: action.time,
+              symbol: action.symbol,
+            })
+          ),
           catchError(() => EMPTY)
-        )
-      )
+        );
+      })
     )
+  );
+
+  getAggTradesNext$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(getAggTrades),
+        switchMap((action) => {
+          return this.loaderService.loadAggTrades({
+            symbol: action.symbol,
+            time: this.dateService.nextFilterTime(action.time),
+          });
+        })
+      ),
+    { dispatch: false }
+  );
+
+  getDepthNext = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(getDepth),
+        switchMap((action) => {
+          return this.loaderService.loadDepth({
+            symbol: action.symbol,
+            time: this.dateService.nextFilterTime(action.time),
+          });
+        })
+      ),
+    { dispatch: false }
   );
 
   getDepth$ = createEffect(() =>
@@ -91,7 +129,13 @@ export class AppEffects {
       ofType(getDepth),
       exhaustMap((action) =>
         this.loaderService.loadDepth(action).pipe(
-          map((payload: any) => getDepthSuccess({ depth: payload })),
+          map((payload: any) =>
+            getDepthSuccess({
+              depth: payload,
+              time: action.time,
+              symbol: action.symbol,
+            })
+          ),
           catchError(() => EMPTY)
         )
       )
@@ -117,8 +161,42 @@ export class AppEffects {
     )
   );
 
+  setTimeFrom$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(setTimeFrom),
+      switchMap(({ time }) => of(setTime({ time: new Date(time.getTime()) })))
+    )
+  );
+
+  forward$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(forward),
+      withLatestFrom(this.store.pipe(select(selectTime))),
+      switchMap(([{ step }, time]) => {
+        if (!time) {
+          return EMPTY;
+        }
+        return of(setTime({ time: new Date(time.getTime() + step) }));
+      })
+    )
+  );
+
+  rewind$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(rewind),
+      withLatestFrom(this.store.pipe(select(selectTime))),
+      switchMap(([{ step }, time]) => {
+        if (!time) {
+          return EMPTY;
+        }
+        return of(setTime({ time: new Date(time.getTime() + step) }));
+      })
+    )
+  );
+
   constructor(
     private actions$: Actions,
+    private dateService: DateService,
     private store: Store<RootState>,
     private loaderService: LoaderService,
     private marketDataService: MarketDataService
