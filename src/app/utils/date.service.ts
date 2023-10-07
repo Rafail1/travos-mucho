@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-export const timeInterval = 1000 * 10;
+const TIME_WINDOW = 1000 * 30;
 
 @Injectable({ providedIn: 'root' })
 export class DateService {
@@ -9,10 +9,14 @@ export class DateService {
   }
 
   public filterTime(time: Date) {
-    return new Date(Math.floor(time.getTime() - (time.getTime() % timeInterval)));
+    return new Date(
+      Math.floor(time.getTime() - (time.getTime() % TIME_WINDOW))
+    );
   }
 
   public nextFilterTime(time: Date) {
-    return new Date(Math.floor(time.getTime() - (time.getTime() % timeInterval)) + timeInterval);
+    return new Date(
+      Math.floor(time.getTime() - (time.getTime() % TIME_WINDOW)) + TIME_WINDOW
+    );
   }
 }

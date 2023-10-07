@@ -27,3 +27,4 @@ export const selectLoadingAggTrades = createSelector(
   app,
   (state) => state.loadingAggTrades
 );
+export const selectSnapshot = createSelector(app, (state) => state.snapshot);

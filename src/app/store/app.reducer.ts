@@ -30,6 +30,11 @@ export interface AppState {
   playing: boolean;
   depth?: any;
   aggTrades?: any;
+  snapshot?: {
+    lastUpdateId: string;
+    asks: Record<string, string>;
+    bids: Record<string, string>;
+  };
   candlestickData?: Array<[number, number, number, number, number, number]>;
 }
 

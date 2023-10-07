@@ -9,11 +9,11 @@ import {
   filter,
   map,
   switchMap,
-  tap,
   withLatestFrom,
 } from 'rxjs/operators';
 import { MarketDataService } from '../common/market-data/market-data.service';
-import { BackendService } from '../modules/backend/backend.service';
+import { LoaderService } from '../modules/loader/loader.service';
+import { DateService } from '../utils/date.service';
 import {
   cleanCandlestickData,
   forward,
@@ -30,9 +30,7 @@ import {
   setTimeFrom,
 } from './app.actions';
 import { RootState } from './app.reducer';
-import { selectSymbol, selectTime } from './app.selectors';
-import { LoaderService } from '../modules/loader/loader.service';
-import { DateService } from '../utils/date.service';
+import { selectSnapshot, selectSymbol, selectTime } from './app.selectors';
 
 @Injectable()
 export class AppEffects {
@@ -127,7 +125,7 @@ export class AppEffects {
   getDepth$ = createEffect(() =>
     this.actions$.pipe(
       ofType(getDepth),
-      exhaustMap((action) =>
+      switchMap((action) =>
         this.loaderService.loadDepth(action).pipe(
           map((payload: any) =>
             getDepthSuccess({

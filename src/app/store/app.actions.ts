@@ -56,3 +56,12 @@ export const forward = createAction(
   '[App Component] forward',
   props<{ step: number }>()
 );
+
+export const setSnapshot = createAction(
+  '[App Component] setSnapshot',
+  props<{
+    lastUpdateId: string;
+    asks: Record<string, string>;
+    bids: Record<string, string>;
+  }>()
+);
