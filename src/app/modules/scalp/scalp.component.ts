@@ -10,7 +10,15 @@ import { GlassService } from './canvas/molecules/glass/glass';
 import { Store, select } from '@ngrx/store';
 import { RootState } from 'src/app/store/app.reducer';
 import { selectDepth, selectTime } from 'src/app/store/app.selectors';
-import { Observable, Subject, combineLatest, takeUntil } from 'rxjs';
+import {
+  Observable,
+  Subject,
+  combineLatest,
+  map,
+  switchMap,
+  takeUntil,
+  tap,
+} from 'rxjs';
 
 let ctx: CanvasRenderingContext2D;
 export const CANVAS_CTX = new InjectionToken<() => CanvasRenderingContext2D>(
@@ -58,21 +66,50 @@ export class ScalpComponent implements OnInit, OnDestroy {
   }
 
   draw() {
-    combineLatest([this.depth$, this.time$]).subscribe(([depth, time]) => {
-
-      // пошёл по depth, depth.data.slice(0, depth.data index of time)
-      // пошёл по snapshot апдейтнул цены
-      this.ctx.clearRect(0, 0, this.width, this.height);
-      this.glassService.render(
-        Array.from({ length: 22 }).map((_, idx) => ({
-          price: (10000 + idx).toString(),
-          value: `${Math.random() * 500000 + 500_000}`,
-        }))
-      );
-    });
+    this.depth$.pipe(
+      switchMap(({ data, snapshot }) => {
+        let index = 0;
+        const asks = snapshot.asks.reduce((acc: any, item: any) => {
+          acc[item[0]] = item[1];
+          return acc;
+        }, {});
+        const bids = snapshot.bids.reduce((acc: any, item: any) => {
+          acc[item[0]] = item[1];
+          return acc;
+        }, {});
+        return this.time$.pipe(
+          tap((time) => {
+            if (!time) {
+              return;
+            }
+            const lastUpdateId = snapshot.lastUpdateId;
+            for (; index < data.length; index++) {
+              if (data[index].E < time) {
+                this.updateSnapshot(data[index], asks, bids);
+              } else {
+                break;
+              }
+            }
+            // пошёл по depth, depth.data.slice(0, depth.data index of time)
+            // пошёл по snapshot апдейтнул цены
+            this.ctx.clearRect(0, 0, this.width, this.height);
+            this.glassService.render(asks, bids);
+          })
+        );
+      })
+    );
 
     // setTimeout(() => {
     //   requestAnimationFrame(() => this.draw(ctx));
     // }, 2000);
+  }
+  updateSnapshot(data: any, asks: any, bids: any) {
+    data.a.forEach((item: any) => {
+      asks[item[0]] = item[1];
+    });
+
+    data.b.forEach((item: any) => {
+      bids[item[0]] = item[1];
+    });
   }
 }

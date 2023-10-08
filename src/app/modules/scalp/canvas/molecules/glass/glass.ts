@@ -1,11 +1,19 @@
 import { Injectable } from '@angular/core';
-import { BarService } from '../../atoms/bar/bar.service';
-import { IOrderBookItem } from './glass.interface';
 import { ConfigService, STYLE_THEME_KEY } from 'src/app/config/config';
-
+import { BarService } from '../../atoms/bar/bar.service';
+interface BarData {
+  type: 'ask' | 'bid';
+  value: string;
+  price: string;
+  spread?: boolean;
+  y: number;
+  x: number;
+  width: number;
+  barHeight: number;
+}
 @Injectable({ providedIn: 'root' })
 export class GlassService {
-  private useSpread = Math.random() >= 0.5;
+  private useSpread = false;
   private config: any;
   constructor(private bar: BarService, private configService: ConfigService) {
     const { glass } = this.configService.getConfig('default');
@@ -13,47 +21,68 @@ export class GlassService {
     this.config = { glass, barHeight };
   }
 
-  public render(data: Array<IOrderBookItem>) {
-    let type: 'ask' | 'bid' = 'ask';
+  public render(asks: Record<string, string>, bids: Record<string, string>) {
     const { glass, barHeight } = this.config;
-    data.forEach((barOptions, idx) => {
+    let idx = 0;
+    for (const [price, value] of Object.entries(asks)) {
+      idx++;
       const y = glass.y + idx * barHeight;
+      this.renderBar({
+        type: 'ask',
+        value,
+        price,
+        spread: false,
+        y,
+        x: glass.x,
+        width: glass.width,
+        barHeight,
+      });
+    }
 
-      const values = [
-        {
-          type,
-          value: Number(barOptions.value),
-        },
-      ];
-
-      const spread =
-        this.useSpread && [data.length / 2, data.length / 2 + 1].includes(idx);
-
-      if (idx === data.length / 2) {
-        type = 'bid';
-        if (!this.useSpread) {
-          values.push({
-            type,
-            value: Number(barOptions.value) / 2,
-          });
-        }
-      }
-
-      this.bar.render(
-        {
-          values,
-          price: Number(barOptions.price),
-          spread,
-        },
-        {
-          y,
-          x: glass.x,
-          width: glass.width,
-          height: barHeight,
-        }
-      );
-    });
+    for (const [price, value] of Object.entries(bids)) {
+      idx++;
+      const y = glass.y + idx * barHeight;
+      this.renderBar({
+        type: 'ask',
+        value,
+        price,
+        spread: false,
+        y,
+        x: glass.x,
+        width: glass.width,
+        barHeight,
+      });
+    }
   }
 
   public squiz() {}
+  private renderBar({
+    type,
+    value,
+    price,
+    spread,
+    y,
+    x,
+    width,
+    barHeight,
+  }: BarData) {
+    this.bar.render(
+      {
+        values: [
+          {
+            type,
+            value: Number(value),
+          },
+        ],
+        price: Number(price),
+        spread,
+      },
+      {
+        y,
+        x,
+        width,
+        height: barHeight,
+      }
+    );
+  }
 }
