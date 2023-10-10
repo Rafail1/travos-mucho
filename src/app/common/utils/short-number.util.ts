@@ -19,5 +19,5 @@ export function shortNumber(
     }
   }
 
-  return { value };
+  return { value, abbrev: '' };
 }

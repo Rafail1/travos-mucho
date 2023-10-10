@@ -38,9 +38,9 @@ export interface IDepth {
   /** Event type // depthUpdate */
   e: string;
   /** Event time */
-  E: number; // Event time
+  E: string; // Event time
   /** Transaction time */
-  T: number;
+  T: string;
   /**Symbol */
   s: string;
   /** First update ID in event */
