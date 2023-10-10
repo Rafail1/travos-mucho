@@ -14,6 +14,11 @@ import {
   setTimeFrom,
   setTimeTo,
 } from './app.actions';
+import {
+  IAggTrade,
+  IDepth,
+  ISnapshot,
+} from '../modules/backend/backend.service';
 
 export interface RootState {
   app: AppState;
@@ -28,13 +33,9 @@ export interface AppState {
   timeFrom?: Date;
   timeTo?: Date;
   playing: boolean;
-  depth?: any;
-  aggTrades?: any;
-  snapshot?: {
-    lastUpdateId: string;
-    asks: Record<string, string>;
-    bids: Record<string, string>;
-  };
+  depth?: Array<IDepth>;
+  aggTrades?: Array<IAggTrade>;
+  snapshot?: ISnapshot;
   candlestickData?: Array<[number, number, number, number, number, number]>;
 }
 
@@ -66,7 +67,8 @@ export const appReducer = createReducer(
   })),
   on(getDepthSuccess, (state, { depth }) => ({
     ...state,
-    depth,
+    depth: depth.depth,
+    snapshot: depth.snapshot,
     loadingDepth: false,
   })),
   on(getDepth, (state, { symbol, time }) => ({

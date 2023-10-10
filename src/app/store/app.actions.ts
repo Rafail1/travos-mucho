@@ -1,4 +1,9 @@
 import { createAction, props } from '@ngrx/store';
+import {
+  IAggTrade,
+  IDepth,
+  ISnapshot,
+} from '../modules/backend/backend.service';
 
 export const setSymbol = createAction(
   '[App Component] setSymbol',
@@ -26,11 +31,15 @@ export const getDepth = createAction(
 );
 export const getAggTradesSuccess = createAction(
   '[App Component] getAggTradesSuccess',
-  props<{ trades: any; time: Date; symbol: string }>()
+  props<{ trades: Array<IAggTrade>; time: Date; symbol: string }>()
 );
 export const getDepthSuccess = createAction(
   '[App Component] getDepthSuccess',
-  props<{ depth: any; time: Date; symbol: string }>()
+  props<{
+    depth: { depth: Array<IDepth>; snapshot: ISnapshot };
+    time: Date;
+    symbol: string;
+  }>()
 );
 
 export const init = createAction('[App Component] init');

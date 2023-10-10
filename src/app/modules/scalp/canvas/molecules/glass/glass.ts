@@ -13,7 +13,6 @@ interface BarData {
 }
 @Injectable({ providedIn: 'root' })
 export class GlassService {
-  private useSpread = false;
   private config: any;
   constructor(private bar: BarService, private configService: ConfigService) {
     const { glass } = this.configService.getConfig('default');

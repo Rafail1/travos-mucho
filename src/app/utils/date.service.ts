@@ -4,8 +4,8 @@ const TIME_WINDOW = 1000 * 30;
 @Injectable({ providedIn: 'root' })
 export class DateService {
   public getUtcTime(date: Date) {
-    const offset = date.getTimezoneOffset();
-    return new Date(date.getTime() - offset * 60000).toISOString();
+    // const offset = date.getTimezoneOffset();
+    return new Date(date.getTime()).toISOString();
   }
 
   public filterTime(time: Date) {

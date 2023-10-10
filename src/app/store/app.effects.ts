@@ -30,7 +30,7 @@ import {
   setTimeFrom,
 } from './app.actions';
 import { RootState } from './app.reducer';
-import { selectSnapshot, selectSymbol, selectTime } from './app.selectors';
+import { selectSymbol, selectTime } from './app.selectors';
 
 @Injectable()
 export class AppEffects {
@@ -55,7 +55,7 @@ export class AppEffects {
       ofType(setSymbol),
       switchMap((action) => {
         const date = new Date();
-        date.setDate(date.getDate() - 2);
+        date.setDate(date.getDate() - 1);
         return this.marketDataService
           .getCandlestickData(action.symbol, date)
           .pipe(
@@ -127,7 +127,7 @@ export class AppEffects {
       ofType(getDepth),
       switchMap((action) =>
         this.loaderService.loadDepth(action).pipe(
-          map((payload: any) =>
+          map((payload) =>
             getDepthSuccess({
               depth: payload,
               time: action.time,
