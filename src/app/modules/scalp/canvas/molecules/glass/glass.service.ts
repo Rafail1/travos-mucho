@@ -42,7 +42,7 @@ export class GlassService {
       idx++;
       const y = glass.y + idx * barHeight;
       this.renderBar({
-        type: 'ask',
+        type: 'bid',
         value,
         price,
         spread: false,

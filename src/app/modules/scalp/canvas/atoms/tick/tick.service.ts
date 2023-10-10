@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@angular/core';
-import { CANVAS_CTX } from 'src/app/app.component';
-import { ConfigService, STYLE_THEME_KEY } from 'src/app/config/config';
+import { ConfigService } from 'src/app/config/config';
+import { CANVAS_CTX } from '../../molecules/glass/glass.component';
 
 @Injectable({ providedIn: 'root' })
 export class TickService {

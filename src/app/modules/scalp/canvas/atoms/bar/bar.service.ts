@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
 import { shortNumber } from 'src/app/common/utils/short-number.util';
 import { ConfigService, STYLE_THEME_KEY } from 'src/app/config/config';
-import { CANVAS_CTX } from '../../../scalp.component';
+import { CANVAS_CTX } from '../../molecules/glass/glass.component';
 import { IBarData, IBarPosition } from './bar.interface';
 
 @Injectable({ providedIn: 'root' })
@@ -31,8 +31,8 @@ export class BarService {
       priceText,
       textY,
     } = this.calculateOptions({ values, price, spread, y, height });
-
-    ctx.fillStyle = backgroundColor;
+    const type = values[0].type;
+    ctx.fillStyle = backgroundColor[type];
     ctx.fillRect(x, y, width, height);
 
     ctx.fillStyle = fillColor;
