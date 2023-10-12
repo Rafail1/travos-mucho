@@ -42,15 +42,15 @@ export const CANVAS_CTX = new InjectionToken<() => CanvasRenderingContext2D>(
   styleUrls: ['./glass.component.scss'],
 })
 export class GlassComponent implements OnInit, OnDestroy {
-  private width;
-  private height;
+  private width: number;
+  private height: number;
   private time$: Observable<Date>;
   private destroy$ = new Subject<void>();
   private depth$: Observable<IDepth[]>;
   data$: Observable<[Record<string, string>, Record<string, string>]>;
   snapshot$: Observable<{
-    asks: Record<string, string>;
-    bids: Record<string, string>;
+    asks: Record<string, [string, string]>;
+    bids: Record<string, [string, string]>;
   }>;
   constructor(
     private elRef: ElementRef,
@@ -59,8 +59,9 @@ export class GlassComponent implements OnInit, OnDestroy {
     private store: Store<RootState>,
     private configService: ConfigService
   ) {
-    const { barHeight, width } = this.configService.getConfig(STYLE_THEME_KEY);
-    this.height = 800 * barHeight;
+    const {
+      glass: { width },
+    } = this.configService.getConfig('default');
     this.width = width;
   }
 
@@ -70,6 +71,8 @@ export class GlassComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    const { barHeight } = this.configService.getConfig(STYLE_THEME_KEY);
+
     const canvas = this.renderer.createElement('canvas');
     canvas.setAttribute('width', this.width);
     canvas.setAttribute('height', this.height);
@@ -78,6 +81,10 @@ export class GlassComponent implements OnInit, OnDestroy {
     this.depth$ = this.store.pipe(
       select(selectDepth),
       filterNullish(),
+      tap((data) => {
+        this.height = data.length * barHeight;
+        canvas.setAttribute('height', this.height);
+      }),
       takeUntil(this.destroy$)
     );
 
@@ -86,15 +93,15 @@ export class GlassComponent implements OnInit, OnDestroy {
       filterNullish(),
       map((snapshot) => {
         const asks = snapshot.asks.reduce(
-          (acc: Record<string, string>, item: Array<string>) => {
-            acc[item[0]] = item[1];
+          (acc: Record<string, [string, string]>, item: [string, string]) => {
+            acc[item[0]] = item;
             return acc;
           },
           {}
         );
         const bids = snapshot.bids.reduce(
-          (acc: Record<string, string>, item: Array<string>) => {
-            acc[item[0]] = item[1];
+          (acc: Record<string, [string, string]>, item: [string, string]) => {
+            acc[item[0]] = item;
             return acc;
           },
           {}
@@ -120,7 +127,7 @@ export class GlassComponent implements OnInit, OnDestroy {
           return this.time$.pipe(
             tap((time) => {
               for (; index < depth.length; index++) {
-                if (new Date(depth[index].E).getTime() < time.getTime()) {
+                if (new Date(depth[index].E).getTime() <= time.getTime()) {
                   this.updateSnapshot(depth[index], asks, bids);
                 } else {
                   break;
@@ -138,13 +145,21 @@ export class GlassComponent implements OnInit, OnDestroy {
       .subscribe();
   }
 
-  updateSnapshot(data: any, asks: any, bids: any) {
-    data.a.forEach((item: any) => {
-      asks[item[0]] = item[1];
+  updateSnapshot(
+    data: any,
+    asks: Record<string, [string, string]>,
+    bids: Record<string, [string, string]>
+  ) {
+    data.a.forEach((item: [string, string]) => {
+      if (asks[item[0]]) {
+        asks[item[0]] = item;
+      }
     });
 
-    data.b.forEach((item: any) => {
-      bids[item[0]] = item[1];
+    data.b.forEach((item: [string, string]) => {
+      if (bids[item[0]]) {
+        bids[item[0]] = item;
+      }
     });
   }
 }
