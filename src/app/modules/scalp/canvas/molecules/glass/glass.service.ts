@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { ConfigService, STYLE_THEME_KEY } from 'src/app/config/config';
 import { BarService } from '../../atoms/bar/bar.service';
 interface BarData {
@@ -16,6 +16,7 @@ interface BarData {
 export class GlassService {
   private config: any;
   private squiz$ = new BehaviorSubject<number>(10);
+  public dataLength$ = new Subject<number>();
   constructor(private bar: BarService, private configService: ConfigService) {
     const { glass } = this.configService.getConfig('default');
     const { barHeight } = this.configService.getConfig(STYLE_THEME_KEY);
@@ -44,6 +45,7 @@ export class GlassService {
       this.squiz(sortedAsks);
       this.squiz(sortedBids);
     }
+    this.dataLength$.next(sortedAsks.length + sortedBids.length);
     for (const [price, value] of sortedAsks) {
       idx++;
       const y = glass.y + idx * barHeight;

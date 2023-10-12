@@ -11,6 +11,7 @@ import {
   Observable,
   Subject,
   combineLatest,
+  distinctUntilChanged,
   map,
   switchMap,
   takeUntil,
@@ -75,18 +76,20 @@ export class GlassComponent implements OnInit, OnDestroy {
 
     const canvas = this.renderer.createElement('canvas');
     canvas.setAttribute('width', this.width);
-    canvas.setAttribute('height', this.height);
     this.elRef.nativeElement.appendChild(canvas);
     ctx = canvas.getContext('2d');
     this.depth$ = this.store.pipe(
       select(selectDepth),
       filterNullish(),
-      tap((data) => {
-        this.height = data.length * barHeight;
-        canvas.setAttribute('height', this.height);
-      }),
       takeUntil(this.destroy$)
     );
+
+    this.glassService.dataLength$
+      .pipe(distinctUntilChanged())
+      .subscribe((value) => {
+        this.height = value * barHeight;
+        canvas.setAttribute('height', this.height);
+      });
 
     this.snapshot$ = this.store.pipe(
       select(selectSnapshot),

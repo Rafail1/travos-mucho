@@ -4,7 +4,6 @@ import { Observable, map } from 'rxjs';
 import { init, setSymbol } from './store/app.actions';
 import { RootState } from './store/app.reducer';
 import { selectAllSymbols, selectSymbol } from './store/app.selectors';
-import { LoaderService } from './modules/loader/loader.service';
 
 @Component({
   selector: 'app-root',
