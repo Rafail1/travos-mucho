@@ -30,10 +30,10 @@ export class GlassService {
     const { glass, barHeight } = this.config;
     let idx = 0;
     const sortedAsks = Object.values(asks).sort((a, b) => {
-      if (a[0] === b[0]) {
+      if (Number(a[0]) === Number(b[0])) {
         return 0;
       }
-      return a[0] < b[0] ? 1 : -1;
+      return Number(a[0]) < Number(b[0]) ? 1 : -1;
     });
     const sortedBids = Object.values(bids).sort((a, b) => {
       if (a[0] === b[0]) {
@@ -41,12 +41,16 @@ export class GlassService {
       }
       return a[0] < b[0] ? 1 : -1;
     });
+
     if (this.squiz$.value > 1) {
       this.squiz(sortedAsks);
       this.squiz(sortedBids);
     }
     this.dataLength$.next(sortedAsks.length + sortedBids.length);
     for (const [price, value] of sortedAsks) {
+      if (!Number(value)) {
+        continue;
+      }
       idx++;
       const y = glass.y + idx * barHeight;
       this.renderBar({
@@ -62,6 +66,9 @@ export class GlassService {
     }
 
     for (const [price, value] of sortedBids) {
+      if (!Number(value)) {
+        continue;
+      }
       idx++;
       const y = glass.y + idx * barHeight;
       this.renderBar({
