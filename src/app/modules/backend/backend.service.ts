@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { DateService } from 'src/app/utils/date.service';
 import { data } from './mock-agg-trades';
-import { map, of } from 'rxjs';
+import { Observable, map, of } from 'rxjs';
 export interface IAggTrade {
   /** ex: aggTrade  // Event type */
   e: string;
@@ -78,7 +78,7 @@ export class BackendService {
     );
   }
 
-  public getAggTrades(symbol: string, time: Date) {
+  public getAggTrades(symbol: string, time: Date): Observable<IAggTrade[]> {
     // return this.httpService.get<Array<IAggTrade>>(`${this.api}/agg-trades`, {
     //   params: new HttpParams({
     //     fromObject: {
@@ -87,21 +87,18 @@ export class BackendService {
     //     },
     //   }),
     // });
-    return of(data).pipe(
-      map((data) => {
-        const cols = data.shift();
-        if (!cols) {
-          return [];
-        }
-        return data.map((item) => {
-          return cols.reduce((acc, col, idx) => {
-            return {
-              ...acc,
-              [col]: item[idx],
-            };
-          }, {});
-        });
-      })
-    );
+    const cols = data.shift() as Array<keyof IAggTrade>;
+    if (!cols) {
+      return of([]);
+    }
+
+    const converted: IAggTrade[] = data.map((item) => {
+      const result = Object.fromEntries(
+        cols.map((col, idx) => [col, item[idx]])
+      );
+      return result as unknown as IAggTrade;
+    });
+
+    return of(converted);
   }
 }

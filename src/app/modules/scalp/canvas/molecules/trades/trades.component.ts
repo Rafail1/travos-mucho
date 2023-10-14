@@ -35,7 +35,7 @@ import { CANVAS_CTX } from '../glass/glass.component';
   selector: 'app-trades',
   template: '',
 })
-export class GlassComponent implements OnInit, OnDestroy {
+export class TradesComponent implements OnInit, OnDestroy {
   private x: number;
   private y: number;
   private width: number;

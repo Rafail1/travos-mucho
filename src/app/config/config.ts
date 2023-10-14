@@ -41,12 +41,6 @@ export class ConfigService {
           x: 0,
           y: 0,
         },
-        tick: {
-          width: 300,
-          height: 700,
-          x: 300,
-          y: 0,
-        },
         thresholds: {
           big: 200_000,
           huge: 800_000,
@@ -63,8 +57,10 @@ export class ConfigService {
           },
         },
         tick: {
-          decPlaces: 0,
-          shorten: true,
+          width: 300,
+          height: 700,
+          x: 300,
+          y: 0,
         },
       },
     ],
