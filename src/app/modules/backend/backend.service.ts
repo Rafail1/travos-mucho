@@ -1,7 +1,8 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { DateService } from 'src/app/utils/date.service';
-
+import { data } from './mock-agg-trades';
+import { map, of } from 'rxjs';
 export interface IAggTrade {
   /** ex: aggTrade  // Event type */
   e: string;
@@ -78,13 +79,29 @@ export class BackendService {
   }
 
   public getAggTrades(symbol: string, time: Date) {
-    return this.httpService.get<Array<IAggTrade>>(`${this.api}/agg-trades`, {
-      params: new HttpParams({
-        fromObject: {
-          time: this.dateService.getUtcTime(time),
-          symbol,
-        },
-      }),
-    });
+    // return this.httpService.get<Array<IAggTrade>>(`${this.api}/agg-trades`, {
+    //   params: new HttpParams({
+    //     fromObject: {
+    //       time: this.dateService.getUtcTime(time),
+    //       symbol,
+    //     },
+    //   }),
+    // });
+    return of(data).pipe(
+      map((data) => {
+        const cols = data.shift();
+        if (!cols) {
+          return [];
+        }
+        return data.map((item) => {
+          return cols.reduce((acc, col, idx) => {
+            return {
+              ...acc,
+              [col]: item[idx],
+            };
+          }, {});
+        });
+      })
+    );
   }
 }

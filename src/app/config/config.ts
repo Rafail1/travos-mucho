@@ -27,7 +27,7 @@ export class ConfigService {
         fillAskColor: 'green',
         fillBidColor: 'red',
         textColor: 'white',
-        backgroundColor:{ ask: 'lightgreen', bid: '#FF7276' },
+        backgroundColor: { ask: 'lightgreen', bid: '#FF7276' },
         tickBuyColor: 'green',
         tickSellColor: 'red',
       },
@@ -39,6 +39,12 @@ export class ConfigService {
           width: 300,
           height: 700,
           x: 0,
+          y: 0,
+        },
+        tick: {
+          width: 300,
+          height: 700,
+          x: 300,
           y: 0,
         },
         thresholds: {
