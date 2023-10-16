@@ -1,12 +1,6 @@
 import { Component } from '@angular/core';
 import { Store, select } from '@ngrx/store';
-import {
-  rewind,
-  play,
-  forward,
-  setTime,
-  pause,
-} from 'src/app/store/app.actions';
+import { rewind, play, forward, pause } from 'src/app/store/app.actions';
 import { RootState } from 'src/app/store/app.reducer';
 import { FORWARD_SECONDS, REWIND_SECONDS, STEP } from '../player.component';
 import { Observable } from 'rxjs';

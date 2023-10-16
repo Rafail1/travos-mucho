@@ -87,12 +87,12 @@ export class BackendService {
     //     },
     //   }),
     // });
-    const cols = data.pop() as Array<keyof IAggTrade>;
+    const cols = data[0] as Array<keyof IAggTrade>;
     if (!cols) {
       return of([]);
     }
 
-    const converted: IAggTrade[] = data.map((item) => {
+    const converted: IAggTrade[] = data.slice(1).map((item) => {
       const result = Object.fromEntries(
         cols.map((col, idx) => [col, item[idx]])
       );

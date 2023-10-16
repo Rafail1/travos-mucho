@@ -54,11 +54,10 @@ export const appReducer = createReducer(
     loadingChart: true,
     symbol,
   })),
-  on(getAggTrades, (state, { symbol, time }) => ({
+  on(getAggTrades, (state, { symbol }) => ({
     ...state,
     symbol,
     loadingAggTrades: true,
-    time,
   })),
   on(getAggTradesSuccess, (state, { trades }) => ({
     ...state,
@@ -71,11 +70,10 @@ export const appReducer = createReducer(
     snapshot: depth.snapshot,
     loadingDepth: false,
   })),
-  on(getDepth, (state, { symbol, time }) => ({
+  on(getDepth, (state, { symbol }) => ({
     ...state,
     symbol,
     loadingDepth: true,
-    time,
   })),
   on(getSymbolsSuccess, (state, { symbols }) => ({
     ...state,
@@ -88,6 +86,7 @@ export const appReducer = createReducer(
       ...state,
       candlestickData: data,
       loadingChart: false,
+      time: from,
       timeFrom: from,
       timeTo: to,
     };

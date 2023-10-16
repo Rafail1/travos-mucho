@@ -31,12 +31,14 @@ import {
 } from './app.actions';
 import { RootState } from './app.reducer';
 import { selectSymbol, selectTime } from './app.selectors';
+import { filterNullish } from '../common/utils/filter-nullish';
 
 @Injectable()
 export class AppEffects {
   setTime$ = createEffect(() =>
     this.actions$.pipe(
       ofType(setTime),
+      filterNullish(),
       map(({ time }) => this.dateService.filterTime(time)),
       distinctUntilChanged((prev, crt) => prev.getTime() === crt.getTime()),
       withLatestFrom(

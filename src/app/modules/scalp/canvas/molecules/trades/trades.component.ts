@@ -91,12 +91,11 @@ export class TradesComponent implements OnInit, OnDestroy {
           return this.time$.pipe(
             tap((time) => {
               for (; index < data.length; index++) {
-                if (new Date(data[index].E).getTime() <= time.getTime()) {
-                  this.renderTicks(data.slice(0, index));
-                } else {
+                if (new Date(data[index].E).getTime() > time.getTime()) {
                   break;
                 }
               }
+              this.renderTicks(data.slice(0, 10));
             })
           );
         })
