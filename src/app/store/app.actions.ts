@@ -31,7 +31,7 @@ export const getDepth = createAction(
 );
 export const getAggTradesSuccess = createAction(
   '[App Component] getAggTradesSuccess',
-  props<{ trades: Array<IAggTrade>; time: Date; symbol: string }>()
+  props<{ trades: Array<IAggTrade> }>()
 );
 export const getDepthSuccess = createAction(
   '[App Component] getDepthSuccess',

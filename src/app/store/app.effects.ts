@@ -83,9 +83,7 @@ export class AppEffects {
         return this.loaderService.loadAggTrades(action).pipe(
           map((data: any) =>
             getAggTradesSuccess({
-              trades: data,
-              time: action.time,
-              symbol: action.symbol,
+              trades: data
             })
           ),
           catchError(() => EMPTY)

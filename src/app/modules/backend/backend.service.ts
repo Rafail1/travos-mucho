@@ -87,7 +87,7 @@ export class BackendService {
     //     },
     //   }),
     // });
-    const cols = data.shift() as Array<keyof IAggTrade>;
+    const cols = data.pop() as Array<keyof IAggTrade>;
     if (!cols) {
       return of([]);
     }

@@ -62,7 +62,7 @@ export const appReducer = createReducer(
   })),
   on(getAggTradesSuccess, (state, { trades }) => ({
     ...state,
-    trades,
+    aggTrades: trades,
     loadingAggTrades: false,
   })),
   on(getDepthSuccess, (state, { depth }) => ({

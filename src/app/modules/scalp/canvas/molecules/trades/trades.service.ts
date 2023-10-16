@@ -15,7 +15,8 @@ export class TradesService {
   }
 
   public render(data: IAggTrade[]) {
-    console.log(data);
-    this.tickService.render();
+    for(const tick of data){
+      this.tickService.render(tick);
+    }
   }
 }
