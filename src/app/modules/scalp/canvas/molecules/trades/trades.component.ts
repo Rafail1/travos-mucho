@@ -29,11 +29,18 @@ import {
   selectTime,
 } from 'src/app/store/app.selectors';
 import { TradesService } from './trades.service';
-import { CANVAS_CTX } from '../glass/glass.component';
-
+let ctx: CanvasRenderingContext2D;
+export const TRADES_CANVAS_CTX = new InjectionToken<() => CanvasRenderingContext2D>(
+  'TRADES_CANVAS_CTX',
+  {
+    providedIn: 'root',
+    factory: () => () => ctx,
+  }
+);
 @Component({
   selector: 'app-trades',
   template: '',
+  styleUrls: ['./trades.component.scss']
 })
 export class TradesComponent implements OnInit, OnDestroy {
   private x: number;
@@ -49,10 +56,11 @@ export class TradesComponent implements OnInit, OnDestroy {
     bids: Record<string, [string, string]>;
   }>;
   constructor(
+    private elRef: ElementRef,
     private tradesService: TradesService,
-    @Inject(CANVAS_CTX) private ctx: () => CanvasRenderingContext2D,
     private store: Store<RootState>,
-    private configService: ConfigService
+    private configService: ConfigService,
+    private renderer: Renderer2,
   ) {
     const {
       tick: { width, x, y },
@@ -68,6 +76,11 @@ export class TradesComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    const canvas = this.renderer.createElement('canvas');
+    canvas.setAttribute('width', this.width);
+    this.elRef.nativeElement.appendChild(canvas);
+    ctx = canvas.getContext('2d');
+    
     this.aggTrades$ = this.store.pipe(
       select(selectAggTrades),
       filterNullish(),
@@ -105,7 +118,7 @@ export class TradesComponent implements OnInit, OnDestroy {
 
   renderTicks(data: IAggTrade[]) {
     requestAnimationFrame(() => {
-      this.ctx().clearRect(this.x, this.y, this.width, this.height);
+      ctx.clearRect(this.x, this.y, this.width, this.height);
       this.tradesService.render(data);
     });
   }
