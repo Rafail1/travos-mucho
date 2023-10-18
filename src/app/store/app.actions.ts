@@ -74,3 +74,10 @@ export const setSnapshot = createAction(
     bids: Record<string, string>;
   }>()
 );
+
+export const putBarY = createAction(
+  '[App Component] putBarY',
+  props<{ price: string; y: number }>()
+);
+
+export const cleanBarYs = createAction('[App Component] cleanBarYs');

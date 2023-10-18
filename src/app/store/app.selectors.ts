@@ -28,3 +28,4 @@ export const selectLoadingAggTrades = createSelector(
   (state) => state.loadingAggTrades
 );
 export const selectSnapshot = createSelector(app, (state) => state.snapshot);
+export const selectBarYs = createSelector(app, (state) => state.barYs);

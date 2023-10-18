@@ -2,6 +2,9 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { ConfigService, STYLE_THEME_KEY } from 'src/app/config/config';
 import { BarService } from '../../atoms/bar/bar.service';
+import { putBarY } from 'src/app/store/app.actions';
+import { Store } from '@ngrx/store';
+import { RootState } from 'src/app/store/app.reducer';
 interface BarData {
   type: 'ask' | 'bid';
   value: string;
@@ -17,7 +20,11 @@ export class GlassService {
   private config: any;
   private squiz$ = new BehaviorSubject<number>(10);
   public dataLength$ = new Subject<number>();
-  constructor(private bar: BarService, private configService: ConfigService) {
+  constructor(
+    private bar: BarService,
+    private configService: ConfigService,
+    private store: Store<RootState>
+  ) {
     const { glass } = this.configService.getConfig('default');
     const { barHeight } = this.configService.getConfig(STYLE_THEME_KEY);
     this.config = { glass, barHeight };
@@ -135,5 +142,6 @@ export class GlassService {
         height: barHeight,
       }
     );
+    this.store.dispatch(putBarY({ price, y }));
   }
 }

@@ -15,6 +15,7 @@ import { MarketDataService } from '../common/market-data/market-data.service';
 import { LoaderService } from '../modules/loader/loader.service';
 import { DateService } from '../utils/date.service';
 import {
+  cleanBarYs,
   cleanCandlestickData,
   forward,
   getAggTrades,
@@ -73,7 +74,7 @@ export class AppEffects {
     this.actions$.pipe(
       ofType(setSymbol),
       switchMap(() => {
-        return [cleanCandlestickData()];
+        return [cleanCandlestickData(), cleanBarYs()];
       })
     )
   );

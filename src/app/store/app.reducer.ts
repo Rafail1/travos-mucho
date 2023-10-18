@@ -1,5 +1,6 @@
 import { createReducer, on } from '@ngrx/store';
 import {
+  cleanBarYs,
   cleanCandlestickData,
   getAggTrades,
   getAggTradesSuccess,
@@ -9,6 +10,7 @@ import {
   getSymbolsSuccess,
   pause,
   play,
+  putBarY,
   setSymbol,
   setTime,
   setTimeFrom,
@@ -37,6 +39,7 @@ export interface AppState {
   aggTrades?: Array<IAggTrade>;
   snapshot?: ISnapshot;
   candlestickData?: Array<[number, number, number, number, number, number]>;
+  barYs: Record<string, number>;
 }
 
 export const initialState: AppState = {
@@ -44,6 +47,7 @@ export const initialState: AppState = {
   loadingChart: false,
   loadingDepth: false,
   loadingAggTrades: false,
+  barYs: {},
 };
 
 export const appReducer = createReducer(
@@ -129,5 +133,15 @@ export const appReducer = createReducer(
   on(pause, (state) => ({
     ...state,
     playing: false,
-  }))
+  })),
+  on(cleanBarYs, (state) => ({
+    ...state,
+    barYs: {},
+  })),
+  on(putBarY, (state, { price, y }) => {
+    state.barYs[price] = y;
+    return {
+      ...state,
+    };
+  })
 );
