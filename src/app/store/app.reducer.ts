@@ -139,9 +139,9 @@ export const appReducer = createReducer(
     barYs: {},
   })),
   on(putBarY, (state, { price, y }) => {
-    state.barYs[price] = y;
     return {
       ...state,
+      barYs: { ...state.barYs, [price]: y },
     };
   })
 );

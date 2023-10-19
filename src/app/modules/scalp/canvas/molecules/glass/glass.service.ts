@@ -18,7 +18,7 @@ interface BarData {
 @Injectable({ providedIn: 'root' })
 export class GlassService {
   private config: any;
-  private squiz$ = new BehaviorSubject<number>(10);
+  private squiz$ = new BehaviorSubject<number>(1);
   public dataLength$ = new Subject<number>();
   constructor(
     private bar: BarService,

@@ -79,26 +79,26 @@ export class BackendService {
   }
 
   public getAggTrades(symbol: string, time: Date): Observable<IAggTrade[]> {
-    // return this.httpService.get<Array<IAggTrade>>(`${this.api}/agg-trades`, {
-    //   params: new HttpParams({
-    //     fromObject: {
-    //       time: this.dateService.getUtcTime(time),
-    //       symbol,
-    //     },
-    //   }),
-    // });
-    const cols = data[0] as Array<keyof IAggTrade>;
-    if (!cols) {
-      return of([]);
-    }
-
-    const converted: IAggTrade[] = data.slice(1).map((item) => {
-      const result = Object.fromEntries(
-        cols.map((col, idx) => [col, item[idx]])
-      );
-      return result as unknown as IAggTrade;
+    return this.httpService.get<Array<IAggTrade>>(`${this.api}/agg-trades`, {
+      params: new HttpParams({
+        fromObject: {
+          time: this.dateService.getUtcTime(time),
+          symbol,
+        },
+      }),
     });
+    // const cols = data[0] as Array<keyof IAggTrade>;
+    // if (!cols) {
+    //   return of([]);
+    // }
 
-    return of(converted);
+    // const converted: IAggTrade[] = data.slice(1).map((item) => {
+    //   const result = Object.fromEntries(
+    //     cols.map((col, idx) => [col, item[idx]])
+    //   );
+    //   return result as unknown as IAggTrade;
+    // });
+
+    // return of(converted);
   }
 }
