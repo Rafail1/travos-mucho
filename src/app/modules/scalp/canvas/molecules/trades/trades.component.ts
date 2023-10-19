@@ -1,52 +1,32 @@
-import {
-  Component,
-  ElementRef,
-  Inject,
-  InjectionToken,
-  OnDestroy,
-  OnInit,
-  Renderer2,
-} from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Store, select } from '@ngrx/store';
 import {
   Observable,
   Subject,
-  combineLatest,
-  distinctUntilChanged,
   map,
+  mapTo,
   switchMap,
+  take,
   takeUntil,
   tap,
+  withLatestFrom,
 } from 'rxjs';
 import { filterNullish } from 'src/app/common/utils/filter-nullish';
-import { ConfigService, STYLE_THEME_KEY } from 'src/app/config/config';
-import { IAggTrade, IDepth } from 'src/app/modules/backend/backend.service';
+import { IAggTrade } from 'src/app/modules/backend/backend.service';
 import { RootState } from 'src/app/store/app.reducer';
 import {
   selectAggTrades,
-  selectDepth,
-  selectSnapshot,
+  selectBarYs,
   selectTime,
 } from 'src/app/store/app.selectors';
-import { TradesService } from './trades.service';
-import { CANVAS_CTX } from '../glass/glass.component';
-let ctx: CanvasRenderingContext2D;
-export const TRADES_CANVAS_CTX = new InjectionToken<
-  () => CanvasRenderingContext2D
->('TRADES_CANVAS_CTX', {
-  providedIn: 'root',
-  factory: () => () => ctx,
-});
+import { CanvasRendererService } from '../../../renderer/canvas/canvas-renderer.service';
+
 @Component({
   selector: 'app-trades',
   template: '',
   styleUrls: ['./trades.component.scss'],
 })
 export class TradesComponent implements OnInit, OnDestroy {
-  private x: number;
-  private y: number;
-  private width: number;
-  private height: number;
   private time$: Observable<Date>;
   private destroy$ = new Subject<void>();
   private aggTrades$: Observable<IAggTrade[]>;
@@ -56,20 +36,9 @@ export class TradesComponent implements OnInit, OnDestroy {
     bids: Record<string, [string, string]>;
   }>;
   constructor(
-    private elRef: ElementRef,
-    private tradesService: TradesService,
     private store: Store<RootState>,
-    private configService: ConfigService,
-    private renderer: Renderer2,
-    @Inject(CANVAS_CTX) private glassCtx: () => CanvasRenderingContext2D
-  ) {
-    const {
-      tick: { width, x, y },
-    } = this.configService.getConfig('default');
-    this.width = width;
-    this.x = x;
-    this.y = y;
-  }
+    private canvasRenderer: CanvasRendererService
+  ) {}
 
   ngOnDestroy(): void {
     this.destroy$.next();
@@ -77,12 +46,6 @@ export class TradesComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    const canvas = this.renderer.createElement('canvas');
-    canvas.setAttribute('width', this.width);
-    canvas.setAttribute('height', this.glassCtx().canvas.height);
-    this.elRef.nativeElement.appendChild(canvas);
-    ctx = canvas.getContext('2d');
-
     this.aggTrades$ = this.store.pipe(
       select(selectAggTrades),
       filterNullish(),
@@ -104,24 +67,20 @@ export class TradesComponent implements OnInit, OnDestroy {
         switchMap((data) => {
           let index = 0;
           return this.time$.pipe(
-            tap((time) => {
+            map((time: Date) => {
               for (; index < data.length; index++) {
                 if (new Date(data[index].E).getTime() > time.getTime()) {
                   break;
                 }
               }
-              this.renderTicks(data.slice(0, index));
-            })
+              return { data, index };
+            }),
+            withLatestFrom(this.store.pipe(select(selectBarYs)))
           );
         })
       )
-      .subscribe();
-  }
-
-  renderTicks(data: IAggTrade[]) {
-    requestAnimationFrame(() => {
-      ctx.clearRect(this.x, this.y, this.width, this.glassCtx().canvas.height);
-      this.tradesService.render(data);
-    });
+      .subscribe(([{ data, index }, barYs]) => {
+        this.canvasRenderer.renderTicks(data.slice(0, index), barYs);
+      });
   }
 }

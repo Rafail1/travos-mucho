@@ -1,16 +1,16 @@
-import { Inject, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
 import { shortNumber } from 'src/app/common/utils/short-number.util';
 import { ConfigService, STYLE_THEME_KEY } from 'src/app/config/config';
-import { CANVAS_CTX } from '../../molecules/glass/glass.component';
+import { CanvasRendererService } from '../../../renderer/canvas/canvas-renderer.service';
 import { IBarData, IBarPosition } from './bar.interface';
 
 @Injectable({ providedIn: 'root' })
 export class BarService {
   private thresholdSubject = new Subject();
   constructor(
-    @Inject(CANVAS_CTX) private ctx: () => CanvasRenderingContext2D,
-    private configService: ConfigService
+    private configService: ConfigService,
+    private canvasRenderer: CanvasRendererService
   ) {}
 
   public render(
@@ -21,33 +21,13 @@ export class BarService {
       return;
     }
 
-    const ctx = this.ctx();
-    const {
-      fillRectWidth,
-      backgroundColor,
-      textColor,
-      fillColor,
-      volumeText,
-      priceText,
-      textY,
-    } = this.calculateOptions({ values, price, spread, y, height });
-    const type = values[0].type;
-    ctx.fillStyle = backgroundColor[type];
-    ctx.fillRect(x, y, width, height);
-
-    ctx.fillStyle = fillColor;
-    ctx.fillRect(x, y, fillRectWidth, height);
-
-    ctx.font = `${height - 2}px Arial`;
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = textColor;
-
-    ctx.fillText(volumeText, x + 4, textY);
-
-    const { width: textWidth } = ctx.measureText(priceText);
-
-    ctx.fillText(priceText, width - textWidth - 4, textY);
+    this.canvasRenderer.renderBar({
+      height,
+      x,
+      y,
+      width,
+      ...this.calculateOptions({ values, price, spread, y, height }),
+    });
   }
 
   private calculateOptions({
@@ -103,7 +83,7 @@ export class BarService {
 
     return {
       fillRectWidth,
-      backgroundColor,
+      backgroundColor: backgroundColor[values[0].type],
       textColor,
       fillColor,
       volumeText,

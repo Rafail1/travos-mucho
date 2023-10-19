@@ -29,8 +29,8 @@ import {
 import { GlassService } from './glass.service';
 
 let ctx: CanvasRenderingContext2D;
-export const CANVAS_CTX = new InjectionToken<() => CanvasRenderingContext2D>(
-  'CANVAS_CTX',
+export const GLASS_CANVAS_CTX = new InjectionToken<() => CanvasRenderingContext2D>(
+  'GLASS_CANVAS_CTX',
   {
     providedIn: 'root',
     factory: () => () => ctx,
@@ -78,6 +78,7 @@ export class GlassComponent implements OnInit, OnDestroy {
     canvas.setAttribute('width', this.width);
     this.elRef.nativeElement.appendChild(canvas);
     ctx = canvas.getContext('2d');
+    
     this.depth$ = this.store.pipe(
       select(selectDepth),
       filterNullish(),
