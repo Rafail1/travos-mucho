@@ -26,7 +26,7 @@ import { CanvasRendererService } from '../../../renderer/canvas/canvas-renderer.
   template: '',
   styleUrls: ['./trades.component.scss'],
 })
-export class TradesComponent implements OnInit, OnDestroy {
+export class TradesComponent implements OnInit, OnDestroy { // will be service
   private time$: Observable<Date>;
   private destroy$ = new Subject<void>();
   private aggTrades$: Observable<IAggTrade[]>;

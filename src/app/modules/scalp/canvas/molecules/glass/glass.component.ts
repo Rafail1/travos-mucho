@@ -1,24 +1,19 @@
 import {
   Component,
-  ElementRef,
-  InjectionToken,
   OnDestroy,
-  OnInit,
-  Renderer2,
+  OnInit
 } from '@angular/core';
 import { Store, select } from '@ngrx/store';
 import {
   Observable,
   Subject,
   combineLatest,
-  distinctUntilChanged,
   map,
   switchMap,
   takeUntil,
-  tap,
+  tap
 } from 'rxjs';
 import { filterNullish } from 'src/app/common/utils/filter-nullish';
-import { ConfigService, STYLE_THEME_KEY } from 'src/app/config/config';
 import { IDepth } from 'src/app/modules/backend/backend.service';
 import { RootState } from 'src/app/store/app.reducer';
 import {
@@ -28,23 +23,12 @@ import {
 } from 'src/app/store/app.selectors';
 import { GlassService } from './glass.service';
 
-let ctx: CanvasRenderingContext2D;
-export const GLASS_CANVAS_CTX = new InjectionToken<() => CanvasRenderingContext2D>(
-  'GLASS_CANVAS_CTX',
-  {
-    providedIn: 'root',
-    factory: () => () => ctx,
-  }
-);
-
 @Component({
   selector: 'app-glass',
   template: '',
   styleUrls: ['./glass.component.scss'],
 })
-export class GlassComponent implements OnInit, OnDestroy {
-  private width: number;
-  private height: number;
+export class GlassComponent implements OnInit, OnDestroy { // will be service
   private time$: Observable<Date>;
   private destroy$ = new Subject<void>();
   private depth$: Observable<IDepth[]>;
@@ -54,16 +38,10 @@ export class GlassComponent implements OnInit, OnDestroy {
     bids: Record<string, [string, string]>;
   }>;
   constructor(
-    private elRef: ElementRef,
     private glassService: GlassService,
-    private renderer: Renderer2,
-    private store: Store<RootState>,
-    private configService: ConfigService
+    private store: Store<RootState>
   ) {
-    const {
-      glass: { width },
-    } = this.configService.getConfig('default');
-    this.width = width;
+
   }
 
   ngOnDestroy(): void {
@@ -125,7 +103,6 @@ export class GlassComponent implements OnInit, OnDestroy {
               }
 
               requestAnimationFrame(() => {
-                ctx.clearRect(0, 0, this.width, this.height);
                 this.glassService.render(asks, bids);
               });
             })

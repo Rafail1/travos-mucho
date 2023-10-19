@@ -34,7 +34,6 @@ export class GlassService {
     bids: Record<string, [string, string]>
   ) {
     const { glass, barHeight } = this.config;
-    let idx = 0;
     const sortedAsks = Object.values(asks).sort((a, b) => {
       if (Number(a[0]) === Number(b[0])) {
         return 0;
