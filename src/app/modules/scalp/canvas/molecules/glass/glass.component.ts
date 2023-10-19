@@ -72,25 +72,11 @@ export class GlassComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    const { barHeight } = this.configService.getConfig(STYLE_THEME_KEY);
-
-    const canvas = this.renderer.createElement('canvas');
-    canvas.setAttribute('width', this.width);
-    this.elRef.nativeElement.appendChild(canvas);
-    ctx = canvas.getContext('2d');
-    
     this.depth$ = this.store.pipe(
       select(selectDepth),
       filterNullish(),
       takeUntil(this.destroy$)
     );
-
-    this.glassService.dataLength$
-      .pipe(distinctUntilChanged())
-      .subscribe((value) => {
-        this.height = value * barHeight;
-        canvas.setAttribute('height', this.height);
-      });
 
     this.snapshot$ = this.store.pipe(
       select(selectSnapshot),

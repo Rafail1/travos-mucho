@@ -36,6 +36,7 @@ export class CanvasRendererComponent implements OnInit {
     private configService: ConfigService,
     private renderer: Renderer2
   ) {}
+
   ngOnInit(): void {
     this.initGlassCtx();
     this.initTradesCtx();

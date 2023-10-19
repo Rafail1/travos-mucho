@@ -53,6 +53,8 @@ export class GlassService {
       this.squiz(sortedAsks);
       this.squiz(sortedBids);
     }
+
+    // TODO(Rafa): move logic to renderer
     this.dataLength$.next(sortedAsks.length + sortedBids.length);
     for (const [price, value] of sortedAsks) {
       if (!Number(value)) {
@@ -89,6 +91,7 @@ export class GlassService {
         barHeight,
       });
     }
+    // TODO(Rafa): end move logic to renderer
   }
 
   public squiz(data: Array<Array<string>>) {
@@ -114,6 +117,7 @@ export class GlassService {
     }
   }
 
+  // TODO(Rafa): move logic to renderer
   private renderBar({
     type,
     value,
@@ -144,4 +148,5 @@ export class GlassService {
     );
     this.store.dispatch(putBarY({ price, y }));
   }
+  // TODO(Rafa): end move logic to renderer
 }
