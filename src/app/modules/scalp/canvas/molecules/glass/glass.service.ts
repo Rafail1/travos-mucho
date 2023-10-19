@@ -5,6 +5,7 @@ import { BarService } from '../../atoms/bar/bar.service';
 import { putBarY } from 'src/app/store/app.actions';
 import { Store } from '@ngrx/store';
 import { RootState } from 'src/app/store/app.reducer';
+import { CanvasRendererService } from '../../../renderer/canvas/canvas-renderer.service';
 interface BarData {
   type: 'ask' | 'bid';
   value: string;
@@ -19,11 +20,9 @@ interface BarData {
 export class GlassService {
   private config: any;
   private squiz$ = new BehaviorSubject<number>(1);
-  public dataLength$ = new Subject<number>();
   constructor(
-    private bar: BarService,
     private configService: ConfigService,
-    private store: Store<RootState>
+    private canvasRenderer: CanvasRendererService
   ) {
     const { glass } = this.configService.getConfig('default');
     const { barHeight } = this.configService.getConfig(STYLE_THEME_KEY);
@@ -53,45 +52,14 @@ export class GlassService {
       this.squiz(sortedAsks);
       this.squiz(sortedBids);
     }
-
-    // TODO(Rafa): move logic to renderer
-    this.dataLength$.next(sortedAsks.length + sortedBids.length);
-    for (const [price, value] of sortedAsks) {
-      if (!Number(value)) {
-        continue;
-      }
-      idx++;
-      const y = glass.y + idx * barHeight;
-      this.renderBar({
-        type: 'ask',
-        value,
-        price,
-        spread: false,
-        y,
-        x: glass.x,
-        width: glass.width,
-        barHeight,
-      });
-    }
-
-    for (const [price, value] of sortedBids) {
-      if (!Number(value)) {
-        continue;
-      }
-      idx++;
-      const y = glass.y + idx * barHeight;
-      this.renderBar({
-        type: 'bid',
-        value,
-        price,
-        spread: false,
-        y,
-        x: glass.x,
-        width: glass.width,
-        barHeight,
-      });
-    }
-    // TODO(Rafa): end move logic to renderer
+    this.canvasRenderer.renderBars({
+      asks: sortedAsks,
+      bids: sortedBids,
+      barHeight,
+      glassWidth: glass.width,
+      glassX: glass.x,
+      glassY: glass.y,
+    });
   }
 
   public squiz(data: Array<Array<string>>) {
@@ -118,35 +86,5 @@ export class GlassService {
   }
 
   // TODO(Rafa): move logic to renderer
-  private renderBar({
-    type,
-    value,
-    price,
-    spread,
-    y,
-    x,
-    width,
-    barHeight,
-  }: BarData) {
-    this.bar.render(
-      {
-        values: [
-          {
-            type,
-            value: Number(value),
-          },
-        ],
-        price: Number(price),
-        spread,
-      },
-      {
-        y,
-        x,
-        width,
-        height: barHeight,
-      }
-    );
-    this.store.dispatch(putBarY({ price, y }));
-  }
   // TODO(Rafa): end move logic to renderer
 }

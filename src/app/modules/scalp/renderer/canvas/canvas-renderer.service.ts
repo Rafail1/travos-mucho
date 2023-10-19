@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@angular/core';
 import { IAggTrade } from 'src/app/modules/backend/backend.service';
 import { GLASS_CANVAS_CTX } from '../../canvas/molecules/glass/glass.component';
 import { TRADES_CANVAS_CTX } from './canvas-renderer.component';
+import { BarService } from '../../canvas/atoms/bar/bar.service';
 
 @Injectable({ providedIn: 'root' })
 export class CanvasRendererService {
@@ -13,7 +14,9 @@ export class CanvasRendererService {
   }
   constructor(
     @Inject(GLASS_CANVAS_CTX) private glassCtx: () => CanvasRenderingContext2D,
-    @Inject(TRADES_CANVAS_CTX) private tradesCtx: () => CanvasRenderingContext2D
+    @Inject(TRADES_CANVAS_CTX)
+    private tradesCtx: () => CanvasRenderingContext2D,
+    private barService: BarService
   ) {}
 
   renderTick({ start, y }: any) {
@@ -23,6 +26,107 @@ export class CanvasRendererService {
     ctx.rect(start, y, 10, 10);
     ctx.fill();
     ctx.stroke();
+  }
+
+  renderBars({
+    asks,
+    bids,
+    barHeight,
+    glassY,
+    glassX,
+    glassWidth,
+  }: {
+    asks: [string, string][];
+    bids: [string, string][];
+    barHeight: number;
+    glassY: number;
+    glassX: number;
+    glassWidth: number;
+  }) {
+    let idx = 0;
+
+    for (const [price, value] of asks) {
+      if (!Number(value)) {
+        continue;
+      }
+      idx++;
+      const y = glassY + idx * barHeight;
+      const {
+        backgroundColor,
+        fillColor,
+        fillRectWidth,
+        priceText,
+        textColor,
+        textY,
+        volumeText,
+      } = this.barService.calculateOptions({
+        type: 'ask',
+        price: Number(price),
+        value: Number(value),
+        spread: false,
+        y,
+        height: barHeight,
+      });
+
+      this.renderBar({
+        type: 'ask',
+        value,
+        price,
+        spread: false,
+        y,
+        x: glassX,
+        width: glassWidth,
+        height: barHeight,
+        backgroundColor,
+        fillColor,
+        fillRectWidth,
+        priceText,
+        textColor,
+        textY,
+        volumeText,
+      });
+    }
+
+    for (const [price, value] of bids) {
+      if (!Number(value)) {
+        continue;
+      }
+      idx++;
+      const y = glassY + idx * barHeight;
+      const {
+        backgroundColor,
+        fillColor,
+        fillRectWidth,
+        priceText,
+        textColor,
+        textY,
+        volumeText,
+      } = this.barService.calculateOptions({
+        type: 'ask',
+        price: Number(price),
+        value: Number(value),
+        spread: false,
+        y,
+        height: barHeight,
+      });
+      this.renderBar({
+        type: 'bid',
+        value,
+        price,
+        spread: false,
+        y,
+        x: glassX,
+        width: glassWidth,
+        height: barHeight,
+        backgroundColor,
+        fillColor,
+        fillRectWidth,
+        priceText,
+        textColor,
+        textY,
+        volumeText,
+      });
+    }
   }
 
   renderBar({

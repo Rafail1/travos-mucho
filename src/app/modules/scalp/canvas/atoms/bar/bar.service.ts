@@ -8,30 +8,11 @@ import { IBarData, IBarPosition } from './bar.interface';
 @Injectable({ providedIn: 'root' })
 export class BarService {
   private thresholdSubject = new Subject();
-  constructor(
-    private configService: ConfigService,
-    private canvasRenderer: CanvasRendererService
-  ) {}
+  constructor(private configService: ConfigService) {}
 
-  public render(
-    { values, price, spread }: IBarData,
-    { x, y, width, height }: IBarPosition
-  ) {
-    if (!values.length) {
-      return;
-    }
-
-    this.canvasRenderer.renderBar({
-      height,
-      x,
-      y,
-      width,
-      ...this.calculateOptions({ values, price, spread, y, height }),
-    });
-  }
-
-  private calculateOptions({
-    values,
+  public calculateOptions({
+    value,
+    type,
     price,
     spread,
     y,
@@ -42,7 +23,6 @@ export class BarService {
       fillBidSpreadColor,
       fillAskColor,
       fillBidColor,
-      fillCombinedColor,
     } = this.configService.getConfig(STYLE_THEME_KEY);
 
     const {
@@ -51,18 +31,13 @@ export class BarService {
       backgroundColor,
       shortPrice,
       textColor,
-    } = this.calculate({ price, values });
+    } = this.calculate({ price, value, type });
 
     let fillColor;
-    if (values.length === 1) {
-      const type = values[0]?.type;
-      if (spread) {
-        fillColor = type == 'ask' ? fillAskSpreadColor : fillBidSpreadColor;
-      } else {
-        fillColor = type == 'ask' ? fillAskColor : fillBidColor;
-      }
+    if (spread) {
+      fillColor = type == 'ask' ? fillAskSpreadColor : fillBidSpreadColor;
     } else {
-      fillColor = fillCombinedColor;
+      fillColor = type == 'ask' ? fillAskColor : fillBidColor;
     }
 
     const valuesByType = shortValues
@@ -83,7 +58,7 @@ export class BarService {
 
     return {
       fillRectWidth,
-      backgroundColor: backgroundColor[values[0].type],
+      backgroundColor: backgroundColor[type],
       textColor,
       fillColor,
       volumeText,
@@ -92,7 +67,7 @@ export class BarService {
     };
   }
 
-  private calculate({ values, price }: Omit<IBarData, 'y'>) {
+  private calculate({ value, type, price }: Omit<IBarData, 'y'>) {
     const {
       glass: { width },
       bars: { volumeFormat, priceFormat },
@@ -101,13 +76,12 @@ export class BarService {
     const { fillAskColor, fillBidColor, textColor, backgroundColor } =
       this.configService.getConfig(STYLE_THEME_KEY);
 
-    const sum = values.reduce((acc, item) => acc + item.value, 0);
-    const fillRectWidth = Math.min(width * (sum / volumeFormat.max), width);
+    const fillRectWidth = Math.min(width * (value / volumeFormat.max), width);
 
     const currentThreshold = this.calculateThreshold(
       thresholds,
       price,
-      sum
+      value
     ) || {
       fillAskColor,
       fillBidColor,
@@ -121,20 +95,16 @@ export class BarService {
     } else {
       shortPrice = { value: price, abbrev: '' };
     }
+    const { value: shortValue, abbrev } = volumeFormat.shorten
+      ? shortNumber(value, volumeFormat.decPlaces)
+      : { value, abbrev: '' };
 
     return {
       fillRectWidth,
       ...currentThreshold,
-      shortValues: values.map(({ type, value }) => {
-        if (volumeFormat.shorten) {
-          return {
-            ...shortNumber(value, volumeFormat.decPlaces),
-            type,
-          };
-        } else {
-          return { value, abbrev: '', type };
-        }
-      }),
+      shortValue,
+      abbrev,
+      type,
       shortPrice,
     };
   }
