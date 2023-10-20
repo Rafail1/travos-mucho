@@ -8,6 +8,7 @@ import { BarService } from '../../canvas/atoms/bar/bar.service';
 
 @Injectable()
 export class CanvasRendererService {
+  idx: number;
   constructor(
     @Inject(GLASS_CANVAS_CTX) private glassCtx: () => CanvasRenderingContext2D,
     @Inject(TRADES_CANVAS_CTX)
@@ -49,92 +50,26 @@ export class CanvasRendererService {
     glassX: number;
     glassWidth: number;
   }) {
-    let idx = 0;
+    this.idx = 0;
     const ctx = this.glassCtx();
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    this.renderGlass({
+      items: asks,
+      barHeight,
+      glassY,
+      glassX,
+      glassWidth,
+      type: 'ask',
+    });
 
-    for (const [price, value] of asks) {
-      if (!Number(value)) {
-        continue;
-      }
-      idx++;
-      const y = glassY + idx * barHeight;
-      const {
-        backgroundColor,
-        fillColor,
-        fillRectWidth,
-        priceText,
-        textColor,
-        textY,
-        volumeText,
-      } = this.barService.calculateOptions({
-        type: 'ask',
-        price: Number(price),
-        value: Number(value),
-        spread: false,
-        y,
-        height: barHeight,
-      });
-
-      this.renderBar({
-        type: 'ask',
-        value,
-        price,
-        spread: false,
-        y,
-        x: glassX,
-        width: glassWidth,
-        height: barHeight,
-        backgroundColor,
-        fillColor,
-        fillRectWidth,
-        priceText,
-        textColor,
-        textY,
-        volumeText,
-      });
-    }
-
-    for (const [price, value] of bids) {
-      if (!Number(value)) {
-        continue;
-      }
-      idx++;
-      const y = glassY + idx * barHeight;
-      const {
-        backgroundColor,
-        fillColor,
-        fillRectWidth,
-        priceText,
-        textColor,
-        textY,
-        volumeText,
-      } = this.barService.calculateOptions({
-        type: 'bid',
-        price: Number(price),
-        value: Number(value),
-        spread: false,
-        y,
-        height: barHeight,
-      });
-      this.renderBar({
-        type: 'bid',
-        value,
-        price,
-        spread: false,
-        y,
-        x: glassX,
-        width: glassWidth,
-        height: barHeight,
-        backgroundColor,
-        fillColor,
-        fillRectWidth,
-        priceText,
-        textColor,
-        textY,
-        volumeText,
-      });
-    }
+    this.renderGlass({
+      items: bids,
+      barHeight,
+      glassY,
+      glassX,
+      glassWidth,
+      type: 'bid',
+    });
   }
 
   renderBar({
@@ -167,5 +102,57 @@ export class CanvasRendererService {
     const { width: textWidth } = ctx.measureText(priceText);
 
     ctx.fillText(priceText, width - textWidth - 4, textY);
+  }
+
+  private renderGlass({
+    items,
+    glassY,
+    barHeight,
+    glassX,
+    glassWidth,
+    type,
+  }: any) {
+    for (const [price, value] of items) {
+      if (!Number(value)) {
+        continue;
+      }
+
+      this.idx++;
+      const y = glassY + this.idx * barHeight;
+      const {
+        backgroundColor,
+        fillColor,
+        fillRectWidth,
+        priceText,
+        textColor,
+        textY,
+        volumeText,
+      } = this.barService.calculateOptions({
+        type,
+        price: Number(price),
+        value: Number(value),
+        spread: false,
+        y,
+        height: barHeight,
+      });
+
+      this.renderBar({
+        type: 'ask',
+        value,
+        price,
+        spread: false,
+        y,
+        x: glassX,
+        width: glassWidth,
+        height: barHeight,
+        backgroundColor,
+        fillColor,
+        fillRectWidth,
+        priceText,
+        textColor,
+        textY,
+        volumeText,
+      });
+    }
   }
 }

@@ -4,7 +4,7 @@ import { shortNumber } from 'src/app/common/utils/short-number.util';
 import { ConfigService, STYLE_THEME_KEY } from 'src/app/config/config';
 import { CanvasRendererService } from '../../../renderer/canvas/canvas-renderer.service';
 import { IBarData, IBarPosition } from './bar.interface';
-
+const formatter = new Intl.NumberFormat();
 @Injectable({ providedIn: 'root' })
 export class BarService {
   private thresholdSubject = new Subject();
@@ -36,13 +36,13 @@ export class BarService {
 
     let fillColor;
     if (spread) {
-      fillColor = type == 'ask' ? fillAskSpreadColor : fillBidSpreadColor;
+      fillColor = type === 'ask' ? fillAskSpreadColor : fillBidSpreadColor;
     } else {
-      fillColor = type == 'ask' ? fillAskColor : fillBidColor;
+      fillColor = type === 'ask' ? fillAskColor : fillBidColor;
     }
-    const volumeText = `${new Intl.NumberFormat().format(shortValue)}${abbrev}`;
+    const volumeText = `${formatter.format(shortValue)}${abbrev}`;
 
-    const priceText = `${new Intl.NumberFormat().format(shortPrice.value)}${
+    const priceText = `${formatter.format(shortPrice.value)}${
       shortPrice.abbrev
     }`;
 
