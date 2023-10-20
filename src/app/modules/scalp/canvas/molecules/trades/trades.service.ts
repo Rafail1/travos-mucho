@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, Injectable, OnDestroy, OnInit } from '@angular/core';
 import { Store, select } from '@ngrx/store';
 import {
   Observable,
@@ -21,12 +21,8 @@ import {
 } from 'src/app/store/app.selectors';
 import { CanvasRendererService } from '../../../renderer/canvas/canvas-renderer.service';
 
-@Component({
-  selector: 'app-trades',
-  template: '',
-  styleUrls: ['./trades.component.scss'],
-})
-export class TradesComponent implements OnInit, OnDestroy { // will be service
+@Injectable()
+export class TradesService implements OnDestroy {
   private time$: Observable<Date>;
   private destroy$ = new Subject<void>();
   private aggTrades$: Observable<IAggTrade[]>;
@@ -35,17 +31,19 @@ export class TradesComponent implements OnInit, OnDestroy { // will be service
     asks: Record<string, [string, string]>;
     bids: Record<string, [string, string]>;
   }>;
+
   constructor(
     private store: Store<RootState>,
     private canvasRenderer: CanvasRendererService
-  ) {}
+  ) {
+  }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
   }
 
-  ngOnInit(): void {
+  public init(): void {
     this.aggTrades$ = this.store.pipe(
       select(selectAggTrades),
       filterNullish(),

@@ -1,11 +1,27 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { Injectable, OnDestroy } from '@angular/core';
+import {
+  BehaviorSubject,
+  Observable,
+  Subject,
+  combineLatest,
+  map,
+  switchMap,
+  takeUntil,
+  tap,
+} from 'rxjs';
 import { ConfigService, STYLE_THEME_KEY } from 'src/app/config/config';
 import { BarService } from '../../atoms/bar/bar.service';
 import { putBarY } from 'src/app/store/app.actions';
-import { Store } from '@ngrx/store';
+import { Store, select } from '@ngrx/store';
 import { RootState } from 'src/app/store/app.reducer';
 import { CanvasRendererService } from '../../../renderer/canvas/canvas-renderer.service';
+import { filterNullish } from 'src/app/common/utils/filter-nullish';
+import { IDepth } from 'src/app/modules/backend/backend.service';
+import {
+  selectDepth,
+  selectSnapshot,
+  selectTime,
+} from 'src/app/store/app.selectors';
 interface BarData {
   type: 'ask' | 'bid';
   value: string;
@@ -16,17 +32,29 @@ interface BarData {
   width: number;
   barHeight: number;
 }
-@Injectable({ providedIn: 'root' })
-export class GlassService {
+@Injectable()
+export class GlassService implements OnDestroy {
   private config: any;
   private squiz$ = new BehaviorSubject<number>(1);
+
+  private time$: Observable<Date>;
+  private destroy$ = new Subject<void>();
+  private depth$: Observable<IDepth[]>;
+  data$: Observable<[Record<string, string>, Record<string, string>]>;
+  snapshot$: Observable<{
+    asks: Record<string, [string, string]>;
+    bids: Record<string, [string, string]>;
+  }>;
+
   constructor(
     private configService: ConfigService,
-    private canvasRenderer: CanvasRendererService
+    private canvasRenderer: CanvasRendererService,
+    private store: Store<RootState>
   ) {
     const { glass } = this.configService.getConfig('default');
     const { barHeight } = this.configService.getConfig(STYLE_THEME_KEY);
     this.config = { glass, barHeight };
+    this.init();
   }
 
   public render(
@@ -51,6 +79,7 @@ export class GlassService {
       this.squiz(sortedAsks);
       this.squiz(sortedBids);
     }
+
     this.canvasRenderer.renderBars({
       asks: sortedAsks,
       bids: sortedBids,
@@ -84,6 +113,91 @@ export class GlassService {
     }
   }
 
-  // TODO(Rafa): move logic to renderer
-  // TODO(Rafa): end move logic to renderer
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  init(): void {
+    this.depth$ = this.store.pipe(
+      select(selectDepth),
+      filterNullish(),
+      takeUntil(this.destroy$)
+    );
+
+    this.snapshot$ = this.store.pipe(
+      select(selectSnapshot),
+      filterNullish(),
+      map((snapshot) => {
+        const asks = snapshot.asks.reduce(
+          (acc: Record<string, [string, string]>, item: [string, string]) => {
+            acc[item[0]] = item;
+            return acc;
+          },
+          {}
+        );
+        const bids = snapshot.bids.reduce(
+          (acc: Record<string, [string, string]>, item: [string, string]) => {
+            acc[item[0]] = item;
+            return acc;
+          },
+          {}
+        );
+        return { asks, bids };
+      }),
+      takeUntil(this.destroy$)
+    );
+    this.time$ = this.store.pipe(
+      select(selectTime),
+      filterNullish(),
+      takeUntil(this.destroy$)
+    );
+
+    this.draw();
+  }
+
+  draw() {
+    combineLatest([this.depth$, this.snapshot$])
+      .pipe(
+        switchMap(([depth, { asks, bids }]) => {
+          let index = 0;
+          return this.time$.pipe(
+            map((time) => {
+              return { time, index, depth, asks, bids };
+            })
+          );
+        })
+      )
+      .subscribe(({ time, index, depth, asks, bids }) => {
+        for (; index < depth.length; index++) {
+          if (new Date(depth[index].E).getTime() <= time.getTime()) {
+            this.updateSnapshot(depth[index], asks, bids);
+          } else {
+            break;
+          }
+        }
+
+        requestAnimationFrame(() => {
+          this.render(asks, bids);
+        });
+      });
+  }
+
+  updateSnapshot(
+    data: any,
+    asks: Record<string, [string, string]>,
+    bids: Record<string, [string, string]>
+  ) {
+    data.a.forEach((item: [string, string]) => {
+      if (asks[item[0]]) {
+        asks[item[0]] = item;
+      }
+    });
+
+    data.b.forEach((item: [string, string]) => {
+      if (bids[item[0]]) {
+        bids[item[0]] = item;
+      }
+    });
+  }
 }

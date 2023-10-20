@@ -6,7 +6,7 @@ import {
 } from './canvas-renderer.component';
 import { BarService } from '../../canvas/atoms/bar/bar.service';
 
-@Injectable({ providedIn: 'root' })
+@Injectable()
 export class CanvasRendererService {
   constructor(
     @Inject(GLASS_CANVAS_CTX) private glassCtx: () => CanvasRenderingContext2D,

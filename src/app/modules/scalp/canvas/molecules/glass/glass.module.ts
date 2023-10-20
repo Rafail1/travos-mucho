@@ -1,9 +1,9 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { TradesService } from './trades.service';
+import { GlassService } from './glass.service';
 
 @NgModule({
   imports: [BrowserModule],
-  providers: [TradesService],
+  providers: [GlassService],
 })
-export class TradesModule {}
+export class GlassModule {}

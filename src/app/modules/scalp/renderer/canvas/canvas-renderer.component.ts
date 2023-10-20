@@ -55,8 +55,12 @@ export class CanvasRendererComponent implements OnInit {
   }
 
   initTradesCtx(): void {
+    const {
+      tick: { width },
+    } = this.configService.getConfig('default');
+
     const canvas = this.renderer.createElement('canvas');
-    canvas.setAttribute('width', this.width);
+    canvas.setAttribute('width', width);
     canvas.setAttribute('height', fullHeight);
     this.elRef.nativeElement.appendChild(canvas);
     glassCtx = canvas.getContext('2d');
