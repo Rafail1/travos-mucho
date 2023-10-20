@@ -110,7 +110,7 @@ export class CanvasRendererService {
         textY,
         volumeText,
       } = this.barService.calculateOptions({
-        type: 'ask',
+        type: 'bid',
         price: Number(price),
         value: Number(value),
         spread: false,

@@ -7,6 +7,8 @@ import {
   Renderer2,
 } from '@angular/core';
 import { ConfigService } from 'src/app/config/config';
+import { GlassService } from '../../canvas/molecules/glass/glass.service';
+import { TradesService } from '../../canvas/molecules/trades/trades.service';
 const fullHeight = 16000;
 let tradesCtx: CanvasRenderingContext2D;
 export const TRADES_CANVAS_CTX = new InjectionToken<
@@ -34,12 +36,16 @@ export class CanvasRendererComponent implements OnInit {
   constructor(
     private elRef: ElementRef,
     private configService: ConfigService,
-    private renderer: Renderer2
+    private renderer: Renderer2,
+    private tradesService: TradesService,
+    private glassService: GlassService
   ) {}
 
   ngOnInit(): void {
     this.initGlassCtx();
     this.initTradesCtx();
+    this.tradesService.init();
+    this.glassService.init();
   }
 
   initGlassCtx(): void {
@@ -63,6 +69,6 @@ export class CanvasRendererComponent implements OnInit {
     canvas.setAttribute('width', width);
     canvas.setAttribute('height', fullHeight);
     this.elRef.nativeElement.appendChild(canvas);
-    glassCtx = canvas.getContext('2d');
+    tradesCtx = canvas.getContext('2d');
   }
 }

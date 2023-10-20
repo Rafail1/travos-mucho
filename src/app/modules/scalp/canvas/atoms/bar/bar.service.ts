@@ -27,10 +27,11 @@ export class BarService {
 
     const {
       fillRectWidth,
-      shortValues,
+      shortValue,
       backgroundColor,
       shortPrice,
       textColor,
+      abbrev,
     } = this.calculate({ price, value, type });
 
     let fillColor;
@@ -39,16 +40,7 @@ export class BarService {
     } else {
       fillColor = type == 'ask' ? fillAskColor : fillBidColor;
     }
-
-    const valuesByType = shortValues
-      .sort((a: any, b: any) => a.type.localeCompare(b.type))
-      .reduce((acc: any, item: any) => {
-        acc[item.type] = `${new Intl.NumberFormat().format(item.value)}${
-          item.abbrev
-        }`;
-        return acc;
-      }, {} as Record<string, string>);
-    const volumeText = Object.values(valuesByType).join(' / ');
+    const volumeText = `${new Intl.NumberFormat().format(shortValue)}${abbrev}`;
 
     const priceText = `${new Intl.NumberFormat().format(shortPrice.value)}${
       shortPrice.abbrev
