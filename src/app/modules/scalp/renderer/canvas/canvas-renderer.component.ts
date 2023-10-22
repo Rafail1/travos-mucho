@@ -7,8 +7,8 @@ import {
   Renderer2,
 } from '@angular/core';
 import { ConfigService } from 'src/app/config/config';
-import { GlassService } from '../../canvas/molecules/glass/glass.service';
-import { TradesService } from '../../canvas/molecules/trades/trades.service';
+import { GlassService } from '../../calculation/glass/glass.service';
+import { TradesService } from '../../calculation/trades/trades.service';
 const fullHeight = 16000;
 let tradesCtx: CanvasRenderingContext2D;
 export const TRADES_CANVAS_CTX = new InjectionToken<

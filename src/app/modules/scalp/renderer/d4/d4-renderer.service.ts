@@ -14,9 +14,6 @@ export class D4RendererService {
   ) {}
 
   renderTicks(ticks: IAggTrade[], barYs: Record<string, number>) {
-    const ctx = this.tradesCtx();
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-
     for (let i = 0; i < ticks.length; i++) {
       const start = i * 14;
       this.renderTick({ x: start, y: barYs[ticks[i].p] });
