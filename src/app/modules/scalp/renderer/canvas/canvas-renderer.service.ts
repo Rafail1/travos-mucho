@@ -5,6 +5,9 @@ import {
   TRADES_CANVAS_CTX,
 } from './canvas-renderer.component';
 import { BarService } from '../../canvas/atoms/bar/bar.service';
+import { Store } from '@ngrx/store';
+import { RootState } from 'src/app/store/app.reducer';
+import { putBarY } from 'src/app/store/app.actions';
 
 @Injectable()
 export class CanvasRendererService {
@@ -13,7 +16,8 @@ export class CanvasRendererService {
     @Inject(GLASS_CANVAS_CTX) private glassCtx: () => CanvasRenderingContext2D,
     @Inject(TRADES_CANVAS_CTX)
     private tradesCtx: () => CanvasRenderingContext2D,
-    private barService: BarService
+    private barService: BarService,
+    private store: Store<RootState>
   ) {}
 
   renderTicks(ticks: IAggTrade[], barYs: Record<string, number>) {
@@ -26,7 +30,7 @@ export class CanvasRendererService {
     }
   }
 
-  renderTick({ start, y }: any) {
+  renderTick({ start, y = 0 }: any) {
     const ctx = this.tradesCtx();
     ctx.fillStyle = 'blue';
     ctx.strokeStyle = 'red';
@@ -113,12 +117,9 @@ export class CanvasRendererService {
     type,
   }: any) {
     for (const [price, value] of items) {
-      if (!Number(value)) {
-        continue;
-      }
-
       this.idx++;
       const y = glassY + this.idx * barHeight;
+
       const {
         backgroundColor,
         fillColor,
@@ -135,9 +136,25 @@ export class CanvasRendererService {
         y,
         height: barHeight,
       });
+      this.store.dispatch(putBarY({ price, y }));
+
+      if (!Number(value)) {
+        this.renderEmptyBar({
+          type,
+          price,
+          textY,
+          spread: false,
+          y,
+          x: glassX,
+          width: glassWidth,
+          height: barHeight,
+          textColor,
+          priceText,
+        });
+        continue;
+      }
 
       this.renderBar({
-        type: 'ask',
         value,
         price,
         spread: false,
@@ -154,5 +171,20 @@ export class CanvasRendererService {
         volumeText,
       });
     }
+  }
+
+  renderEmptyBar({ textColor, priceText, textY, y, x, width, height }: any) {
+    const ctx = this.glassCtx();
+    ctx.fillStyle = '#ddd';
+    ctx.fillRect(x, y, width, height);
+
+    ctx.font = `${height - 2}px Arial`;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+
+    const { width: textWidth } = ctx.measureText(priceText);
+    ctx.fillStyle = textColor;
+
+    ctx.fillText(priceText, width - textWidth - 4, textY);
   }
 }
