@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
 import { shortNumber } from 'src/app/common/utils/short-number.util';
 import { ConfigService, STYLE_THEME_KEY } from 'src/app/config/config';
-import { CanvasRendererService } from '../../../renderer/canvas/canvas-renderer.service';
 import { IBarData, IBarPosition } from './bar.interface';
 const formatter = new Intl.NumberFormat();
 @Injectable({ providedIn: 'root' })

@@ -9,25 +9,9 @@ import {
   import { ConfigService } from 'src/app/config/config';
   import { GlassService } from '../../canvas/molecules/glass/glass.service';
   import { TradesService } from '../../canvas/molecules/trades/trades.service';
-  const fullHeight = 16000;
-  let tradesCtx: CanvasRenderingContext2D;
-  export const TRADES_CANVAS_CTX = new InjectionToken<
-    () => CanvasRenderingContext2D
-  >('TRADES_CANVAS_CTX', {
-    providedIn: 'root',
-    factory: () => () => tradesCtx,
-  });
-  
-  let glassCtx: CanvasRenderingContext2D;
-  export const GLASS_CANVAS_CTX = new InjectionToken<
-    () => CanvasRenderingContext2D
-  >('GLASS_CANVAS_CTX', {
-    providedIn: 'root',
-    factory: () => () => glassCtx,
-  });
   
   @Component({
-    selector: 'app-canvas-renderer',
+    selector: 'app-d4-renderer',
     template: '',
     styleUrls: ['./d4-renderer.component.scss'],
   })

@@ -1,15 +1,12 @@
-import { Component, Injectable, OnDestroy, OnInit } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { Store, select } from '@ngrx/store';
 import {
   Observable,
   Subject,
   map,
-  mapTo,
   switchMap,
-  take,
   takeUntil,
-  tap,
-  withLatestFrom,
+  withLatestFrom
 } from 'rxjs';
 import { filterNullish } from 'src/app/common/utils/filter-nullish';
 import { IAggTrade } from 'src/app/modules/backend/backend.service';
@@ -19,7 +16,7 @@ import {
   selectBarYs,
   selectTime,
 } from 'src/app/store/app.selectors';
-import { CanvasRendererService } from '../../../renderer/canvas/canvas-renderer.service';
+import { D4RendererService } from '../../renderer/d4/d4-renderer.service';
 
 @Injectable()
 export class TradesService implements OnDestroy {
@@ -34,7 +31,7 @@ export class TradesService implements OnDestroy {
 
   constructor(
     private store: Store<RootState>,
-    private canvasRenderer: CanvasRendererService
+    private d4Renderer: D4RendererService
   ) {
   }
 
@@ -78,7 +75,7 @@ export class TradesService implements OnDestroy {
         })
       )
       .subscribe(([{ data, index }, barYs]) => {
-        this.canvasRenderer.renderTicks(data.slice(0, index), barYs);
+        this.d4Renderer.renderTicks(data.slice(0, index), barYs);
       });
   }
 }

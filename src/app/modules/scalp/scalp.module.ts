@@ -3,10 +3,10 @@ import { BrowserModule } from '@angular/platform-browser';
 
 import { StoreModule } from '@ngrx/store';
 import { BackendModule } from '../backend/backend.module';
-import { GlassModule } from './canvas/molecules/glass/glass.module';
-import { TradesModule } from './canvas/molecules/trades/trades.module';
+import { D4RendererModule } from './renderer/d4/d4-renderer.module';
 import { ScalpComponent } from './scalp.component';
-import { CanvasRendererModule } from './renderer/canvas/canvas-renderer.module';
+import { GlassModule } from './calculation/glass/glass.module';
+import { TradesModule } from './calculation/trades/trades.module';
 
 @NgModule({
   declarations: [ScalpComponent],
@@ -16,7 +16,7 @@ import { CanvasRendererModule } from './renderer/canvas/canvas-renderer.module';
     StoreModule,
     TradesModule,
     GlassModule,
-    CanvasRendererModule,
+    D4RendererModule,
   ],
   exports: [ScalpComponent],
 })

@@ -1,4 +1,5 @@
 import { Injectable, OnDestroy } from '@angular/core';
+import { Store, select } from '@ngrx/store';
 import {
   BehaviorSubject,
   Observable,
@@ -6,22 +7,18 @@ import {
   combineLatest,
   map,
   switchMap,
-  takeUntil,
-  tap,
+  takeUntil
 } from 'rxjs';
-import { ConfigService, STYLE_THEME_KEY } from 'src/app/config/config';
-import { BarService } from '../../atoms/bar/bar.service';
-import { putBarY } from 'src/app/store/app.actions';
-import { Store, select } from '@ngrx/store';
-import { RootState } from 'src/app/store/app.reducer';
-import { CanvasRendererService } from '../../../renderer/canvas/canvas-renderer.service';
 import { filterNullish } from 'src/app/common/utils/filter-nullish';
+import { ConfigService, STYLE_THEME_KEY } from 'src/app/config/config';
 import { IDepth } from 'src/app/modules/backend/backend.service';
+import { RootState } from 'src/app/store/app.reducer';
 import {
   selectDepth,
   selectSnapshot,
   selectTime,
 } from 'src/app/store/app.selectors';
+import { D4RendererService } from '../../renderer/d4/d4-renderer.service';
 interface BarData {
   type: 'ask' | 'bid';
   value: string;
@@ -48,7 +45,7 @@ export class GlassService implements OnDestroy {
 
   constructor(
     private configService: ConfigService,
-    private canvasRenderer: CanvasRendererService,
+    private D4renderer: D4RendererService,
     private store: Store<RootState>
   ) {
     const { glass } = this.configService.getConfig('default');
@@ -80,7 +77,7 @@ export class GlassService implements OnDestroy {
       this.squiz(sortedBids);
     }
 
-    this.canvasRenderer.renderBars({
+    this.D4renderer.renderBars({
       asks: sortedAsks,
       bids: sortedBids,
       barHeight,
