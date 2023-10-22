@@ -7,8 +7,8 @@ import {
     Renderer2,
   } from '@angular/core';
   import { ConfigService } from 'src/app/config/config';
-  import { GlassService } from '../../canvas/molecules/glass/glass.service';
-  import { TradesService } from '../../canvas/molecules/trades/trades.service';
+import { GlassService } from '../../calculation/glass/glass.service';
+import { TradesService } from '../../calculation/trades/trades.service';
   
   @Component({
     selector: 'app-d4-renderer',
@@ -33,27 +33,11 @@ import {
     }
   
     initGlassCtx(): void {
-      const {
-        glass: { width },
-      } = this.configService.getConfig('default');
-  
-      const canvas = this.renderer.createElement('canvas');
-      canvas.setAttribute('width', width);
-      canvas.setAttribute('height', fullHeight);
-      this.elRef.nativeElement.appendChild(canvas);
-      glassCtx = canvas.getContext('2d');
+      
     }
   
     initTradesCtx(): void {
-      const {
-        tick: { width },
-      } = this.configService.getConfig('default');
-  
-      const canvas = this.renderer.createElement('canvas');
-      canvas.setAttribute('width', width);
-      canvas.setAttribute('height', fullHeight);
-      this.elRef.nativeElement.appendChild(canvas);
-      tradesCtx = canvas.getContext('2d');
+     
     }
   }
   
