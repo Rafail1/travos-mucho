@@ -26,15 +26,15 @@ export class CanvasRendererService {
 
     for (let i = 0; i < ticks.length; i++) {
       const start = i * 14;
-      this.renderTick({ start, y: barYs[ticks[i].p] });
+      this.renderTick({ x: start, y: barYs[ticks[i].p] });
     }
   }
 
-  renderTick({ start, y = 0 }: any) {
+  renderTick({ x, y = 0 }: any) {
     const ctx = this.tradesCtx();
     ctx.fillStyle = 'blue';
     ctx.strokeStyle = 'red';
-    ctx.rect(start, y, 10, 10);
+    ctx.rect(x, y, 10, 10);
     ctx.fill();
     ctx.stroke();
   }
@@ -173,7 +173,7 @@ export class CanvasRendererService {
     }
   }
 
-  renderEmptyBar({ textColor, priceText, textY, y, x, width, height }: any) {
+  private renderEmptyBar({ textColor, priceText, textY, y, x, width, height }: any) {
     const ctx = this.glassCtx();
     ctx.fillStyle = '#ddd';
     ctx.fillRect(x, y, width, height);
