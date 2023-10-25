@@ -13,7 +13,6 @@ import {
 } from 'rxjs/operators';
 import { MarketDataService } from '../common/market-data/market-data.service';
 import { LoaderService } from '../modules/loader/loader.service';
-import { DateService } from '../utils/date.service';
 import {
   cleanBarYs,
   cleanCandlestickData,
@@ -33,6 +32,7 @@ import {
 import { RootState } from './app.reducer';
 import { selectSymbol, selectTime } from './app.selectors';
 import { filterNullish } from '../common/utils/filter-nullish';
+import { DateService } from '../common/utils/date.service';
 
 @Injectable()
 export class AppEffects {
@@ -86,7 +86,7 @@ export class AppEffects {
         return this.loaderService.loadAggTrades(action).pipe(
           map((data: any) =>
             getAggTradesSuccess({
-              trades: data
+              trades: data,
             })
           ),
           catchError(() => EMPTY)

@@ -1,8 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { DateService } from 'src/app/utils/date.service';
-import { data } from './mock-agg-trades';
-import { Observable, map, of } from 'rxjs';
+import { Observable } from 'rxjs';
+import { DateService } from 'src/app/common/utils/date.service';
 export interface IAggTrade {
   /** ex: aggTrade  // Event type */
   e: string;
