@@ -3,6 +3,7 @@ import { of, tap } from 'rxjs';
 import {
   BackendService,
   IAggTrade,
+  ICluster,
   IDepth,
   ISnapshot,
 } from '../backend/backend.service';
@@ -13,6 +14,7 @@ export class LoaderService {
     string,
     Map<string, { depth: Array<IDepth>; snapshot: ISnapshot }>
   >();
+  private clusterCache = new Map<string, Map<string, Array<ICluster>>>();
   private aggTradesCache = new Map<string, Map<string, Array<IAggTrade>>>();
   constructor(private backendService: BackendService) {}
 
@@ -65,5 +67,26 @@ export class LoaderService {
       }),
       tap((data) => this.depthCache.get(symbol)?.set(key, data))
     );
+  }
+
+  loadCluster({ symbol, time }: { symbol: string; time: Date }) {
+    if (this.currentSymbol !== symbol) {
+      this.depthCache.delete(this.currentSymbol);
+      this.aggTradesCache.delete(this.currentSymbol);
+      this.clusterCache.delete(this.currentSymbol);
+      this.currentSymbol = symbol;
+    }
+
+    const key = `${time.getTime()}`;
+    if (this.clusterCache.get(symbol)?.has(key)) {
+      const data = this.clusterCache.get(symbol)?.get(key);
+      if (data !== undefined) {
+        return of(data);
+      }
+    }
+
+    return this.backendService
+      .getCluster(symbol, time)
+      .pipe(tap((data) => this.clusterCache.get(symbol)?.set(key, data)));
   }
 }

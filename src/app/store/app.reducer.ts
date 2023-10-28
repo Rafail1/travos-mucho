@@ -5,6 +5,8 @@ import {
   getAggTrades,
   getAggTradesSuccess,
   getCandlestickDataSuccess,
+  getCluster,
+  getClusterSuccess,
   getDepth,
   getDepthSuccess,
   getSymbolsSuccess,
@@ -18,6 +20,7 @@ import {
 } from './app.actions';
 import {
   IAggTrade,
+  ICluster,
   IDepth,
   ISnapshot,
 } from '../modules/backend/backend.service';
@@ -38,6 +41,7 @@ export interface AppState {
   depth?: Array<IDepth>;
   aggTrades?: Array<IAggTrade>;
   snapshot?: ISnapshot;
+  cluster?: ICluster[];
   candlestickData?: Array<[number, number, number, number, number, number]>;
   barYs: Record<string, number>;
 }
@@ -60,7 +64,6 @@ export const appReducer = createReducer(
   })),
   on(getAggTrades, (state, { symbol }) => ({
     ...state,
-    symbol,
     loadingAggTrades: true,
   })),
   on(getAggTradesSuccess, (state, { trades }) => ({
@@ -74,9 +77,17 @@ export const appReducer = createReducer(
     snapshot: depth.snapshot,
     loadingDepth: false,
   })),
+  on(getCluster, (state) => ({
+    ...state,
+    loadingCluster: true,
+  })),
+  on(getClusterSuccess, (state, { cluster }) => ({
+    ...state,
+    cluster,
+    loadingCluster: false,
+  })),
   on(getDepth, (state, { symbol }) => ({
     ...state,
-    symbol,
     loadingDepth: true,
   })),
   on(getSymbolsSuccess, (state, { symbols }) => ({

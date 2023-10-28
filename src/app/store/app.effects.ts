@@ -20,6 +20,8 @@ import {
   getAggTrades,
   getAggTradesSuccess,
   getCandlestickDataSuccess,
+  getCluster,
+  getClusterSuccess,
   getDepth,
   getDepthSuccess,
   getSymbolsSuccess,
@@ -48,7 +50,11 @@ export class AppEffects {
           .pipe(filter((symbol) => symbol !== undefined)) as Observable<string>
       ),
       switchMap(([time, symbol]) => {
-        return [getAggTrades({ symbol, time }), getDepth({ symbol, time })];
+        return [
+          getAggTrades({ symbol, time }),
+          getDepth({ symbol, time }),
+          getCluster({ symbol, time }),
+        ];
       })
     )
   );
@@ -132,6 +138,23 @@ export class AppEffects {
             getDepthSuccess({
               depth: payload,
               time: action.time,
+              symbol: action.symbol,
+            })
+          ),
+          catchError(() => EMPTY)
+        )
+      )
+    )
+  );
+
+  getCluster$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(getCluster),
+      switchMap((action) =>
+        this.loaderService.loadCluster(action).pipe(
+          map((payload) =>
+            getClusterSuccess({
+              cluster: payload,
               symbol: action.symbol,
             })
           ),

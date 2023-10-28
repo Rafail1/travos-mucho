@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { IAggTrade } from 'src/app/modules/backend/backend.service';
+import { IAggTrade, ICluster } from 'src/app/modules/backend/backend.service';
 
 @Injectable()
 export class D4RendererService {
@@ -17,6 +17,10 @@ export class D4RendererService {
   }
 
   renderTick(data: IAggTrade) {
+    throw new Error('Method not implemented.');
+  }
+
+  renderCluster(data: ICluster) {
     throw new Error('Method not implemented.');
   }
 }

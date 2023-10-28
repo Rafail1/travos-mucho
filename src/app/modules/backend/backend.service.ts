@@ -24,7 +24,12 @@ export interface IAggTrade {
   /**  ex: 1691652205944; // Trade time */
   T: number;
 }
-
+export interface ICluster {
+  p: string;
+  volume: number;
+  m: boolean;
+  min5_slot: string;
+}
 export interface ISnapshot {
   lastUpdateId: string;
   symbol: string;
@@ -86,18 +91,16 @@ export class BackendService {
         },
       }),
     });
-    // const cols = data[0] as Array<keyof IAggTrade>;
-    // if (!cols) {
-    //   return of([]);
-    // }
+  }
 
-    // const converted: IAggTrade[] = data.slice(1).map((item) => {
-    //   const result = Object.fromEntries(
-    //     cols.map((col, idx) => [col, item[idx]])
-    //   );
-    //   return result as unknown as IAggTrade;
-    // });
-
-    // return of(converted);
+  getCluster(symbol: string, time: Date) {
+    return this.httpService.get<Array<ICluster>>(`${this.api}/cluster`, {
+      params: new HttpParams({
+        fromObject: {
+          time: this.dateService.getUtcTime(time),
+          symbol,
+        },
+      }),
+    });
   }
 }

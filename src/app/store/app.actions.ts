@@ -1,6 +1,7 @@
 import { createAction, props } from '@ngrx/store';
 import {
   IAggTrade,
+  ICluster,
   IDepth,
   ISnapshot,
 } from '../modules/backend/backend.service';
@@ -29,6 +30,11 @@ export const getDepth = createAction(
   '[App Component] getDepth',
   props<{ symbol: string; time: Date }>()
 );
+export const getCluster = createAction(
+  '[App Component] getCluster',
+  props<{ symbol: string; time: Date }>()
+);
+
 export const getAggTradesSuccess = createAction(
   '[App Component] getAggTradesSuccess',
   props<{ trades: Array<IAggTrade> }>()
@@ -38,6 +44,13 @@ export const getDepthSuccess = createAction(
   props<{
     depth: { depth: Array<IDepth>; snapshot: ISnapshot };
     time: Date;
+    symbol: string;
+  }>()
+);
+export const getClusterSuccess = createAction(
+  '[App Component] getClusterSuccess',
+  props<{
+    cluster: ICluster[];
     symbol: string;
   }>()
 );
