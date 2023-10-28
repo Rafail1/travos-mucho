@@ -6,7 +6,7 @@ import {
   map,
   switchMap,
   takeUntil,
-  withLatestFrom
+  withLatestFrom,
 } from 'rxjs';
 import { filterNullish } from 'src/app/common/utils/filter-nullish';
 import { IAggTrade } from 'src/app/modules/backend/backend.service';
@@ -32,8 +32,7 @@ export class TradesService implements OnDestroy {
   constructor(
     private store: Store<RootState>,
     private d4Renderer: D4RendererService
-  ) {
-  }
+  ) {}
 
   ngOnDestroy(): void {
     this.destroy$.next();
@@ -69,13 +68,15 @@ export class TradesService implements OnDestroy {
                 }
               }
               return { data, index };
-            }),
-            withLatestFrom(this.store.pipe(select(selectBarYs)))
+            })
           );
         })
       )
-      .subscribe(([{ data, index }, barYs]) => {
-        this.d4Renderer.renderTicks(data.slice(0, index), barYs);
+      .subscribe(({ data, index }) => {
+        const _data = data.slice(0, index);
+        for (let item of _data) {
+          this.d4Renderer.renderTick(item);
+        }
       });
   }
 }

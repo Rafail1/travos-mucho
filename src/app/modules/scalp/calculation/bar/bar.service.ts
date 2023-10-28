@@ -9,21 +9,7 @@ export class BarService {
   private thresholdSubject = new Subject();
   constructor(private configService: ConfigService) {}
 
-  public calculateOptions({
-    value,
-    type,
-    price,
-    spread,
-    y,
-    height,
-  }: IBarData & Pick<IBarPosition, 'y' | 'height'>) {
-    const {
-      fillAskSpreadColor,
-      fillBidSpreadColor,
-      fillAskColor,
-      fillBidColor,
-    } = this.configService.getConfig(STYLE_THEME_KEY);
-
+  public calculateOptions({ value, type, price }: IBarData) {
     const {
       fillRectWidth,
       shortValue,
@@ -31,34 +17,24 @@ export class BarService {
       shortPrice,
       textColor,
       abbrev,
-    } = this.calculate({ price, value, type });
+    } = this.calculate({ price, value });
 
-    let fillColor;
-    if (spread) {
-      fillColor = type === 'ask' ? fillAskSpreadColor : fillBidSpreadColor;
-    } else {
-      fillColor = type === 'ask' ? fillAskColor : fillBidColor;
-    }
     const volumeText = `${formatter.format(shortValue)}${abbrev}`;
 
     const priceText = `${formatter.format(shortPrice.value)}${
       shortPrice.abbrev
     }`;
 
-    const textY = y + height / 2 + 1;
-
     return {
       fillRectWidth,
       backgroundColor: backgroundColor[type],
       textColor,
-      fillColor,
       volumeText,
       priceText,
-      textY,
     };
   }
 
-  private calculate({ value, type, price }: Omit<IBarData, 'y'>) {
+  private calculate({ value, price }: Omit<IBarData, 'y' | 'type'>) {
     const {
       glass: { width },
       bars: { volumeFormat, priceFormat },
@@ -95,7 +71,6 @@ export class BarService {
       ...currentThreshold,
       shortValue,
       abbrev,
-      type,
       shortPrice,
     };
   }

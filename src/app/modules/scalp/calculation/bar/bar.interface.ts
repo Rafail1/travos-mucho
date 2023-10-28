@@ -16,7 +16,9 @@ export interface IBarPosition {
 
 export interface IBarData {
   price: number;
-  type: 'ask' | 'bid';
+  type: IBarType;
   value: number;
   spread?: boolean;
 }
+
+export type IBarType = 'ask' | 'bid';
