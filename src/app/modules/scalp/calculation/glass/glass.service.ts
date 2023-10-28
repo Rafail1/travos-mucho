@@ -22,7 +22,9 @@ export class GlassService implements OnDestroy {
     private D4renderer: D4RendererService,
     private store: Store<RootState>,
     private barService: BarService
-  ) {
+  ) {}
+
+  init() {
     this.depth$ = this.store.pipe(
       select(selectDepth),
       filterNullish(),
@@ -61,7 +63,6 @@ export class GlassService implements OnDestroy {
     );
     this.draw();
   }
-
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
