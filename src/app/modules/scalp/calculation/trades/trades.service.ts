@@ -52,10 +52,10 @@ export class TradesService implements OnDestroy {
       takeUntil(this.destroy$)
     );
 
-    this.draw();
+    this.initDataFlow();
   }
 
-  draw() {
+  initDataFlow() {
     this.aggTrades$
       .pipe(
         switchMap((data) => {

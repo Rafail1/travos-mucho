@@ -12,7 +12,7 @@ import { TradesService } from '../../calculation/trades/trades.service';
 
 @Component({
   selector: 'app-d4-renderer',
-  template: '',
+  templateUrl: './d4-renderer.component.html',
   styleUrls: ['./d4-renderer.component.scss'],
 })
 export class D4Component implements OnInit {
@@ -26,13 +26,7 @@ export class D4Component implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.initGlassCtx();
-    this.initTradesCtx();
     this.tradesService.init();
     this.glassService.init();
   }
-
-  initGlassCtx(): void {}
-
-  initTradesCtx(): void {}
 }

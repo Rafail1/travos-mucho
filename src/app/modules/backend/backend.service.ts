@@ -2,6 +2,14 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { DateService } from 'src/app/common/utils/date.service';
+export interface IBar {
+  depth: [string, string];
+  backgroundColor: string;
+  fillRectWidth: string;
+  priceText: string;
+  textColor: string;
+  volumeText: string;
+}
 export interface IAggTrade {
   /** ex: aggTrade  // Event type */
   e: string;

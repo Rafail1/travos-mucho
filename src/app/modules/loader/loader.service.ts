@@ -52,13 +52,13 @@ export class LoaderService {
 
     return this.backendService.getDepth(symbol, time).pipe(
       tap(({ snapshot }) => {
-        snapshot.asks.sort((a, b) => {
+        snapshot?.asks.sort((a, b) => {
           if (Number(a[0]) === Number(b[0])) {
             return 0;
           }
           return Number(a[0]) < Number(b[0]) ? 1 : -1;
         });
-        snapshot.bids.sort((a, b) => {
+        snapshot?.bids.sort((a, b) => {
           if (a[0] === b[0]) {
             return 0;
           }
