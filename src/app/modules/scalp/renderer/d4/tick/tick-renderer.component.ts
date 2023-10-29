@@ -11,6 +11,7 @@ import { ConfigService } from 'src/app/config/config';
 import { IAggTrade } from 'src/app/modules/backend/backend.service';
 import { TradesService } from '../../../calculation/trades/trades.service';
 import { Subject, takeUntil } from 'rxjs';
+import { TickRendererService } from './tick-renderer.service';
 
 @Component({
   selector: 'app-tick-renderer',
@@ -24,6 +25,7 @@ export class TickRendererComponent implements OnInit, OnDestroy {
   constructor(
     private tickService: TradesService,
     private elRef: ElementRef,
+    private tickRendererService: TickRendererService,
     private configService: ConfigService,
     private renderer: Renderer2
   ) {}
@@ -36,7 +38,7 @@ export class TickRendererComponent implements OnInit, OnDestroy {
   }
 
   renderTick(data: IAggTrade) {
-    this.ticks.push(data);
+    this.tickRendererService.render(data);
   }
 
   ngOnDestroy(): void {
@@ -45,10 +47,8 @@ export class TickRendererComponent implements OnInit, OnDestroy {
   }
 
   private createSvg(): void {
-    d3.select(this.elRef.nativeElement)
-      .append('svg')
-      //   .attr('width', this.data.)
-      //   .attr('height', 16)
-      .append('g');
+    this.tickRendererService.setSvg(
+      d3.select(this.elRef.nativeElement).append('svg')
+    );
   }
 }

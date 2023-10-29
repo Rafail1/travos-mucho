@@ -13,7 +13,6 @@ import { Subject, takeUntil } from 'rxjs';
 })
 export class BarRendererComponent implements OnInit {
   @Input() data: IBar;
-  private bars = new Map<string, IBar>();
   private destroy$ = new Subject<void>();
   constructor(
     private elRef: ElementRef,
@@ -31,50 +30,12 @@ export class BarRendererComponent implements OnInit {
   }
 
   private createSvg(): void {
-    d3.select(this.elRef.nativeElement).append('svg').append('g');
+    this.barRendererService.setSvg(
+      d3.select(this.elRef.nativeElement).append('svg')
+    );
   }
 
   renderBar(data: IBar) {
-    const key = data.depth[0];
-    if (!this.bars.has(key)) {
-      this.barRendererService.add(data);
-      this.bars.set(data.depth[0], data);
-      return;
-    }
-
-    const prevBar = this.bars.get(key) as IBar;
-    const {
-      backgroundColor,
-      depth,
-      fillRectWidth,
-      priceText,
-      textColor,
-      volumeText,
-    } = prevBar;
-    if (depth[1] !== data.depth[1]) {
-      this.barRendererService.updateVolume(key, data.depth[1]);
-    }
-
-    if (backgroundColor !== data.backgroundColor) {
-      this.barRendererService.updateBackgroundColor(key, data.backgroundColor);
-    }
-
-    if (fillRectWidth !== data.fillRectWidth) {
-      this.barRendererService.updateFillRectWidth(key, data.fillRectWidth);
-    }
-
-    if (priceText !== data.priceText) {
-      this.barRendererService.updatePriceText(key, data.priceText);
-    }
-
-    if (textColor !== data.textColor) {
-      this.barRendererService.updateTextColor(key, data.textColor);
-    }
-
-    if (volumeText !== data.volumeText) {
-      this.barRendererService.updateVolume(key, data.volumeText);
-    }
-
-    this.bars.set(data.depth[0], data);
+    this.barRendererService.render(data)
   }
 }
