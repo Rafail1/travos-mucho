@@ -36,7 +36,7 @@ export interface ICluster {
   p: string;
   volume: number;
   m: boolean;
-  min5_slot: string;
+  min5_slot: Date;
 }
 export interface ISnapshot {
   lastUpdateId: string;

@@ -1,38 +1,20 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { Store, select } from '@ngrx/store';
-import {
-  Observable,
-  Subject,
-  map,
-  switchMap,
-  takeUntil,
-  withLatestFrom,
-} from 'rxjs';
+import { Observable, Subject, map, switchMap, takeUntil } from 'rxjs';
 import { filterNullish } from 'src/app/common/utils/filter-nullish';
 import { IAggTrade } from 'src/app/modules/backend/backend.service';
 import { RootState } from 'src/app/store/app.reducer';
-import {
-  selectAggTrades,
-  selectBarYs,
-  selectTime,
-} from 'src/app/store/app.selectors';
-import { D4RendererService } from '../../renderer/d4/d4-renderer.service';
+import { selectAggTrades, selectTime } from 'src/app/store/app.selectors';
 
 @Injectable()
 export class TradesService implements OnDestroy {
+  public data$ = new Subject<IAggTrade>();
+
   private time$: Observable<Date>;
   private destroy$ = new Subject<void>();
   private aggTrades$: Observable<IAggTrade[]>;
-  data$: Observable<[Record<string, string>, Record<string, string>]>;
-  snapshot$: Observable<{
-    asks: Record<string, [string, string]>;
-    bids: Record<string, [string, string]>;
-  }>;
 
-  constructor(
-    private store: Store<RootState>,
-    private d4Renderer: D4RendererService
-  ) {}
+  constructor(private store: Store<RootState>) {}
 
   ngOnDestroy(): void {
     this.destroy$.next();
@@ -75,7 +57,7 @@ export class TradesService implements OnDestroy {
       .subscribe(({ data, index }) => {
         const _data = data.slice(0, index);
         for (let item of _data) {
-          this.d4Renderer.renderTick(item);
+          this.data$.next(item);
         }
       });
   }
