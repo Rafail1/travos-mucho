@@ -13,6 +13,11 @@ export class TickRendererService {
     this.svg = svg;
   }
 
+  clean() {
+    this.svg.selectAll('*').remove();
+    this.circlesIndexes.splice(0);
+  }
+
   render(data: IAggTrade) {
     if (!this.svg) {
       return;

@@ -6,13 +6,15 @@ import {
   OnInit,
   Renderer2,
 } from '@angular/core';
+import { Store, select } from '@ngrx/store';
 import * as d3 from 'd3';
 import { Subject, takeUntil } from 'rxjs';
 import { ConfigService } from 'src/app/config/config';
 import { IAggTrade, ICluster } from 'src/app/modules/backend/backend.service';
+import { RootState } from 'src/app/store/app.reducer';
 import { TradesService } from '../../../calculation/trades/trades.service';
-import { IClusterData } from '../d4-renderer.service';
 import { ClusterRendererService } from './cluster-renderer.service';
+import { selectSymbol } from 'src/app/store/app.selectors';
 
 @Component({
   selector: 'app-cluster-renderer',
@@ -27,6 +29,7 @@ export class ClusterRendererComponent implements OnInit, OnDestroy {
     private elRef: ElementRef,
     private clusterRendererService: ClusterRendererService,
     private tickService: TradesService,
+    private store: Store<RootState>,
     private configService: ConfigService,
     private renderer: Renderer2
   ) {}
@@ -46,6 +49,11 @@ export class ClusterRendererComponent implements OnInit, OnDestroy {
         min5_slot: new Date(data.E),
       });
     });
+    this.store
+      .pipe(select(selectSymbol), takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.clusterRendererService.clean();
+      });
   }
 
   private createSvg(): void {

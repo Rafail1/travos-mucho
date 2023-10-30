@@ -57,6 +57,11 @@ export class BarRendererService {
     element.attr('volume', volumeText);
   }
 
+  clean() {
+    this.svg.selectAll('*').remove();
+    this.rects.clear();
+  }
+
   add(key: string, data: IBar) {
     const element = this.svg.insert('rect');
     this.rects.set(key, { element, data });

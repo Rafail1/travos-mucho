@@ -26,6 +26,13 @@ export class ClusterRendererService {
     this.svg = svg;
   }
 
+  clean() {
+    this.svg.selectAll('*').remove();
+    this.clusters.clear();
+    this.groupIndexes.clear();
+    this.groups.splice(0);
+  }
+
   render(data: ICluster) {
     let element;
     let group;

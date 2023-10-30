@@ -5,6 +5,9 @@ import { IBar } from 'src/app/modules/backend/backend.service';
 import { BarRendererService } from './bar-renderer.service';
 import { GlassService } from '../../../calculation/glass/glass.service';
 import { Subject, takeUntil } from 'rxjs';
+import { Store, select } from '@ngrx/store';
+import { RootState } from 'src/app/store/app.reducer';
+import { selectSymbol } from 'src/app/store/app.selectors';
 
 @Component({
   selector: 'app-bar-renderer',
@@ -18,6 +21,7 @@ export class BarRendererComponent implements OnInit {
     private elRef: ElementRef,
     private barRendererService: BarRendererService,
     private glassService: GlassService,
+    private store: Store<RootState>,
     private configService: ConfigService,
     private renderer: Renderer2
   ) {}
@@ -27,6 +31,11 @@ export class BarRendererComponent implements OnInit {
     this.glassService.data$.pipe(takeUntil(this.destroy$)).subscribe((data) => {
       this.renderBar(data);
     });
+    this.store
+      .pipe(select(selectSymbol), takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.barRendererService.clean();
+      });
   }
 
   private createSvg(): void {
@@ -36,6 +45,6 @@ export class BarRendererComponent implements OnInit {
   }
 
   renderBar(data: IBar) {
-    this.barRendererService.render(data)
+    this.barRendererService.render(data);
   }
 }

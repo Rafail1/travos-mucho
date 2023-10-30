@@ -12,6 +12,9 @@ import { IAggTrade } from 'src/app/modules/backend/backend.service';
 import { TradesService } from '../../../calculation/trades/trades.service';
 import { Subject, takeUntil } from 'rxjs';
 import { TickRendererService } from './tick-renderer.service';
+import { Store, select } from '@ngrx/store';
+import { RootState } from 'src/app/store/app.reducer';
+import { selectSymbol } from 'src/app/store/app.selectors';
 
 @Component({
   selector: 'app-tick-renderer',
@@ -26,7 +29,7 @@ export class TickRendererComponent implements OnInit, OnDestroy {
     private tickService: TradesService,
     private elRef: ElementRef,
     private tickRendererService: TickRendererService,
-    private configService: ConfigService,
+    private store: Store<RootState>,
     private renderer: Renderer2
   ) {}
 
@@ -35,6 +38,11 @@ export class TickRendererComponent implements OnInit, OnDestroy {
     this.tickService.data$.pipe(takeUntil(this.destroy$)).subscribe((data) => {
       this.renderTick(data);
     });
+    this.store
+      .pipe(select(selectSymbol), takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.tickRendererService.clean();
+      });
   }
 
   renderTick(data: IAggTrade) {
