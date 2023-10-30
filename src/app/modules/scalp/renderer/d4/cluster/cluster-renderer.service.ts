@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { IClusterData } from '../d4-renderer.service';
 import { Selection } from 'd3';
 import { ICluster } from 'src/app/modules/backend/backend.service';
-
+const MAX_LENGTH = 20;
 @Injectable()
 export class ClusterRendererService {
   private svg: Selection<SVGSVGElement, unknown, null, undefined>;
@@ -16,6 +16,11 @@ export class ClusterRendererService {
       }
     >
   >();
+  private groupIndexes = new Map<
+    Date,
+    Selection<SVGGElement, unknown, null, undefined>
+  >();
+  private groups: Array<Date> = [];
 
   setSvg(svg: Selection<SVGSVGElement, unknown, null, undefined>) {
     this.svg = svg;
@@ -23,13 +28,24 @@ export class ClusterRendererService {
 
   render(data: ICluster) {
     let element;
+    let group;
     let elementData;
     if (!this.clusters.has(data.min5_slot)) {
       elementData = {
         askVolume: data.m ? Number(data.volume) : 0,
         bidVolume: data.m ? 0 : Number(data.volume),
       };
-      element = this.svg.insert('rect');
+      group = this.svg.insert('g');
+      this.groupIndexes.set(data.min5_slot, group);
+      element = group.insert('rect');
+
+      this.groups.push(data.min5_slot);
+      const outdates = this.groups.splice(MAX_LENGTH);
+      for (const outdated of outdates) {
+        this.groupIndexes.get(outdated)?.remove();
+        this.groupIndexes.delete(outdated);
+      }
+
       this.clusters.set(
         data.min5_slot,
         new Map([[data.p, { data: elementData, element }]])
@@ -39,7 +55,12 @@ export class ClusterRendererService {
         askVolume: data.m ? Number(data.volume) : 0,
         bidVolume: data.m ? 0 : Number(data.volume),
       };
-      element = this.svg.insert('rect');
+      group = this.groupIndexes.get(data.min5_slot);
+      if (!group) {
+        throw Error('group not found');
+      }
+
+      element = group.insert('rect');
 
       this.clusters
         .get(data.min5_slot)
@@ -58,6 +79,7 @@ export class ClusterRendererService {
       }
       elementData = currentVolume;
     }
+
     element
       .attr('askVolume', elementData.askVolume)
       .attr('bidVolume', elementData.bidVolume);
