@@ -51,6 +51,6 @@ export class GridService {
   }
 
   getY(price: string) {
-    return this.gridIndexes.get(Number(price));
+    return this.gridIndexes.get(Number(price)) ?? 0;
   }
 }

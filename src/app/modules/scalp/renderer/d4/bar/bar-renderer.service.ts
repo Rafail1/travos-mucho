@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Selection } from 'd3';
 import { IBar } from 'src/app/modules/backend/backend.service';
+import { GridService } from '../grid/grid.service';
 
 @Injectable()
 export class BarRendererService {
@@ -9,7 +10,7 @@ export class BarRendererService {
     string,
     { element: Selection<SVGRectElement, unknown, null, undefined>; data: IBar }
   >();
-
+  constructor(private gridService: GridService) {}
   setSvg(svg: Selection<SVGSVGElement, unknown, null, undefined>) {
     this.svg = svg;
   }
@@ -70,6 +71,7 @@ export class BarRendererService {
     this.updateFillRectWidth(key, data.fillRectWidth);
     this.updatePriceText(key, data.priceText);
     this.updateTextColor(key, data.textColor);
+    element.attr('y', this.gridService.getY(key));
   }
 
   render(data: IBar) {

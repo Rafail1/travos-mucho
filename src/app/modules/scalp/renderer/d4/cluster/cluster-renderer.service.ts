@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { IClusterData } from '../d4-renderer.service';
 import { Selection } from 'd3';
 import { ICluster } from 'src/app/modules/backend/backend.service';
+import { GridService } from '../grid/grid.service';
 const MAX_LENGTH = 20;
 @Injectable()
 export class ClusterRendererService {
@@ -21,7 +22,7 @@ export class ClusterRendererService {
     Selection<SVGGElement, unknown, null, undefined>
   >();
   private groups: Array<Date> = [];
-
+  constructor(private gridService: GridService) {}
   setSvg(svg: Selection<SVGSVGElement, unknown, null, undefined>) {
     this.svg = svg;
   }
@@ -88,6 +89,7 @@ export class ClusterRendererService {
     }
 
     element
+      .attr('y', this.gridService.getY(data.p))
       .attr('askVolume', elementData.askVolume)
       .attr('bidVolume', elementData.bidVolume);
   }

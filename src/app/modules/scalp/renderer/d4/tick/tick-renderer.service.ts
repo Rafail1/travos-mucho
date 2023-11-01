@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Selection } from 'd3';
 import { IAggTrade } from 'src/app/modules/backend/backend.service';
+import { GridService } from '../grid/grid.service';
 const MAX_LENGTH = 100;
 @Injectable()
 export class TickRendererService {
@@ -8,6 +9,8 @@ export class TickRendererService {
   private circlesIndexes: Array<
     Selection<SVGCircleElement, unknown, null, undefined>
   > = [];
+
+  constructor(private gridService: GridService) {}
 
   setSvg(svg: Selection<SVGSVGElement, unknown, null, undefined>) {
     this.svg = svg;
@@ -22,7 +25,10 @@ export class TickRendererService {
     if (!this.svg) {
       return;
     }
-    this.circlesIndexes.push(this.svg.insert('circle'));
+    this.circlesIndexes.push(
+      this.svg.insert('circle').attr('y', this.gridService.getY(data.p))
+    );
+
     const outdated = this.circlesIndexes.splice(MAX_LENGTH);
     for (const item of outdated) {
       item.remove();
