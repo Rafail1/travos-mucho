@@ -58,7 +58,7 @@ export const getClusterSuccess = createAction(
 export const init = createAction('[App Component] init');
 export const getSymbolsSuccess = createAction(
   '[App Component] getSymbolsSuccess',
-  props<{ symbols: Array<string> }>()
+  props<{ symbols: Array<{ symbol: string; tickSize: string }> }>()
 );
 export const getCandlestickDataSuccess = createAction(
   '[App Component] getCandlestickDataSuccess',

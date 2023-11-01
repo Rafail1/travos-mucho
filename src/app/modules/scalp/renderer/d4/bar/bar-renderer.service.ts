@@ -71,7 +71,7 @@ export class BarRendererService {
     this.updateFillRectWidth(key, data.fillRectWidth);
     this.updatePriceText(key, data.priceText);
     this.updateTextColor(key, data.textColor);
-    element.attr('y', this.gridService.getY(key));
+    element.attr('y', this.gridService.getY(data.depth[0]));
   }
 
   render(data: IBar) {

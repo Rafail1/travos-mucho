@@ -14,6 +14,7 @@ import {
   selectTime,
 } from 'src/app/store/app.selectors';
 import { BarService } from '../bar/bar.service';
+import { GridService } from '../../renderer/d4/grid/grid.service';
 
 @Injectable()
 export class GlassService implements OnDestroy {
@@ -25,7 +26,8 @@ export class GlassService implements OnDestroy {
 
   constructor(
     private store: Store<RootState>,
-    private barService: BarService
+    private barService: BarService,
+    private gridService: GridService,
   ) {}
 
   init() {
@@ -57,6 +59,7 @@ export class GlassService implements OnDestroy {
 
   initSnapshotFlow() {
     this.snapshot$.subscribe((depth) => {
+      this.gridService.update(depth)
       for (const item of depth.asks) {
         this.data$.next({
           depth: item,

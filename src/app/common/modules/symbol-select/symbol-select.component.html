@@ -1,3 +1,5 @@
 <select [formControl]="symbolFormControl">
-  <option *ngFor="let value of symbols" [value]="value">{{ value }}</option>
+  <option *ngFor="let value of symbols" [value]="value.symbol">
+    {{ value.symbol }}
+  </option>
 </select>

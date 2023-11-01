@@ -33,7 +33,7 @@ export interface AppState {
   loadingChart: boolean;
   loadingDepth: boolean;
   loadingAggTrades: boolean;
-  symbols?: Array<string>;
+  symbols?: Array<{ symbol: string; tickSize: string }>;
   time?: Date;
   timeFrom?: Date;
   timeTo?: Date;

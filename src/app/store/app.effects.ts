@@ -169,7 +169,9 @@ export class AppEffects {
       ofType(init),
       exhaustMap(() =>
         this.marketDataService.getSymbols().pipe(
-          map((symbols: Array<string>) => getSymbolsSuccess({ symbols })),
+          map((symbols: Array<{ symbol: string; tickSize: string }>) =>
+            getSymbolsSuccess({ symbols })
+          ),
           catchError(() => EMPTY)
         )
       )
@@ -179,7 +181,7 @@ export class AppEffects {
   getSymbolsSuccess$ = createEffect(() =>
     this.actions$.pipe(
       ofType(getSymbolsSuccess),
-      switchMap(({ symbols }) => of(setSymbol({ symbol: symbols[0] })))
+      switchMap(({ symbols }) => of(setSymbol({ symbol: symbols[0].symbol })))
     )
   );
 

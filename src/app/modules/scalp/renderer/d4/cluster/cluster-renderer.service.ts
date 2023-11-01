@@ -89,7 +89,7 @@ export class ClusterRendererService {
     }
 
     element
-      .attr('y', this.gridService.getY(data.p))
+      // .attr('y', this.gridService.getY(data.p))
       .attr('askVolume', elementData.askVolume)
       .attr('bidVolume', elementData.bidVolume);
   }

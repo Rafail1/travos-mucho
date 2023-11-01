@@ -13,11 +13,16 @@ export class MarketDataService {
       map(({ symbols }: any) =>
         symbols.reduce(
           (
-            acc: Array<string>,
-            { symbol, contractType, quoteAsset, status }: any
+            acc: Array<{ symbol: string; tickSize: string }>,
+            { symbol, contractType, quoteAsset, status, filters }: any
           ) => {
             if (this.isAvailable({ contractType, quoteAsset, status })) {
-              acc.push(symbol);
+              const tickSize = filters.find(
+                (item: any) => item.filterType === 'PRICE_FILTER'
+              )?.tickSize;
+              if (tickSize) {
+                acc.push({ symbol, tickSize });
+              }
             }
 
             return acc;
@@ -26,7 +31,7 @@ export class MarketDataService {
         )
       ),
       map((symbols: any) =>
-        symbols.sort((a: string, b: string) => a.localeCompare(b))
+        symbols.sort((a: any, b: any) => a.symbol.localeCompare(b.symbol))
       )
     );
   }

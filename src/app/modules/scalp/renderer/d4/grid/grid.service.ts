@@ -13,6 +13,7 @@ export class GridService {
   private gridIndexes = new Map<number, number>();
   private snapshot$: Observable<ISnapshot>;
   private symbol$: Observable<string>;
+  data: ISnapshot;
   constructor(
     private store: Store<RootState>,
     private configService: ConfigService
@@ -27,30 +28,34 @@ export class GridService {
       this.grid.clear();
       this.gridIndexes.clear();
     });
-
-    this.snapshot$.subscribe((data) => {
-      const { barHeight } = this.configService.getConfig(STYLE_THEME_KEY);
-      data.asks.forEach(([price]) => {
-        const priceN = Number(price);
-        if (!this.grid.has(priceN)) {
-          this.grid.add(priceN);
-        }
-      });
-      data.bids.forEach(([price]) => {
-        const priceN = Number(price);
-
-        if (!this.grid.has(priceN)) {
-          this.grid.add(priceN);
-        }
-      });
-      [...this.grid].sort().forEach((price, index) => {
-        const y = index * barHeight;
-        this.gridIndexes.set(price, y);
-      });
-    });
   }
 
   getY(price: string) {
+    if (!this.gridIndexes.has(Number(price))) {
+      return 0;
+    }
     return this.gridIndexes.get(Number(price)) ?? 0;
+  }
+
+  update(data: ISnapshot) {
+    this.data = data
+    const { barHeight } = this.configService.getConfig(STYLE_THEME_KEY);
+    data.asks.forEach(([price]) => {
+      const priceN = Number(price);
+      if (!this.grid.has(priceN)) {
+        this.grid.add(priceN);
+      }
+    });
+    data.bids.forEach(([price]) => {
+      const priceN = Number(price);
+
+      if (!this.grid.has(priceN)) {
+        this.grid.add(priceN);
+      }
+    });
+    [...this.grid].sort().forEach((price, index) => {
+      const y = index * barHeight;
+      this.gridIndexes.set(price, y);
+    });
   }
 }

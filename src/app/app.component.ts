@@ -12,7 +12,9 @@ import { selectAllSymbols, selectSymbol } from './store/app.selectors';
 })
 export class AppComponent implements OnInit {
   public symbol$: Observable<string | undefined>;
-  public options$: Observable<Array<string> | undefined>;
+  public options$: Observable<
+    Array<{ symbol: string; tickSize: string }> | undefined
+  >;
   constructor(private store: Store<RootState>) {}
   ngOnInit(): void {
     this.symbol$ = this.store.pipe(select(selectSymbol));

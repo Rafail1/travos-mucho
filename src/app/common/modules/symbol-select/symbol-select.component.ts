@@ -19,7 +19,7 @@ export class SymbolSelectComponent implements ControlValueAccessor, OnInit {
   }
 
   @Input()
-  symbols: Array<string> | null | undefined;
+  symbols: Array<{ symbol: string; tickSize: string }> | null | undefined;
   symbolFormControl = new FormControl();
   onChange = (symbol: string) => {};
   onTouched = () => {};
