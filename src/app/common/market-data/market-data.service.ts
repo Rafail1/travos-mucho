@@ -2,6 +2,12 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { map, tap } from 'rxjs';
 
+export interface IExchangeInfo {
+  symbol: string;
+  tickSize: string;
+  pricePrecision: number;
+}
+
 @Injectable()
 export class MarketDataService {
   private apiUrl = 'https://fapi.binance.com/fapi/v1';
@@ -13,15 +19,15 @@ export class MarketDataService {
       map(({ symbols }: any) =>
         symbols.reduce(
           (
-            acc: Array<{ symbol: string; tickSize: string }>,
-            { symbol, contractType, quoteAsset, status, filters }: any
+            acc: Array<IExchangeInfo>,
+            { symbol, contractType, quoteAsset, status, filters, pricePrecision }: any
           ) => {
             if (this.isAvailable({ contractType, quoteAsset, status })) {
               const tickSize = filters.find(
                 (item: any) => item.filterType === 'PRICE_FILTER'
               )?.tickSize;
               if (tickSize) {
-                acc.push({ symbol, tickSize });
+                acc.push({ symbol, tickSize, pricePrecision });
               }
             }
 

@@ -24,16 +24,19 @@ import {
   IDepth,
   ISnapshot,
 } from '../modules/backend/backend.service';
+import { IExchangeInfo } from '../common/market-data/market-data.service';
 
 export interface RootState {
   app: AppState;
 }
 export interface AppState {
+  pricePrecision?: number;
   symbol?: string;
+  tickSize?: string;
   loadingChart: boolean;
   loadingDepth: boolean;
   loadingAggTrades: boolean;
-  symbols?: Array<{ symbol: string; tickSize: string }>;
+  symbols?: Array<IExchangeInfo>;
   time?: Date;
   timeFrom?: Date;
   timeTo?: Date;
@@ -56,12 +59,17 @@ export const initialState: AppState = {
 
 export const appReducer = createReducer(
   initialState,
-  on(setSymbol, (state, { symbol }) => ({
-    ...state,
-    playing: false,
-    loadingChart: true,
-    symbol,
-  })),
+  on(setSymbol, (state, { symbol }) => {
+    const exchangeInfo = state.symbols?.find((item) => item.symbol === symbol);
+    return {
+      ...state,
+      playing: false,
+      loadingChart: true,
+      symbol,
+      tickSize: exchangeInfo?.tickSize,
+      pricePrecision: exchangeInfo?.pricePrecision,
+    };
+  }),
   on(getAggTrades, (state, { symbol }) => ({
     ...state,
     loadingAggTrades: true,

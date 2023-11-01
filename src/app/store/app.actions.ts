@@ -5,6 +5,7 @@ import {
   IDepth,
   ISnapshot,
 } from '../modules/backend/backend.service';
+import { IExchangeInfo } from '../common/market-data/market-data.service';
 
 export const setSymbol = createAction(
   '[App Component] setSymbol',
@@ -58,7 +59,7 @@ export const getClusterSuccess = createAction(
 export const init = createAction('[App Component] init');
 export const getSymbolsSuccess = createAction(
   '[App Component] getSymbolsSuccess',
-  props<{ symbols: Array<{ symbol: string; tickSize: string }> }>()
+  props<{ symbols: Array<IExchangeInfo> }>()
 );
 export const getCandlestickDataSuccess = createAction(
   '[App Component] getCandlestickDataSuccess',

@@ -11,7 +11,7 @@ import {
   switchMap,
   withLatestFrom,
 } from 'rxjs/operators';
-import { MarketDataService } from '../common/market-data/market-data.service';
+import { IExchangeInfo, MarketDataService } from '../common/market-data/market-data.service';
 import { LoaderService } from '../modules/loader/loader.service';
 import {
   cleanBarYs,
@@ -169,7 +169,7 @@ export class AppEffects {
       ofType(init),
       exhaustMap(() =>
         this.marketDataService.getSymbols().pipe(
-          map((symbols: Array<{ symbol: string; tickSize: string }>) =>
+          map((symbols: Array<IExchangeInfo>) =>
             getSymbolsSuccess({ symbols })
           ),
           catchError(() => EMPTY)

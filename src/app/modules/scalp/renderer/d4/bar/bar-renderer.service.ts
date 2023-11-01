@@ -64,6 +64,10 @@ export class BarRendererService {
   }
 
   add(key: string, data: IBar) {
+    const y = this.gridService.getY(data.depth[0]);
+    if (!y) {
+      return;
+    }
     const element = this.svg.insert('rect');
     this.rects.set(key, { element, data });
     this.updateVolumeText(key, data.volumeText);
@@ -71,7 +75,7 @@ export class BarRendererService {
     this.updateFillRectWidth(key, data.fillRectWidth);
     this.updatePriceText(key, data.priceText);
     this.updateTextColor(key, data.textColor);
-    element.attr('y', this.gridService.getY(data.depth[0]));
+    element.attr('y', y);
   }
 
   render(data: IBar) {

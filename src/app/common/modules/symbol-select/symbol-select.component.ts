@@ -1,5 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { ControlValueAccessor, FormControl } from '@angular/forms';
+import { IExchangeInfo } from '../../market-data/market-data.service';
 
 @Component({
   selector: 'app-symbol-select',
@@ -19,7 +20,7 @@ export class SymbolSelectComponent implements ControlValueAccessor, OnInit {
   }
 
   @Input()
-  symbols: Array<{ symbol: string; tickSize: string }> | null | undefined;
+  symbols: Array<IExchangeInfo> | null | undefined;
   symbolFormControl = new FormControl();
   onChange = (symbol: string) => {};
   onTouched = () => {};

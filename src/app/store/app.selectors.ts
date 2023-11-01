@@ -4,6 +4,8 @@ import { RootState } from './app.reducer';
 const app = (state: RootState) => state.app;
 
 export const selectSymbol = createSelector(app, (state) => state.symbol);
+export const selectTickSize = createSelector(app, (state) => state.tickSize);
+export const selectPricePrecision = createSelector(app, (state) => state.pricePrecision);
 export const selectTime = createSelector(app, (state) => state.time);
 export const selectTimeFrom = createSelector(app, (state) => state.timeFrom);
 export const selectTimeTo = createSelector(app, (state) => state.timeTo);

@@ -4,6 +4,7 @@ import { Observable, map } from 'rxjs';
 import { init, setSymbol } from './store/app.actions';
 import { RootState } from './store/app.reducer';
 import { selectAllSymbols, selectSymbol } from './store/app.selectors';
+import { IExchangeInfo } from './common/market-data/market-data.service';
 
 @Component({
   selector: 'app-root',
@@ -13,7 +14,7 @@ import { selectAllSymbols, selectSymbol } from './store/app.selectors';
 export class AppComponent implements OnInit {
   public symbol$: Observable<string | undefined>;
   public options$: Observable<
-    Array<{ symbol: string; tickSize: string }> | undefined
+    Array<IExchangeInfo> | undefined
   >;
   constructor(private store: Store<RootState>) {}
   ngOnInit(): void {
