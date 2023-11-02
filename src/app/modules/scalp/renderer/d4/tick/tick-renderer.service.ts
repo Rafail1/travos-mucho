@@ -25,10 +25,11 @@ export class TickRendererService {
     if (!this.svg) {
       return;
     }
-    this.circlesIndexes.push(
-      this.svg.insert('circle')
-      // .attr('y', this.gridService.getY(data.p))
-    );
+    const y = this.gridService.getY(data.p);
+    if (!y) {
+      return;
+    }
+    this.circlesIndexes.push(this.svg.insert('circle').attr('y', y));
 
     const outdated = this.circlesIndexes.splice(MAX_LENGTH);
     for (const item of outdated) {

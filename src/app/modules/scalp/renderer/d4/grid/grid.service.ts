@@ -49,6 +49,13 @@ export class GridService {
     return this.gridIndexes.get(Number(price));
   }
 
+  getMin5SlotX(min5_slot: Date) {
+    return (
+      Math.floor((Date.now() - min5_slot.getTime()) / (60 * 1000 * 5)) *
+      this.configService.getConfig(STYLE_THEME_KEY).clusterWidth
+    );
+  }
+
   update(data: ISnapshot) {
     const { barHeight } = this.configService.getConfig(STYLE_THEME_KEY);
     let max = Number(data.asks[0][0]);
