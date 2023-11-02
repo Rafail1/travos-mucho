@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-const TIME_WINDOW = 1000 * 120;
+const TIME_WINDOW = 1000 * 90;
 
 @Injectable({ providedIn: 'root' })
 export class DateService {
