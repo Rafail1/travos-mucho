@@ -213,7 +213,7 @@ export class AppEffects {
         if (!time) {
           return EMPTY;
         }
-        return of(setTime({ time: new Date(time.getTime() + step) }));
+        return of(setTime({ time: new Date(time.getTime() - step) }));
       })
     )
   );

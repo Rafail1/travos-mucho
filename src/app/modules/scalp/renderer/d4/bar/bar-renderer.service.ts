@@ -71,12 +71,19 @@ export class BarRendererService {
     this.rects.clear();
   }
 
+  delete(key: string) {
+    const element = this.rects.get(key)?.element;
+    element?.select('text').text('');
+    element?.select('.fill').attr('width', 0);
+  }
+
   add(key: string, data: IBar) {
     const y = this.gridService.getY(data.depth[0]);
     if (!y) {
       return;
     }
     const element = this.svg.insert('g');
+    element.attr('data-id', key);
     const rect = element.append('rect').attr('class', 'background');
     const fillRect = element.append('rect').attr('class', 'fill');
     rect
@@ -114,6 +121,11 @@ export class BarRendererService {
 
   render(data: IBar) {
     const key = data.depth[0];
+    if (Number(data.depth[1]) === 0) {
+      this.delete(key);
+      return;
+    }
+
     if (!this.rects.has(key)) {
       this.add(key, data);
       return;

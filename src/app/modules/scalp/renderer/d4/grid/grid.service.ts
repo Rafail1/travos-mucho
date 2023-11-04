@@ -81,7 +81,7 @@ export class GridService {
     }
 
     let index = 0;
-    for (let priceN = this.min; priceN <= this.max; priceN += this.tickSize) {
+    for (let priceN = this.max; priceN >= this.min; priceN -= this.tickSize) {
       priceN = Number(priceN.toFixed(this.pricePrecision));
       if (this.grid.has(priceN)) {
         continue;

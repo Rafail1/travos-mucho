@@ -79,22 +79,22 @@ export class BackendService {
   ) {}
 
   public getDepth(symbol: string, time: Date) {
-    return of(response);
-    // return this.httpService.get<{ depth: Array<IDepth>; snapshot: ISnapshot }>(
-    //   `${this.api}/depth`,
-    //   {
-    //     params: new HttpParams({
-    //       fromObject: {
-    //         time: this.dateService.getUtcTime(time),
-    //         symbol,
-    //       },
-    //     }),
-    //   }
-    // );
+    // return of(response);
+    return this.httpService.get<{ depth: Array<IDepth>; snapshot: ISnapshot }>(
+      `${this.api}/depth`,
+      {
+        params: new HttpParams({
+          fromObject: {
+            time: this.dateService.getUtcTime(time),
+            symbol,
+          },
+        }),
+      }
+    );
   }
 
   public getAggTrades(symbol: string, time: Date): Observable<IAggTrade[]> {
-    return of([]);
+    // return of([]);
     return this.httpService.get<Array<IAggTrade>>(`${this.api}/agg-trades`, {
       params: new HttpParams({
         fromObject: {
@@ -106,7 +106,7 @@ export class BackendService {
   }
 
   getCluster(symbol: string, time: Date) {
-    return of([]);
+    // return of([]);
 
     return this.httpService.get<Array<ICluster>>(`${this.api}/cluster`, {
       params: new HttpParams({
