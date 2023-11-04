@@ -71,10 +71,11 @@ export class BarRendererService {
     this.rects.clear();
   }
 
-  delete(key: string) {
+  delete(key: string, data: IBar) {
     const element = this.rects.get(key)?.element;
-    element?.select('text').text('');
+    element?.selectAll('text').text('');
     element?.select('.fill').attr('width', 0);
+    element?.select('.background').style('fill', data.backgroundColor);
   }
 
   add(key: string, data: IBar) {
@@ -123,7 +124,7 @@ export class BarRendererService {
   render(data: IBar) {
     const key = data.depth[0];
     if (Number(data.depth[1]) === 0) {
-      this.delete(key);
+      this.delete(key, data);
       return;
     }
 

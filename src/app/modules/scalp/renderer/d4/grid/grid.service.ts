@@ -75,8 +75,8 @@ export class GridService {
     this.max = middleAsk + this.tickSize * data.asks.length;
     this.min = middleBid - this.tickSize * data.bids.length;
     if (this.grid.size === 0) {
-      // this.min = Number((this.min - 500 * this.tickSize).toFixed(this.pricePrecision));
-      // this.max = Number((this.max + 500 * this.tickSize).toFixed(this.pricePrecision));
+      this.min = Number((this.min - 500 * this.tickSize).toFixed(this.pricePrecision));
+      this.max = Number((this.max + 500 * this.tickSize).toFixed(this.pricePrecision));
       this.height$.next(Math.ceil((this.max - this.min) / this.tickSize) * barHeight);
     }
 
