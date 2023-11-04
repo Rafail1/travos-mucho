@@ -98,11 +98,10 @@ export class BarRendererService {
       .append('text')
       .attr('class', 'volume')
       .attr('y', y + 2)
-      .attr('x', rect.node()?.getBoundingClientRect().width || 300)
       .attr('dominant-baseline', 'hanging')
+      .attr('text-anchor', 'start')
       .attr('height', this.gridService.getBarHeight())
-      .attr('font-size', this.gridService.getBarHeight() - 2)
-      .attr('text-anchor', 'end');
+      .attr('font-size', this.gridService.getBarHeight() - 2);
     element
       .append('text')
       .attr('class', 'price')
@@ -110,7 +109,9 @@ export class BarRendererService {
       .attr('height', this.gridService.getBarHeight())
       .attr('font-size', this.gridService.getBarHeight() - 2)
       .attr('dominant-baseline', 'hanging')
-      .attr('text-anchor', 'start');
+      .attr('x', rect.node()?.getBoundingClientRect().width || 300)
+      .attr('dominant-baseline', 'hanging')
+      .attr('text-anchor', 'end');
     this.rects.set(key, { element, data });
     this.updateVolumeText(key, data.volumeText);
     this.updateBackgroundColor(key, data.backgroundColor);
