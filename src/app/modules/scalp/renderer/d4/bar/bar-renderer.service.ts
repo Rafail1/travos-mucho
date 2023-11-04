@@ -23,7 +23,7 @@ export class BarRendererService {
       throw new Error('rect not found');
     }
     const { element, data } = this.rects.get(key)!;
-    element.select('rect').attr('textColor', textColor);
+    element.select('text').attr('fill', textColor);
     data.textColor = textColor;
   }
   updatePriceText(key: string, priceText: string) {
@@ -32,16 +32,19 @@ export class BarRendererService {
     }
     const { element, data } = this.rects.get(key)!;
     data.priceText = priceText;
-    element.select('rect').attr('priceText', priceText);
+    element.select('.price').text(priceText);
   }
-  updateFillRectWidth(key: string, fillRectWidth: string) {
+  updateFillRectWidth(key: string, fillRectWidth: string, fillColor: string) {
     if (!this.rects.has(key)) {
       throw new Error('rect not found');
     }
     const { element, data } = this.rects.get(key)!;
     data.fillRectWidth = fillRectWidth;
 
-    element.select('rect').attr('fillRectWidth', fillRectWidth);
+    element
+      .select('.fill')
+      .attr('width', fillRectWidth)
+      .style('fill', fillColor);
   }
   updateBackgroundColor(key: string, backgroundColor: string) {
     if (!this.rects.has(key)) {
@@ -50,8 +53,9 @@ export class BarRendererService {
     const { element, data } = this.rects.get(key)!;
     data.backgroundColor = backgroundColor;
 
-    element.select('rect').style('fill-color', backgroundColor);
+    element.select('.background').style('fill', backgroundColor);
   }
+
   updateVolumeText(key: string, volumeText: string) {
     if (!this.rects.has(key)) {
       throw new Error('rect not found');
@@ -59,7 +63,7 @@ export class BarRendererService {
     const { element, data } = this.rects.get(key)!;
     data.volumeText = volumeText;
 
-    element.select('rect').attr('volume', volumeText);
+    element.select('.volume').text(volumeText);
   }
 
   clean() {
@@ -73,17 +77,39 @@ export class BarRendererService {
       return;
     }
     const element = this.svg.insert('g');
-    const rect = element.append('rect');
-    this.rects.set(key, { element, data });
-    this.updateVolumeText(key, data.volumeText);
-    this.updateBackgroundColor(key, data.backgroundColor);
-    this.updateFillRectWidth(key, data.fillRectWidth);
-    this.updatePriceText(key, data.priceText);
-    this.updateTextColor(key, data.textColor);
+    const rect = element.append('rect').attr('class', 'background');
+    const fillRect = element.append('rect').attr('class', 'fill');
     rect
       .attr('height', this.gridService.getBarHeight())
       .attr('width', '100%')
       .attr('y', y);
+    fillRect
+      .attr('height', this.gridService.getBarHeight())
+      .attr('width', 0)
+      .attr('y', y);
+    element
+      .append('text')
+      .attr('class', 'volume')
+      .attr('y', y + 2)
+      .attr('x', rect.node()?.getBoundingClientRect().width || 300)
+      .attr('dominant-baseline', 'hanging')
+      .attr('height', this.gridService.getBarHeight())
+      .attr('font-size', this.gridService.getBarHeight() - 2)
+      .attr('text-anchor', 'end');
+    element
+      .append('text')
+      .attr('class', 'price')
+      .attr('y', y + 2)
+      .attr('height', this.gridService.getBarHeight())
+      .attr('font-size', this.gridService.getBarHeight() - 2)
+      .attr('dominant-baseline', 'hanging')
+      .attr('text-anchor', 'start');
+    this.rects.set(key, { element, data });
+    this.updateVolumeText(key, data.volumeText);
+    this.updateBackgroundColor(key, data.backgroundColor);
+    this.updateFillRectWidth(key, data.fillRectWidth, data.fillColor);
+    this.updatePriceText(key, data.priceText);
+    this.updateTextColor(key, data.textColor);
   }
 
   render(data: IBar) {
@@ -102,7 +128,7 @@ export class BarRendererService {
     }
 
     if (fillRectWidth !== data.fillRectWidth) {
-      this.updateFillRectWidth(key, data.fillRectWidth);
+      this.updateFillRectWidth(key, data.fillRectWidth, data.fillColor);
     }
 
     if (priceText !== data.priceText) {

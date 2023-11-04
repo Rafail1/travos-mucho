@@ -17,6 +17,8 @@ export class BarService {
       shortPrice,
       textColor,
       abbrev,
+      fillAskColor,
+      fillBidColor,
     } = this.calculate({ price, value });
     const volumeText = `${shortValue}${abbrev}`;
 
@@ -25,6 +27,7 @@ export class BarService {
     return {
       fillRectWidth,
       backgroundColor: backgroundColor[type],
+      fillColor: type == 'ask' ? fillAskColor : fillBidColor,
       textColor,
       volumeText,
       priceText,

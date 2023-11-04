@@ -27,7 +27,7 @@ export class GlassService implements OnDestroy {
   constructor(
     private store: Store<RootState>,
     private barService: BarService,
-    private gridService: GridService,
+    private gridService: GridService
   ) {}
 
   init() {
@@ -59,10 +59,11 @@ export class GlassService implements OnDestroy {
 
   initSnapshotFlow() {
     this.snapshot$.subscribe((depth) => {
-      this.gridService.update(depth)
+      this.gridService.update(depth);
       for (const item of depth.asks) {
         this.data$.next({
           depth: item,
+          type: 'ask',
           ...this.barService.calculateOptions({
             type: 'ask',
             price: Number(item[0]),
@@ -73,6 +74,7 @@ export class GlassService implements OnDestroy {
       for (const item of depth.bids) {
         this.data$.next({
           depth: item,
+          type: 'bid',
           ...this.barService.calculateOptions({
             type: 'bid',
             price: Number(item[0]),
@@ -101,6 +103,7 @@ export class GlassService implements OnDestroy {
             for (const item of depth[index].a) {
               this.data$.next({
                 depth: item,
+                type: 'ask',
                 ...this.barService.calculateOptions({
                   type: 'ask',
                   price: Number(item[0]),
@@ -111,6 +114,7 @@ export class GlassService implements OnDestroy {
             for (const item of depth[index].b) {
               this.data$.next({
                 depth: item,
+                type: 'bid',
                 ...this.barService.calculateOptions({
                   type: 'bid',
                   price: Number(item[0]),

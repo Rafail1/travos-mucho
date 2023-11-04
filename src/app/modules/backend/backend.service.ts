@@ -1,14 +1,18 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { DateService } from 'src/app/common/utils/date.service';
+import { response } from './mock-trades';
+import { IBarType } from '../scalp/calculation/bar/bar.interface';
 export interface IBar {
   depth: [string, string];
   backgroundColor: string;
   fillRectWidth: string;
+  fillColor: string;
   priceText: string;
   textColor: string;
   volumeText: string;
+  type: IBarType;
 }
 export interface IAggTrade {
   /** ex: aggTrade  // Event type */
@@ -48,8 +52,6 @@ export interface ISnapshot {
 }
 
 export interface IDepth {
-  /** Event type // depthUpdate */
-  e: string;
   /** Event time */
   E: string; // Event time
   /** Transaction time */
@@ -57,11 +59,11 @@ export interface IDepth {
   /**Symbol */
   s: string;
   /** First update ID in event */
-  U: number;
+  U: string;
   /**Final update ID in event */
-  u: number;
+  u: string;
   /** Final update Id in last stream(ie `u` in last stream) */
-  pu: number;
+  pu: string;
   /**  Bids to be updated [ '0.0024', // Price level to be updated '10', // Quantity]*/
   b: Array<[string, string]>;
   /** Asks to be updated  [ '0.0026', // Price level to be updated '100', // Quantity] */
@@ -77,20 +79,22 @@ export class BackendService {
   ) {}
 
   public getDepth(symbol: string, time: Date) {
-    return this.httpService.get<{ depth: Array<IDepth>; snapshot: ISnapshot }>(
-      `${this.api}/depth`,
-      {
-        params: new HttpParams({
-          fromObject: {
-            time: this.dateService.getUtcTime(time),
-            symbol,
-          },
-        }),
-      }
-    );
+    return of(response);
+    // return this.httpService.get<{ depth: Array<IDepth>; snapshot: ISnapshot }>(
+    //   `${this.api}/depth`,
+    //   {
+    //     params: new HttpParams({
+    //       fromObject: {
+    //         time: this.dateService.getUtcTime(time),
+    //         symbol,
+    //       },
+    //     }),
+    //   }
+    // );
   }
 
   public getAggTrades(symbol: string, time: Date): Observable<IAggTrade[]> {
+    return of([]);
     return this.httpService.get<Array<IAggTrade>>(`${this.api}/agg-trades`, {
       params: new HttpParams({
         fromObject: {
@@ -102,6 +106,8 @@ export class BackendService {
   }
 
   getCluster(symbol: string, time: Date) {
+    return of([]);
+
     return this.httpService.get<Array<ICluster>>(`${this.api}/cluster`, {
       params: new HttpParams({
         fromObject: {

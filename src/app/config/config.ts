@@ -8,13 +8,13 @@ export class ConfigService {
       {
         thresholds: {
           big: {
-            fillAskColor: '#ff0000',
-            fillBidColor: '#ff0000',
+            fillAskColor: '#ffff00',
+            fillBidColor: '#ff00ff',
             textColor: '#ffffff',
             backgroundColor: { ask: 'lightgreen', bid: '#FF7276' },
           },
           huge: {
-            fillAskColor: '#0000ff',
+            fillAskColor: '#00ffff',
             fillBidColor: '#0000ff',
             textColor: '#00ffff',
             backgroundColor: { ask: 'lightgreen', bid: '#FF7276' },
