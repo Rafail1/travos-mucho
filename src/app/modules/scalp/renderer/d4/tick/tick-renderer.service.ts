@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Selection } from 'd3';
 import { IAggTrade } from 'src/app/modules/backend/backend.service';
 import { GridService } from '../grid/grid.service';
+import { ConfigService } from 'src/app/config/config';
 const MAX_LENGTH = 100;
 @Injectable()
 export class TickRendererService {
@@ -10,7 +11,7 @@ export class TickRendererService {
     Selection<SVGCircleElement, unknown, null, undefined>
   > = [];
 
-  constructor(private gridService: GridService) {}
+  constructor(private gridService: GridService, private configService: ConfigService) {}
 
   setSvg(svg: Selection<SVGSVGElement, unknown, null, undefined>) {
     this.svg = svg;

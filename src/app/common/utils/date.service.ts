@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { FIVE_MINUTES } from 'src/app/modules/player/player.component';
-const TIME_WINDOW = 1000 * 90;
+const TIME_WINDOW = 1000 * 30;
 
 @Injectable({ providedIn: 'root' })
 export class DateService {

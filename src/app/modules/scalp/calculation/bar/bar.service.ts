@@ -3,7 +3,7 @@ import { Subject } from 'rxjs';
 import { shortNumber } from 'src/app/common/utils/short-number.util';
 import { ConfigService, STYLE_THEME_KEY } from 'src/app/config/config';
 import { IBarData, IBarPosition } from './bar.interface';
-const formatter = new Intl.NumberFormat();
+const formatter = new Intl.NumberFormat(undefined);
 @Injectable({ providedIn: 'root' })
 export class BarService {
   private thresholdSubject = new Subject();
@@ -18,12 +18,9 @@ export class BarService {
       textColor,
       abbrev,
     } = this.calculate({ price, value });
+    const volumeText = `${shortValue}${abbrev}`;
 
-    const volumeText = `${formatter.format(shortValue)}${abbrev}`;
-
-    const priceText = `${formatter.format(shortPrice.value)}${
-      shortPrice.abbrev
-    }`;
+    const priceText = `${shortPrice.value}${shortPrice.abbrev}`;
 
     return {
       fillRectWidth,

@@ -8,18 +8,22 @@ export class BarRendererService {
   private svg: Selection<SVGSVGElement, unknown, null, undefined>;
   private rects = new Map<
     string,
-    { element: Selection<SVGRectElement, unknown, null, undefined>; data: IBar }
+    { element: Selection<SVGGElement, unknown, null, undefined>; data: IBar }
   >();
   constructor(private gridService: GridService) {}
   setSvg(svg: Selection<SVGSVGElement, unknown, null, undefined>) {
     this.svg = svg;
+    this.gridService.getHeight().subscribe((height) => {
+      this.svg.style('height', height);
+    });
+    this.svg.style('width', '100%');
   }
   updateTextColor(key: string, textColor: string) {
     if (!this.rects.has(key)) {
       throw new Error('rect not found');
     }
     const { element, data } = this.rects.get(key)!;
-    element.attr('textColor', textColor);
+    element.select('rect').attr('textColor', textColor);
     data.textColor = textColor;
   }
   updatePriceText(key: string, priceText: string) {
@@ -28,7 +32,7 @@ export class BarRendererService {
     }
     const { element, data } = this.rects.get(key)!;
     data.priceText = priceText;
-    element.attr('priceText', priceText);
+    element.select('rect').attr('priceText', priceText);
   }
   updateFillRectWidth(key: string, fillRectWidth: string) {
     if (!this.rects.has(key)) {
@@ -37,7 +41,7 @@ export class BarRendererService {
     const { element, data } = this.rects.get(key)!;
     data.fillRectWidth = fillRectWidth;
 
-    element.attr('fillRectWidth', fillRectWidth);
+    element.select('rect').attr('fillRectWidth', fillRectWidth);
   }
   updateBackgroundColor(key: string, backgroundColor: string) {
     if (!this.rects.has(key)) {
@@ -46,7 +50,7 @@ export class BarRendererService {
     const { element, data } = this.rects.get(key)!;
     data.backgroundColor = backgroundColor;
 
-    element.style('fill-color', backgroundColor);
+    element.select('rect').style('fill-color', backgroundColor);
   }
   updateVolumeText(key: string, volumeText: string) {
     if (!this.rects.has(key)) {
@@ -55,7 +59,7 @@ export class BarRendererService {
     const { element, data } = this.rects.get(key)!;
     data.volumeText = volumeText;
 
-    element.attr('volume', volumeText);
+    element.select('rect').attr('volume', volumeText);
   }
 
   clean() {
@@ -68,14 +72,18 @@ export class BarRendererService {
     if (!y) {
       return;
     }
-    const element = this.svg.insert('rect');
+    const element = this.svg.insert('g');
+    const rect = element.append('rect');
     this.rects.set(key, { element, data });
     this.updateVolumeText(key, data.volumeText);
     this.updateBackgroundColor(key, data.backgroundColor);
     this.updateFillRectWidth(key, data.fillRectWidth);
     this.updatePriceText(key, data.priceText);
     this.updateTextColor(key, data.textColor);
-    element.attr('y', y);
+    rect
+      .attr('height', this.gridService.getBarHeight())
+      .attr('width', '100%')
+      .attr('y', y);
   }
 
   render(data: IBar) {

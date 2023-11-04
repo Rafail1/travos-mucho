@@ -49,11 +49,11 @@ export class ConfigService {
         bars: {
           volumeFormat: {
             max: 1_000_000,
-            decPlaces: 2,
+            decPlaces: 5,
             shorten: true,
           },
           priceFormat: {
-            decPlaces: 2,
+            decPlaces: 5,
             shorten: false,
           },
         },
