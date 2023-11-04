@@ -8,13 +8,21 @@ const MAX_LENGTH = 100;
 export class TickRendererService {
   private svg: Selection<SVGSVGElement, unknown, null, undefined>;
   private circlesIndexes: Array<
-    Selection<SVGCircleElement, unknown, null, undefined>
+    Selection<SVGGElement, unknown, null, undefined>
   > = [];
 
-  constructor(private gridService: GridService, private configService: ConfigService) {}
+  constructor(
+    private gridService: GridService,
+    private configService: ConfigService
+  ) {}
 
   setSvg(svg: Selection<SVGSVGElement, unknown, null, undefined>) {
     this.svg = svg;
+    for (let i = 0; i < MAX_LENGTH; i++) {
+      const group = this.svg.insert('g');
+      this.circlesIndexes.push(group);
+      group.insert('circle');
+    }
   }
 
   clean() {
@@ -30,11 +38,11 @@ export class TickRendererService {
     if (!y) {
       return;
     }
-    this.circlesIndexes.push(this.svg.insert('circle').attr('y', y));
-
-    const outdated = this.circlesIndexes.splice(MAX_LENGTH);
-    for (const item of outdated) {
-      item.remove();
+    const group = this.circlesIndexes.pop();
+    if (!group) {
+      throw Error('circle not found');
     }
+    group.select('circle').attr('y', y);
+    this.circlesIndexes.unshift(group);
   }
 }
