@@ -1,9 +1,10 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Observable, map, of } from 'rxjs';
 import { DateService } from 'src/app/common/utils/date.service';
 import { response } from './mock-trades';
 import { IBarType } from '../scalp/calculation/bar/bar.interface';
+import { BarService } from '../scalp/calculation/bar/bar.service';
 export interface IBar {
   depth: [string, string];
   backgroundColor: string;
@@ -13,6 +14,7 @@ export interface IBar {
   textColor: string;
   volumeText: string;
   type: IBarType;
+  E?: number;
 }
 export interface IAggTrade {
   /** ex: aggTrade  // Event type */
@@ -75,7 +77,8 @@ export class BackendService {
   private api = 'http://localhost:3000';
   constructor(
     private httpService: HttpClient,
-    private dateService: DateService
+    private dateService: DateService,
+    private barService: BarService
   ) {}
 
   public getDepth(symbol: string, time: Date) {
