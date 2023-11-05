@@ -81,8 +81,8 @@ export const appReducer = createReducer(
   })),
   on(getDepthSuccess, (state, { depth }) => ({
     ...state,
-    depth: depth.depth,
-    snapshot: depth.snapshot,
+    depth: depth?.depth,
+    snapshot: depth?.snapshot,
     loadingDepth: false,
   })),
   on(getCluster, (state) => ({

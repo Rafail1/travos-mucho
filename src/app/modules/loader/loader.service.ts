@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store, select } from '@ngrx/store';
-import { Observable, map, of, tap, withLatestFrom } from 'rxjs';
+import { EMPTY, Observable, map, of, tap, withLatestFrom } from 'rxjs';
 import { filterNullish } from 'src/app/common/utils/filter-nullish';
 import { RootState } from 'src/app/store/app.reducer';
 import { selectTickSize } from 'src/app/store/app.selectors';
@@ -51,7 +51,7 @@ export class LoaderService {
   }: {
     symbol: string;
     time: Date;
-  }): Observable<{ depth: Array<IBar>; snapshot: ISnapshotFormatted }> {
+  }): Observable<{ depth: Array<IBar>; snapshot: ISnapshotFormatted } | undefined> {
     if (this.currentSymbol !== symbol) {
       this.depthCache.delete(this.currentSymbol);
       this.aggTradesCache.delete(this.currentSymbol);
@@ -69,6 +69,9 @@ export class LoaderService {
     return this.backendService.getDepth(symbol, time).pipe(
       withLatestFrom(this.store.pipe(select(selectTickSize), filterNullish())),
       map(([data, tickSize]) => {
+        if (!data.snapshot) {
+          return;
+        }
         const formattedSnapshot = [
           ...data.snapshot.asks.map((item) => ({
             E: data.snapshot.E,

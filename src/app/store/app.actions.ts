@@ -43,7 +43,7 @@ export const getAggTradesSuccess = createAction(
 export const getDepthSuccess = createAction(
   '[App Component] getDepthSuccess',
   props<{
-    depth: { depth: Array<IBar>; snapshot: ISnapshotFormatted };
+    depth?: { depth: Array<IBar>; snapshot: ISnapshotFormatted };
     time: Date;
     symbol: string;
   }>()

@@ -33,20 +33,25 @@ export class TickRendererService {
     this.data = [];
   }
   renderCircles() {
-    return;
-    const groups: any = this.svg
-      .selectAll('g')
-      .data(this.data, function (d: any) {
-        return d[0];
-      });
-    const g = groups.join(function (enter: any) {
+    const groups: any = this.svg.selectAll('g').data(this.data, (d: any) => d);
+    const g = groups.join((enter: any) => {
       enter.append('g');
     });
     groups.exit().remove();
-    const circles: any = g
-      .selectAll('circle')
-      .data((d: any) => [d.slice(1, 4)]);
-    const texts: any = g.selectAll('text').data((d: any) => [d[4]]);
+    const circles = g.selectAll('circle').data(
+      (d: any) => d.slice(0, 1),
+      (d: any) => {
+        return d;
+      }
+    );
+    const texts: any = g.selectAll('text').data(
+      (d: any) => {
+        return d.slice(0, 1);
+      },
+      (d: any) => {
+        return d;
+      }
+    );
 
     circles.join(
       (enter: any) => {
@@ -54,14 +59,14 @@ export class TickRendererService {
       },
       (update: any) => {
         update
-          .attr('cx', function (d: any) {
-            return d[0];
+          .attr('cx', (d: number) => {
+            return this.data[d][1];
           })
-          .attr('cy', (d: any) => {
-            return d[1];
+          .attr('cy', (d: number) => {
+            return this.data[d][2];
           })
-          .attr('fill', function (d: any) {
-            return d[2];
+          .attr('fill', (d: number) => {
+            return this.data[d][3];
           });
       },
       (exit: any) => {
@@ -73,7 +78,12 @@ export class TickRendererService {
         enter.append('text');
       },
       (update: any) => {
-        update.text((d: any) => d);
+        update.text((d: number) => {
+          if (!this.data[d]) {
+            debugger;
+          }
+          return this.data[d][4];
+        });
       }
     );
   }

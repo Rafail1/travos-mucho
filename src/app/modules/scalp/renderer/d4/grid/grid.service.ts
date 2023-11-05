@@ -48,7 +48,10 @@ export class GridService {
   }
 
   getY(price: string) {
-    return this.gridIndexes.get(Number(price));
+    const { barHeight } = this.configService.getConfig(STYLE_THEME_KEY);
+
+    return (Math.ceil((Number(price) - this.min) / this.tickSize) - 1) * barHeight;
+    // return this.gridIndexes.get(Number(price)) || 0;
   }
 
   getGrid() {
@@ -82,9 +85,11 @@ export class GridService {
       // this.max = Number(
       //   (this.max + 100 * this.tickSize).toFixed(this.pricePrecision)
       // );
-      this.height$.next(
-        Math.ceil((this.max - this.min) / this.tickSize) * barHeight
-      );
+      // this.height$.next(
+      //   Math.ceil((this.max - this.min) / this.tickSize) * barHeight
+      // );
+
+      this.height$.next(Object.keys(data.data).length * barHeight)
     }
 
     let index = 0;
