@@ -1,4 +1,11 @@
 import { createReducer, on } from '@ngrx/store';
+import { IExchangeInfo } from '../common/market-data/market-data.service';
+import {
+  IAggTrade,
+  IBar,
+  ICluster,
+  ISnapshotFormatted,
+} from '../modules/backend/backend.service';
 import {
   cleanBarYs,
   cleanCandlestickData,
@@ -18,13 +25,6 @@ import {
   setTimeFrom,
   setTimeTo,
 } from './app.actions';
-import {
-  IAggTrade,
-  ICluster,
-  IDepth,
-  ISnapshot,
-} from '../modules/backend/backend.service';
-import { IExchangeInfo } from '../common/market-data/market-data.service';
 
 export interface RootState {
   app: AppState;
@@ -41,9 +41,9 @@ export interface AppState {
   timeFrom?: Date;
   timeTo?: Date;
   playing: boolean;
-  depth?: Array<IDepth>;
+  depth?: Array<IBar>;
   aggTrades?: Array<IAggTrade>;
-  snapshot?: ISnapshot;
+  snapshot?: ISnapshotFormatted;
   cluster?: ICluster[];
   candlestickData?: Array<[number, number, number, number, number, number]>;
   barYs: Record<string, number>;

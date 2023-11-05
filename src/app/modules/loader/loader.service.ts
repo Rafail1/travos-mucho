@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { map, of, tap } from 'rxjs';
+import { Observable, map, of, tap, withLatestFrom } from 'rxjs';
 import {
   BackendService,
   IAggTrade,
@@ -7,21 +7,27 @@ import {
   ICluster,
   IDepth,
   ISnapshot,
+  ISnapshotFormatted,
 } from '../backend/backend.service';
 import { IBarType } from '../scalp/calculation/bar/bar.interface';
 import { BarService } from '../scalp/calculation/bar/bar.service';
+import { RootState } from 'src/app/store/app.reducer';
+import { Store, select } from '@ngrx/store';
+import { selectTickSize } from 'src/app/store/app.selectors';
+import { filterNullish } from 'src/app/common/utils/filter-nullish';
 @Injectable()
 export class LoaderService {
   private currentSymbol: string;
   private depthCache = new Map<
     string,
-    Map<string, { depth: Array<IBar>; snapshot: { E: number; data: IBar[] } }>
+    Map<string, { depth: Array<IBar>; snapshot: ISnapshotFormatted }>
   >();
   private clusterCache = new Map<string, Map<string, Array<ICluster>>>();
   private aggTradesCache = new Map<string, Map<string, Array<IAggTrade>>>();
   constructor(
     private backendService: BackendService,
-    private barService: BarService
+    private barService: BarService,
+    private store: Store<RootState>
   ) {}
 
   loadAggTrades({ symbol, time }: { symbol: string; time: Date }) {
@@ -41,7 +47,13 @@ export class LoaderService {
     );
   }
 
-  loadDepth({ symbol, time }: { symbol: string; time: Date }) {
+  loadDepth({
+    symbol,
+    time,
+  }: {
+    symbol: string;
+    time: Date;
+  }): Observable<{ depth: Array<IBar>; snapshot: ISnapshotFormatted }> {
     if (this.currentSymbol !== symbol) {
       this.depthCache.delete(this.currentSymbol);
       this.aggTradesCache.delete(this.currentSymbol);
@@ -57,23 +69,11 @@ export class LoaderService {
     }
 
     return this.backendService.getDepth(symbol, time).pipe(
-      tap(({ snapshot }) => {
-        snapshot?.asks.sort((a: any, b: any) => {
-          if (Number(a[0]) === Number(b[0])) {
-            return 0;
-          }
-          return Number(a[0]) < Number(b[0]) ? 1 : -1;
-        });
-        snapshot?.bids.sort((a: any, b: any) => {
-          if (a[0] === b[0]) {
-            return 0;
-          }
-          return a[0] < b[0] ? 1 : -1;
-        });
-      }),
-      map((data) => {
-        const d = [
+      withLatestFrom(this.store.pipe(select(selectTickSize), filterNullish())),
+      map(([data, tickSize]) => {
+        const formattedSnapshot = [
           ...data.snapshot.asks.map((item) => ({
+            E: data.snapshot.E,
             depth: item,
             type: 'ask' as IBarType,
             ...this.barService.calculateOptions({
@@ -83,6 +83,7 @@ export class LoaderService {
             }),
           })),
           ...data.snapshot.bids.map((item) => ({
+            E: data.snapshot.E,
             depth: item,
             type: 'bid' as IBarType,
             ...this.barService.calculateOptions({
@@ -94,12 +95,12 @@ export class LoaderService {
         ].reduce((acc, item) => {
           acc[Number(item.depth[0])] = item;
           return acc;
-        }, {} as any);
+        }, {} as { [key: number]: IBar });
 
-        const formattedData = [];
+        const formattedDepth = [];
         for (let index = 0; index < data.depth.length; index++) {
           for (const item of data.depth[index].a) {
-            formattedData.push({
+            formattedDepth.push({
               E: data.depth[index].E,
               depth: item,
               type: 'ask' as IBarType,
@@ -111,7 +112,7 @@ export class LoaderService {
             });
           }
           for (const item of data.depth[index].b) {
-            formattedData.push({
+            formattedDepth.push({
               E: data.depth[index].E,
               depth: item,
               type: 'bid' as IBarType,
@@ -123,11 +124,21 @@ export class LoaderService {
             });
           }
         }
-        this.depthCache.get(symbol)?.set(key, {
-          depth: formattedData,
-          snapshot: { E: data.snapshot.E, data: d },
-        });
-        return formattedData;
+
+        const middleAsk = Number(
+          data.snapshot.asks[data.snapshot.asks.length - 1][0]
+        );
+        const middleBid = Number(data.snapshot.bids[0][0]);
+        const max = middleAsk + Number(tickSize) * data.snapshot.asks.length;
+        const min = middleBid - Number(tickSize) * data.snapshot.bids.length;
+
+        const result = {
+          depth: formattedDepth,
+          snapshot: { E: data.snapshot.E, data: formattedSnapshot, max, min },
+        };
+        this.depthCache.get(symbol)?.set(key, result);
+
+        return result;
       })
     );
   }

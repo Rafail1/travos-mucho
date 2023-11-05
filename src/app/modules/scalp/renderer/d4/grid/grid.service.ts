@@ -3,7 +3,10 @@ import { Store, select } from '@ngrx/store';
 import { Observable, Subject } from 'rxjs';
 import { filterNullish } from 'src/app/common/utils/filter-nullish';
 import { ConfigService, STYLE_THEME_KEY } from 'src/app/config/config';
-import { ISnapshot } from 'src/app/modules/backend/backend.service';
+import {
+  ISnapshot,
+  ISnapshotFormatted,
+} from 'src/app/modules/backend/backend.service';
 import { RootState } from 'src/app/store/app.reducer';
 import {
   selectPricePrecision,
@@ -72,12 +75,10 @@ export class GridService {
     );
   }
 
-  update(data: ISnapshot) {
+  update(data: ISnapshotFormatted) {
     const { barHeight } = this.configService.getConfig(STYLE_THEME_KEY);
-    const middleAsk = Number(data.asks[data.asks.length - 1][0]);
-    const middleBid = Number(data.bids[0][0]);
-    this.max = middleAsk + this.tickSize * data.asks.length;
-    this.min = middleBid - this.tickSize * data.bids.length;
+    this.max = data.max;
+    this.min = data.min;
     if (this.grid.size === 0) {
       // this.min = Number(
       //   (this.min - 100 * this.tickSize).toFixed(this.pricePrecision)

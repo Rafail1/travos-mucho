@@ -1,9 +1,11 @@
 import { createAction, props } from '@ngrx/store';
 import {
   IAggTrade,
+  IBar,
   ICluster,
   IDepth,
   ISnapshot,
+  ISnapshotFormatted,
 } from '../modules/backend/backend.service';
 import { IExchangeInfo } from '../common/market-data/market-data.service';
 
@@ -43,7 +45,7 @@ export const getAggTradesSuccess = createAction(
 export const getDepthSuccess = createAction(
   '[App Component] getDepthSuccess',
   props<{
-    depth: { depth: Array<IDepth>; snapshot: ISnapshot };
+    depth: { depth: Array<IBar>; snapshot: ISnapshotFormatted };
     time: Date;
     symbol: string;
   }>()

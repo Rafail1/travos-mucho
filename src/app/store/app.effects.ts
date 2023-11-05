@@ -11,7 +11,10 @@ import {
   switchMap,
   withLatestFrom,
 } from 'rxjs/operators';
-import { IExchangeInfo, MarketDataService } from '../common/market-data/market-data.service';
+import {
+  IExchangeInfo,
+  MarketDataService,
+} from '../common/market-data/market-data.service';
 import { LoaderService } from '../modules/loader/loader.service';
 import {
   cleanBarYs,

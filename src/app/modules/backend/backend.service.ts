@@ -14,7 +14,14 @@ export interface IBar {
   textColor: string;
   volumeText: string;
   type: IBarType;
-  E?: number;
+  E: string;
+}
+
+export interface ISnapshotFormatted {
+  min: number;
+  max: number;
+  E: string;
+  data: { [key: number]: IBar };
 }
 export interface IAggTrade {
   /** ex: aggTrade  // Event type */

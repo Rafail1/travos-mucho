@@ -6,6 +6,7 @@ import {
   IBar,
   IDepth,
   ISnapshot,
+  ISnapshotFormatted,
 } from 'src/app/modules/backend/backend.service';
 import { RootState } from 'src/app/store/app.reducer';
 import {
@@ -22,8 +23,8 @@ export class GlassService implements OnDestroy {
   public data$ = new Subject<{ [key: number]: IBar }>();
   private time$: Observable<Date>;
   private destroy$ = new Subject<void>();
-  private depth$: Observable<IDepth[]>;
-  private snapshot$: Observable<ISnapshot>;
+  private depth$: Observable<IBar[]>;
+  private snapshot$: Observable<ISnapshotFormatted>;
 
   constructor(
     private store: Store<RootState>,
@@ -61,31 +62,7 @@ export class GlassService implements OnDestroy {
   initSnapshotFlow() {
     this.snapshot$.subscribe((depth) => {
       this.gridService.update(depth);
-      const d = [
-        ...depth.asks.map((item) => ({
-          depth: item,
-          type: 'ask' as IBarType,
-          ...this.barService.calculateOptions({
-            type: 'ask',
-            price: Number(item[0]),
-            value: Number(item[1]),
-          }),
-        })),
-        ...depth.bids.map((item) => ({
-          depth: item,
-          type: 'bid' as IBarType,
-          ...this.barService.calculateOptions({
-            type: 'bid',
-            price: Number(item[0]),
-            value: Number(item[1]),
-          }),
-        })),
-      ].reduce((acc, item) => {
-        acc[Number(item.depth[0])] = item;
-        return acc;
-      }, {} as any);
-
-      this.data$.next(d);
+      this.data$.next(depth.data);
     });
   }
 
@@ -105,28 +82,7 @@ export class GlassService implements OnDestroy {
         const data = [];
         for (; index < depth.length; index++) {
           if (new Date(depth[index].E).getTime() <= time.getTime()) {
-            for (const item of depth[index].a) {
-              data.push({
-                depth: item,
-                type: 'ask' as IBarType,
-                ...this.barService.calculateOptions({
-                  type: 'ask',
-                  price: Number(item[0]),
-                  value: Number(item[1]),
-                }),
-              });
-            }
-            for (const item of depth[index].b) {
-              data.push({
-                depth: item,
-                type: 'bid' as IBarType,
-                ...this.barService.calculateOptions({
-                  type: 'bid',
-                  price: Number(item[0]),
-                  value: Number(item[1]),
-                }),
-              });
-            }
+            data.push(depth[index]);
           } else {
             break;
           }

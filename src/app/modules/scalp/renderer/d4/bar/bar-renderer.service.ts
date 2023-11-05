@@ -212,6 +212,7 @@ export class BarRendererService {
 
   emptyRow(key: number): IBar {
     return {
+      E: '',
       depth: [String(key), '0'],
       backgroundColor: 'gray',
       fillColor: 'gray',
