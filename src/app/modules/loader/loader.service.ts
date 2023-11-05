@@ -1,20 +1,18 @@
 import { Injectable } from '@angular/core';
+import { Store, select } from '@ngrx/store';
 import { Observable, map, of, tap, withLatestFrom } from 'rxjs';
+import { filterNullish } from 'src/app/common/utils/filter-nullish';
+import { RootState } from 'src/app/store/app.reducer';
+import { selectTickSize } from 'src/app/store/app.selectors';
 import {
   BackendService,
   IAggTrade,
   IBar,
   ICluster,
-  IDepth,
-  ISnapshot,
   ISnapshotFormatted,
 } from '../backend/backend.service';
 import { IBarType } from '../scalp/calculation/bar/bar.interface';
 import { BarService } from '../scalp/calculation/bar/bar.service';
-import { RootState } from 'src/app/store/app.reducer';
-import { Store, select } from '@ngrx/store';
-import { selectTickSize } from 'src/app/store/app.selectors';
-import { filterNullish } from 'src/app/common/utils/filter-nullish';
 @Injectable()
 export class LoaderService {
   private currentSymbol: string;

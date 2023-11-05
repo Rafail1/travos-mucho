@@ -1,13 +1,11 @@
 import { createAction, props } from '@ngrx/store';
+import { IExchangeInfo } from '../common/market-data/market-data.service';
 import {
   IAggTrade,
   IBar,
   ICluster,
-  IDepth,
-  ISnapshot,
   ISnapshotFormatted,
 } from '../modules/backend/backend.service';
-import { IExchangeInfo } from '../common/market-data/market-data.service';
 
 export const setSymbol = createAction(
   '[App Component] setSymbol',

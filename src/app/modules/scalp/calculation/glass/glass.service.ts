@@ -4,8 +4,6 @@ import { Observable, Subject, map, switchMap, takeUntil } from 'rxjs';
 import { filterNullish } from 'src/app/common/utils/filter-nullish';
 import {
   IBar,
-  IDepth,
-  ISnapshot,
   ISnapshotFormatted,
 } from 'src/app/modules/backend/backend.service';
 import { RootState } from 'src/app/store/app.reducer';
@@ -14,9 +12,8 @@ import {
   selectSnapshot,
   selectTime,
 } from 'src/app/store/app.selectors';
-import { BarService } from '../bar/bar.service';
 import { GridService } from '../../renderer/d4/grid/grid.service';
-import { IBarType } from '../bar/bar.interface';
+import { BarService } from '../bar/bar.service';
 
 @Injectable()
 export class GlassService implements OnDestroy {

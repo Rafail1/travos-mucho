@@ -3,14 +3,10 @@ import { Store, select } from '@ngrx/store';
 import { Observable, Subject } from 'rxjs';
 import { filterNullish } from 'src/app/common/utils/filter-nullish';
 import { ConfigService, STYLE_THEME_KEY } from 'src/app/config/config';
-import {
-  ISnapshot,
-  ISnapshotFormatted,
-} from 'src/app/modules/backend/backend.service';
+import { ISnapshotFormatted } from 'src/app/modules/backend/backend.service';
 import { RootState } from 'src/app/store/app.reducer';
 import {
   selectPricePrecision,
-  selectSnapshot,
   selectSymbol,
   selectTickSize,
 } from 'src/app/store/app.selectors';
