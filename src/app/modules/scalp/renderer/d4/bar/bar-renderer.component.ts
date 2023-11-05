@@ -44,7 +44,7 @@ export class BarRendererComponent implements OnInit {
     );
   }
 
-  renderBar(data: IBar) {
+  renderBar(data: { [key: number]: IBar }) {
     this.barRendererService.render(data);
   }
 }

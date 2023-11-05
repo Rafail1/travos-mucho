@@ -87,13 +87,13 @@ export class BarService {
       currentThresholdTheme = 'big';
     }
 
-    if (currentThresholdTheme) {
-      this.thresholdSubject.next({
-        theme: currentThresholdTheme,
-        value,
-        price,
-      });
-    }
+    // if (currentThresholdTheme) {
+    //   this.thresholdSubject.next({
+    //     theme: currentThresholdTheme,
+    //     value,
+    //     price,
+    //   });
+    // }
 
     return currentThresholdTheme
       ? this.configService.getConfig(STYLE_THEME_KEY).thresholds[

@@ -15,10 +15,11 @@ import {
 } from 'src/app/store/app.selectors';
 import { BarService } from '../bar/bar.service';
 import { GridService } from '../../renderer/d4/grid/grid.service';
+import { IBarType } from '../bar/bar.interface';
 
 @Injectable()
 export class GlassService implements OnDestroy {
-  public data$ = new Subject<IBar>();
+  public data$ = new Subject<{ [key: number]: IBar }>();
   private time$: Observable<Date>;
   private destroy$ = new Subject<void>();
   private depth$: Observable<IDepth[]>;
@@ -60,28 +61,31 @@ export class GlassService implements OnDestroy {
   initSnapshotFlow() {
     this.snapshot$.subscribe((depth) => {
       this.gridService.update(depth);
-      for (const item of depth.asks) {
-        this.data$.next({
+      const d = [
+        ...depth.asks.map((item) => ({
           depth: item,
-          type: 'ask',
+          type: 'ask' as IBarType,
           ...this.barService.calculateOptions({
             type: 'ask',
             price: Number(item[0]),
             value: Number(item[1]),
           }),
-        });
-      }
-      for (const item of depth.bids) {
-        this.data$.next({
+        })),
+        ...depth.bids.map((item) => ({
           depth: item,
-          type: 'bid',
+          type: 'bid' as IBarType,
           ...this.barService.calculateOptions({
             type: 'bid',
             price: Number(item[0]),
             value: Number(item[1]),
           }),
-        });
-      }
+        })),
+      ].reduce((acc, item) => {
+        acc[Number(item.depth[0])] = item;
+        return acc;
+      }, {} as any);
+
+      this.data$.next(d);
     });
   }
 
@@ -98,12 +102,13 @@ export class GlassService implements OnDestroy {
         })
       )
       .subscribe(({ time, index, depth }) => {
+        const data = [];
         for (; index < depth.length; index++) {
           if (new Date(depth[index].E).getTime() <= time.getTime()) {
             for (const item of depth[index].a) {
-              this.data$.next({
+              data.push({
                 depth: item,
-                type: 'ask',
+                type: 'ask' as IBarType,
                 ...this.barService.calculateOptions({
                   type: 'ask',
                   price: Number(item[0]),
@@ -112,9 +117,9 @@ export class GlassService implements OnDestroy {
               });
             }
             for (const item of depth[index].b) {
-              this.data$.next({
+              data.push({
                 depth: item,
-                type: 'bid',
+                type: 'bid' as IBarType,
                 ...this.barService.calculateOptions({
                   type: 'bid',
                   price: Number(item[0]),
@@ -126,6 +131,12 @@ export class GlassService implements OnDestroy {
             break;
           }
         }
+        this.data$.next(
+          data.reduce((acc, item) => {
+            acc[Number(item.depth[0])] = item;
+            return acc;
+          }, {} as any)
+        );
       });
   }
 }

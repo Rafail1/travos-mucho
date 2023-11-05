@@ -60,6 +60,7 @@ export class ClusterRendererService {
   }
 
   render(data: ICluster) {
+    return;
     let element;
     let group;
     let elementData;

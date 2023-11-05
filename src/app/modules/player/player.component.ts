@@ -5,7 +5,7 @@ import { forward, pause } from 'src/app/store/app.actions';
 import { RootState } from 'src/app/store/app.reducer';
 import { selectPlaying } from 'src/app/store/app.selectors';
 export const FIVE_MINUTES = 1000 * 60 * 5;
-export const STEP = 100;
+export const STEP = 300;
 export const REWIND_SECONDS = 1000 * 30;
 export const FORWARD_SECONDS = 1000 * 30;
 @Component({

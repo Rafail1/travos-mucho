@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Selection, merge } from 'd3';
+import { Selection, merge, transition } from 'd3';
 import { IAggTrade } from 'src/app/modules/backend/backend.service';
 import { GridService } from '../grid/grid.service';
 import { ConfigService, STYLE_THEME_KEY } from 'src/app/config/config';
@@ -33,6 +33,7 @@ export class TickRendererService {
     this.data = [];
   }
   renderCircles() {
+    return;
     const groups: any = this.svg
       .selectAll('g')
       .data(this.data, function (d: any) {
@@ -49,17 +50,14 @@ export class TickRendererService {
 
     circles.join(
       (enter: any) => {
-        enter.append('circle');
+        enter.append('circle').attr('r', RADIUS);
       },
       (update: any) => {
         update
-          .attr('r', RADIUS)
           .attr('cx', function (d: any) {
-            console.log(d);
             return d[0];
           })
           .attr('cy', (d: any) => {
-            console.log(d);
             return d[1];
           })
           .attr('fill', function (d: any) {
@@ -95,13 +93,13 @@ export class TickRendererService {
       return;
     }
 
-    this.data[this.latestElementIdx][0] = this.latestElementIdx;
-    this.data[this.latestElementIdx][1] = y;
-    this.data[this.latestElementIdx][2] = this.latestElementIdx * RADIUS;
-    this.data[this.latestElementIdx][3] = data.m
-      ? this.askColor
-      : this.bidColor;
-    this.data[this.latestElementIdx][4] = data.q;
+    this.data[this.latestElementIdx] = [
+      this.latestElementIdx,
+      y,
+      this.latestElementIdx * RADIUS,
+      data.m ? this.askColor : this.bidColor,
+      data.q,
+    ];
 
     if (this.latestElementIdx === MAX_LENGTH - 1) {
       this.latestElementIdx = 0;
