@@ -40,7 +40,7 @@ export class BarRendererComponent implements OnInit {
 
   private createSvg(): void {
     this.barRendererService.setSvg(
-      d3.select(this.elRef.nativeElement).append('svg')
+      d3.select<SVGElement, IBar>(this.elRef.nativeElement).append('svg')
     );
   }
 

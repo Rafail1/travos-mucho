@@ -38,10 +38,13 @@ export class TradesService implements OnDestroy {
   }
 
   initDataFlow() {
+    let index = 0;
+    let latestIdx = 0;
+
     this.aggTrades$
       .pipe(
         switchMap((data) => {
-          let index = 0;
+          index = 0;
           return this.time$.pipe(
             map((time: Date) => {
               for (; index < data.length; index++) {
@@ -55,7 +58,8 @@ export class TradesService implements OnDestroy {
         })
       )
       .subscribe(({ data, index }) => {
-        const _data = data.slice(0, index);
+        const _data = data.slice(latestIdx, index);
+        latestIdx = index;
         for (let item of _data) {
           this.data$.next(item);
         }

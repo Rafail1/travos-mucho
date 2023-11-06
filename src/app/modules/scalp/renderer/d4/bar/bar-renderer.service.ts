@@ -8,10 +8,10 @@ export class BarRendererService {
   init(data: IBar[]) {
     throw new Error('Method not implemented.');
   }
-  private svg: Selection<SVGSVGElement, unknown, null, undefined>;
+  private svg: Selection<SVGSVGElement, IBar, HTMLElement, undefined>;
   private data = new Map<string, IBar>();
   constructor(private gridService: GridService) {}
-  setSvg(svg: Selection<SVGSVGElement, unknown, null, undefined>) {
+  setSvg(svg: Selection<SVGSVGElement, IBar, HTMLElement, undefined>) {
     this.svg = svg;
 
     this.gridService.getHeight().subscribe((height) => {
@@ -76,7 +76,6 @@ export class BarRendererService {
             .attr('font-size', this.gridService.getBarHeight() - 2)
             .attr('dominant-baseline', 'hanging')
             .attr('x', 300)
-            .attr('dominant-baseline', 'hanging')
             .attr('text-anchor', 'end')
             .attr('y', (key: string) => {
               const d = this.data.get(key)!;

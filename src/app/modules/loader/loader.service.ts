@@ -3,7 +3,10 @@ import { Store, select } from '@ngrx/store';
 import { EMPTY, Observable, map, of, tap, withLatestFrom } from 'rxjs';
 import { filterNullish } from 'src/app/common/utils/filter-nullish';
 import { RootState } from 'src/app/store/app.reducer';
-import { selectTickSize } from 'src/app/store/app.selectors';
+import {
+  selectPricePrecision,
+  selectTickSize,
+} from 'src/app/store/app.selectors';
 import {
   BackendService,
   IAggTrade,
@@ -51,7 +54,9 @@ export class LoaderService {
   }: {
     symbol: string;
     time: Date;
-  }): Observable<{ depth: Array<IBar>; snapshot: ISnapshotFormatted } | undefined> {
+  }): Observable<
+    { depth: Array<IBar>; snapshot: ISnapshotFormatted } | undefined
+  > {
     if (this.currentSymbol !== symbol) {
       this.depthCache.delete(this.currentSymbol);
       this.aggTradesCache.delete(this.currentSymbol);
@@ -67,8 +72,11 @@ export class LoaderService {
     }
 
     return this.backendService.getDepth(symbol, time).pipe(
-      withLatestFrom(this.store.pipe(select(selectTickSize), filterNullish())),
-      map(([data, tickSize]) => {
+      withLatestFrom(
+        this.store.pipe(select(selectTickSize), filterNullish()),
+        this.store.pipe(select(selectPricePrecision), filterNullish())
+      ),
+      map(([data, tickSize, pricePrecision]) => {
         if (!data.snapshot) {
           return;
         }
@@ -126,12 +134,20 @@ export class LoaderService {
           }
         }
 
-        const middleAsk = Number(
-          data.snapshot.asks[data.snapshot.asks.length - 1][0]
-        );
+        const middleAsk = Number(data.snapshot.asks[0][0]);
         const middleBid = Number(data.snapshot.bids[0][0]);
-        const max = middleAsk + Number(tickSize) * data.snapshot.asks.length;
-        const min = middleBid - Number(tickSize) * data.snapshot.bids.length;
+        const max = Number(
+          (
+            middleAsk +
+            Number((Number(tickSize) * data.snapshot.asks.length).toPrecision(pricePrecision))
+          ).toPrecision(Number(pricePrecision))
+        );
+        const min = Number(
+          (
+            middleBid -
+            Number((Number(tickSize) * data.snapshot.bids.length).toPrecision(pricePrecision))
+          ).toPrecision(Number(pricePrecision))
+        );
 
         const result = {
           depth: formattedDepth,
