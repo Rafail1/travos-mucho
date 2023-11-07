@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { map, tap } from 'rxjs';
+import { GridService } from 'src/app/modules/scalp/renderer/d4/grid/grid.service';
 
 export interface IExchangeInfo {
   symbol: string;
@@ -12,7 +13,10 @@ export interface IExchangeInfo {
 export class MarketDataService {
   private apiUrl = 'https://fapi.binance.com/fapi/v1';
 
-  constructor(private httpClient: HttpClient) {}
+  constructor(
+    private httpClient: HttpClient,
+    private gridService: GridService
+  ) {}
 
   getSymbols() {
     return this.httpClient.get(`${this.apiUrl}/exchangeInfo`).pipe(
@@ -20,7 +24,14 @@ export class MarketDataService {
         symbols.reduce(
           (
             acc: Array<IExchangeInfo>,
-            { symbol, contractType, quoteAsset, status, filters, pricePrecision }: any
+            {
+              symbol,
+              contractType,
+              quoteAsset,
+              status,
+              filters,
+              pricePrecision,
+            }: any
           ) => {
             if (this.isAvailable({ contractType, quoteAsset, status })) {
               const tickSize = filters.find(
@@ -53,18 +64,35 @@ export class MarketDataService {
         },
       })
       .pipe(
-        map((data: any) =>
-          data.map(([time, open, high, low, close, volume]: any) => {
-            return [
+        map((data: any) => {
+          const result: [number, number, number, number, number, number][] = [];
+          let min = Number(data[0][3]);
+          let max = Number(data[0][2]);
+          for (const [time, open, high, low, close, volume] of data) {
+            const highN = Number(high);
+            const lowN = Number(low);
+
+            if (highN > max) {
+              max = highN;
+            }
+
+            if (min > lowN) {
+              min = lowN;
+            }
+
+            result.push([
               time,
               Number(open),
-              Number(high),
-              Number(low),
+              highN,
+              lowN,
               Number(close),
               Number(volume),
-            ];
-          })
-        )
+            ]);
+          }
+          this.gridService.setBounds({ min, max });
+
+          return result;
+        })
       );
   }
 

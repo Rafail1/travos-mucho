@@ -9,6 +9,7 @@ import { Store, select } from '@ngrx/store';
 import { selectTime } from 'src/app/store/app.selectors';
 import { DateService } from 'src/app/common/utils/date.service';
 import { filterNullish } from 'src/app/common/utils/filter-nullish';
+import { ConfigService } from 'src/app/config/config';
 const MAX_LENGTH = 20;
 @Injectable()
 export class ClusterRendererService {
@@ -36,6 +37,10 @@ export class ClusterRendererService {
 
   setSvg(svg: Selection<SVGSVGElement, unknown, null, undefined>) {
     this.svg = svg;
+    this.gridService.getHeight().subscribe((height) => {
+      this.svg.style('height', height);
+    });
+    this.svg.style('width', '100%');
   }
 
   clean() {
@@ -60,6 +65,15 @@ export class ClusterRendererService {
             ],
           ])
         );
+      } else if (!this.clusters.get(data.min5_slot)?.has(data.p)) {
+        const elementData = {
+          price: Number(data.p),
+          volume: Number(data.volume),
+          askVolume: data.m ? Number(data.volume) : 0,
+          bidVolume: data.m ? 0 : Number(data.volume),
+        };
+
+        this.clusters.get(data.min5_slot)?.set(data.p, elementData);
       } else {
         const elementData = this.clusters.get(data.min5_slot)!.get(data.p)!;
 
@@ -70,15 +84,14 @@ export class ClusterRendererService {
         }
       }
     }
-  }
-
-  render(data: ICluster) {
-    const y = this.gridService.getY(data.p);
-    if (!y) {
+    if (!clusters.length) {
       return;
     }
-    this.addClusters([data]);
 
+    this.render();
+  }
+
+  render() {
     this.svg
       .selectAll('g')
       .data(this.clusters.keys())
@@ -94,16 +107,36 @@ export class ClusterRendererService {
           .join(
             (enter) => {
               const g = enter.append('g');
-              g.append('rect').attr('fill', (d) => {
-                const percent = d.askVolume / d.bidVolume;
-                const red = (255 - 255 * percent).toString(16).toUpperCase();
-                const green = (255 * percent).toString(16).toUpperCase();
-                return `#${red}${green}00`;
-              });
+              g.append('rect')
+                .attr('width', '100%')
+                .attr('height', this.gridService.getBarHeight())
+                .attr('y', (d) => {
+                  return this.gridService.getY(d.price);
+                })
+                .attr('fill', (d) => {
+                  const max = Math.max(d.bidVolume, d.askVolume);
+                  const onePeace = max / 255;
+                 
+                  const red = Math.floor(d.bidVolume / onePeace)
+                    .toString(16)
+                    .padStart(2, "0")
+                    .toUpperCase();
+                  const green = Math.floor(d.askVolume / onePeace)
+                    .toString(16)
+                    .padStart(2, "0")
+                    .toUpperCase();
+                  return `#${red}${green}00`;
+                });
 
-              g.append('text').text((d) => {
-                return d.volume;
-              });
+              g.append('text')
+                .attr('width', '100%')
+                .attr('height', this.gridService.getBarHeight())
+                .attr('y', (d) => {
+                  return this.gridService.getY(d.price);
+                })
+                .text((d) => {
+                  return d.volume;
+                });
 
               return g;
             },
@@ -111,7 +144,7 @@ export class ClusterRendererService {
               update
                 .selectAll<BaseType, IClusterData>('rect')
                 .attr('fill', (d) => {
-                  const percent = d.askVolume / d.bidVolume;
+                  const percent = (d.askVolume - d.bidVolume) / d.bidVolume;
                   const red = (255 - 255 * percent).toString(16).toUpperCase();
                   const green = (255 * percent).toString(16).toUpperCase();
                   return `#${red}${green}00`;

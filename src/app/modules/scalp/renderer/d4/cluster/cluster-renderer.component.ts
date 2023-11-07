@@ -70,6 +70,6 @@ export class ClusterRendererComponent implements OnInit, OnDestroy {
   }
 
   private renderCluster(data: ICluster) {
-    this.clusterRendererService.render(data);
+    this.clusterRendererService.addClusters([data]);
   }
 }

@@ -40,6 +40,11 @@ export class GridService {
     this.init();
   }
 
+  setBounds(data: { min: number; max: number }) {
+    this.max = data.max;
+    this.min = data.min;
+  }
+
   init() {
     this.symbol$.subscribe(() => {
       this.grid.clear();
@@ -47,7 +52,7 @@ export class GridService {
     });
   }
 
-  getY(price: string) {
+  getY(price: string | number) {
     const { barHeight } = this.configService.getConfig(STYLE_THEME_KEY);
     const idx =
       Number((this.max - Number(price)).toPrecision(this.pricePrecision)) /
@@ -77,10 +82,8 @@ export class GridService {
 
   update(data: ISnapshotFormatted) {
     const { barHeight } = this.configService.getConfig(STYLE_THEME_KEY);
-    this.max = data.max;
-    this.min = data.min;
     if (this.grid.size === 0) {
-      this.height$.next(Object.keys(data.data).length * barHeight);
+      this.height$.next(((this.max - this.min) / this.tickSize) * barHeight);
     }
 
     let index = 0;
