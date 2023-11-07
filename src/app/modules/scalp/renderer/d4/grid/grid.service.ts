@@ -80,16 +80,6 @@ export class GridService {
     this.max = data.max;
     this.min = data.min;
     if (this.grid.size === 0) {
-      // this.min = Number(
-      //   (this.min - 100 * this.tickSize).toFixed(this.pricePrecision)
-      // );
-      // this.max = Number(
-      //   (this.max + 100 * this.tickSize).toFixed(this.pricePrecision)
-      // );
-      // this.height$.next(
-      //   Math.ceil((this.max - this.min) / this.tickSize) * barHeight
-      // );
-
       this.height$.next(Object.keys(data.data).length * barHeight);
     }
 

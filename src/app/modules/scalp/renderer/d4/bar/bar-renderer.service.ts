@@ -21,11 +21,10 @@ export class BarRendererService {
   }
 
   clean() {
+    this.svg.selectAll('*').remove();
     this.data.clear();
   }
-  getKeys() {
-    return this.gridService.getGrid().keys();
-  }
+  
   render(data: { [key: number]: IBar }) {
     for (const [key, item] of Object.entries(data)) {
       this.data.set(key, item);

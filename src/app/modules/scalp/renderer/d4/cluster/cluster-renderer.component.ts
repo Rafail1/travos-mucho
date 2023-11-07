@@ -14,7 +14,8 @@ import { IAggTrade, ICluster } from 'src/app/modules/backend/backend.service';
 import { RootState } from 'src/app/store/app.reducer';
 import { TradesService } from '../../../calculation/trades/trades.service';
 import { ClusterRendererService } from './cluster-renderer.service';
-import { selectSymbol } from 'src/app/store/app.selectors';
+import { selectCluster, selectSymbol } from 'src/app/store/app.selectors';
+import { filterNullish } from 'src/app/common/utils/filter-nullish';
 
 @Component({
   selector: 'app-cluster-renderer',
@@ -53,6 +54,12 @@ export class ClusterRendererComponent implements OnInit, OnDestroy {
       .pipe(select(selectSymbol), takeUntil(this.destroy$))
       .subscribe(() => {
         this.clusterRendererService.clean();
+      });
+
+    this.store
+      .pipe(select(selectCluster), filterNullish(), takeUntil(this.destroy$))
+      .subscribe((clusters) => {
+        this.clusterRendererService.addClusters(clusters);
       });
   }
 

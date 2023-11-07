@@ -41,6 +41,9 @@ export class HighchartsComponent implements OnDestroy, OnInit {
         enabled: true,
       },
     },
+    tooltip: {
+      enabled: false,
+    },
     scrollbar: {
       enabled: false,
     },
