@@ -4,6 +4,7 @@ import { Observable, Subject } from 'rxjs';
 import { filterNullish } from 'src/app/common/utils/filter-nullish';
 import { ConfigService, STYLE_THEME_KEY } from 'src/app/config/config';
 import { ISnapshotFormatted } from 'src/app/modules/backend/backend.service';
+import { FIVE_MINUTES } from 'src/app/modules/player/player.component';
 import { RootState } from 'src/app/store/app.reducer';
 import {
   selectPricePrecision,
@@ -75,7 +76,7 @@ export class GridService {
 
   getMin5SlotX(min5_slot: Date) {
     return (
-      Math.floor((Date.now() - min5_slot.getTime()) / (60 * 1000 * 5)) *
+      Math.floor((Date.now() - min5_slot.getTime()) / FIVE_MINUTES) *
       this.configService.getConfig(STYLE_THEME_KEY).clusterWidth
     );
   }

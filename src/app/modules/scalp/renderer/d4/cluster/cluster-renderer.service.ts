@@ -24,7 +24,7 @@ export class ClusterRendererService {
     //   .pipe(
     //     select(selectTime),
     //     filterNullish(),
-    //     map((time) => this.dateService.getMin5Slot(time)),
+    //     map((time) => this.dateService.nextFilterTime(time, FIVE_MINUTES)),
     //     distinctUntilChanged((prev, crt) => prev === crt)
     //   )
     //   .subscribe(() => {
@@ -47,56 +47,66 @@ export class ClusterRendererService {
     this.svg.selectAll('*').remove();
     this.clusters.clear();
   }
+  updateCluster(data: ICluster) {
+    if (!this.clusters.get(data.min5_slot)?.has(data.p)) {
+      const elementData = {
+        slot: data.min5_slot,
+        price: Number(data.p),
+        volume: Number(data.volume),
+        askVolume: data.m ? Number(data.volume) : 0,
+        bidVolume: data.m ? 0 : Number(data.volume),
+      };
 
-  addClusters(clusters: ICluster[]) {
-    for (let data of clusters) {
-      if (!this.clusters.has(data.min5_slot)) {
-        this.clusters.set(
-          data.min5_slot,
-          new Map([
-            [
-              data.p,
-              {
-                price: Number(data.p),
-                volume: Number(data.volume),
-                askVolume: data.m ? 0 : Number(data.volume),
-                bidVolume: data.m ? Number(data.volume) : 0,
-              },
-            ],
-          ])
-        );
-      } else if (!this.clusters.get(data.min5_slot)?.has(data.p)) {
-        const elementData = {
-          price: Number(data.p),
-          volume: Number(data.volume),
-          askVolume: data.m ? Number(data.volume) : 0,
-          bidVolume: data.m ? 0 : Number(data.volume),
-        };
+      this.clusters.get(data.min5_slot)?.set(data.p, elementData);
+    } else {
+      const elementData = this.clusters.get(data.min5_slot)!.get(data.p)!;
 
-        this.clusters.get(data.min5_slot)?.set(data.p, elementData);
+      if (data.m) {
+        elementData.bidVolume = elementData.bidVolume + Number(data.volume);
       } else {
-        const elementData = this.clusters.get(data.min5_slot)!.get(data.p)!;
-
-        if (data.m) {
-          elementData.bidVolume = elementData.bidVolume + Number(data.volume);
-        } else {
-          elementData.askVolume = elementData.askVolume + Number(data.volume);
-        }
+        elementData.askVolume = elementData.askVolume + Number(data.volume);
       }
     }
-    if (!clusters.length) {
-      return;
+
+    this.render();
+  }
+
+  addClusters(clusters: Map<Date, ICluster[]>) {
+    for (let [key, cluster] of clusters.entries()) {
+      if (!this.clusters.has(key)) {
+        this.clusters.set(
+          key,
+          new Map(
+            cluster.map((item) => {
+              return [
+                item.p,
+                {
+                  slot: key,
+                  price: Number(item.p),
+                  volume: Number(item.volume),
+                  askVolume: item.m ? 0 : Number(item.volume),
+                  bidVolume: item.m ? Number(item.volume) : 0,
+                },
+              ];
+            })
+          )
+        );
+      }
     }
 
     this.render();
   }
 
   render() {
+    if (!this.clusters.size) {
+      return;
+    }
     this.svg
-      .selectAll('g')
+      .selectAll('.node')
       .data(this.clusters.keys())
       .join((enter) => {
         const g = enter.append('g');
+        g.attr('class', 'node');
         const dataObj = this.clusters.get(enter.datum());
         if (!dataObj) {
           console.error('no data object');
@@ -108,31 +118,37 @@ export class ClusterRendererService {
             (enter) => {
               const g = enter.append('g');
               g.append('rect')
-                .attr('width', '100%')
+                .attr('width', '20%')
                 .attr('height', this.gridService.getBarHeight())
                 .attr('y', (d) => {
                   return this.gridService.getY(d.price);
                 })
+                .attr('x', (d) => {
+                  return this.gridService.getMin5SlotX(d.slot);
+                })
                 .attr('fill', (d) => {
                   const max = Math.max(d.bidVolume, d.askVolume);
                   const onePeace = max / 255;
-                 
+
                   const red = Math.floor(d.bidVolume / onePeace)
                     .toString(16)
-                    .padStart(2, "0")
+                    .padStart(2, '0')
                     .toUpperCase();
                   const green = Math.floor(d.askVolume / onePeace)
                     .toString(16)
-                    .padStart(2, "0")
+                    .padStart(2, '0')
                     .toUpperCase();
                   return `#${red}${green}00`;
                 });
 
               g.append('text')
-                .attr('width', '100%')
+                .attr('width', '20%')
                 .attr('height', this.gridService.getBarHeight())
                 .attr('y', (d) => {
                   return this.gridService.getY(d.price);
+                })
+                .attr('x', (d) => {
+                  return this.gridService.getMin5SlotX(d.slot);
                 })
                 .text((d) => {
                   return d.volume;

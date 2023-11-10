@@ -8,6 +8,7 @@ import {
   exhaustMap,
   filter,
   map,
+  mergeMap,
   switchMap,
   withLatestFrom,
 } from 'rxjs/operators';
@@ -35,9 +36,10 @@ import {
   setTimeFrom,
 } from './app.actions';
 import { RootState } from './app.reducer';
-import { selectSymbol, selectTime } from './app.selectors';
+import { selectClusters, selectSymbol, selectTime } from './app.selectors';
 import { filterNullish } from '../common/utils/filter-nullish';
 import { DateService } from '../common/utils/date.service';
+import { FIVE_MINUTES } from '../modules/player/player.component';
 
 @Injectable()
 export class AppEffects {
@@ -53,11 +55,7 @@ export class AppEffects {
           .pipe(filter((symbol) => symbol !== undefined)) as Observable<string>
       ),
       switchMap(([time, symbol]) => {
-        return [
-          getAggTrades({ symbol, time }),
-          getDepth({ symbol, time }),
-          getCluster({ symbol, time }),
-        ];
+        return [getAggTrades({ symbol, time }), getDepth({ symbol, time })];
       })
     )
   );
@@ -150,20 +148,60 @@ export class AppEffects {
     )
   );
 
+  getClusterTimes$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(setTime),
+      map(({ time }) => this.dateService.filterTime(time, FIVE_MINUTES)),
+      distinctUntilChanged((prev, crt) => prev.getTime() === crt.getTime()),
+      withLatestFrom(
+        this.store.pipe(select(selectClusters)),
+        this.store.pipe(select(selectSymbol), filterNullish())
+      ),
+      switchMap(([action, clusters, symbol]) => {
+        let time = action;
+        const times = [];
+        for (let i = 0; i < 5; i++) {
+          if (!clusters.has(time)) {
+            times.push(time);
+          }
+          time = this.dateService.prevFilterTime(time, FIVE_MINUTES);
+        }
+        if (times.length) {
+          return times.map((item) => {
+            return getCluster({ time: item, symbol });
+          });
+        } else {
+          return EMPTY;
+        }
+      })
+    )
+  );
+
   getCluster$ = createEffect(() =>
     this.actions$.pipe(
       ofType(getCluster),
-      switchMap((action) =>
-        this.loaderService.loadCluster(action).pipe(
+      withLatestFrom(this.store.pipe(select(selectClusters), filterNullish())),
+      mergeMap(([action, clusters]) => {
+        if (clusters.has(action.time)) {
+          return EMPTY;
+        }
+
+        const times = [action.time];
+        for (let i = 0; i < 5; i++) {
+          times.push(this.dateService.prevFilterTime(times[i], FIVE_MINUTES));
+        }
+
+        return this.loaderService.loadCluster(action).pipe(
           map((payload) =>
             getClusterSuccess({
+              time: action.time,
               cluster: payload,
               symbol: action.symbol,
             })
           ),
           catchError(() => EMPTY)
-        )
-      )
+        );
+      })
     )
   );
 

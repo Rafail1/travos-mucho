@@ -30,5 +30,5 @@ export const selectLoadingAggTrades = createSelector(
   (state) => state.loadingAggTrades
 );
 export const selectSnapshot = createSelector(app, (state) => state.snapshot);
-export const selectCluster = createSelector(app, (state) => state.cluster);
+export const selectClusters = createSelector(app, (state) => state.clusterMap);
 export const selectBarYs = createSelector(app, (state) => state.barYs);

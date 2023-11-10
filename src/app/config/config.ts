@@ -21,7 +21,7 @@ export class ConfigService {
           },
         },
         barHeight: 16,
-        clusterWidth: 100,
+        clusterWidth: 60,
         fillCombinedColor: 'red',
         fillAskSpreadColor: '#987654',
         fillBidSpreadColor: '#456789',

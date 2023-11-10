@@ -44,7 +44,7 @@ export interface AppState {
   depth?: Array<IBar>;
   aggTrades?: Array<IAggTrade>;
   snapshot?: ISnapshotFormatted;
-  cluster?: ICluster[];
+  clusterMap: Map<Date, ICluster[]>;
   candlestickData?: Array<[number, number, number, number, number, number]>;
   barYs: Record<string, number>;
 }
@@ -54,6 +54,7 @@ export const initialState: AppState = {
   loadingChart: false,
   loadingDepth: false,
   loadingAggTrades: false,
+  clusterMap: new Map(),
   barYs: {},
 };
 
@@ -89,11 +90,16 @@ export const appReducer = createReducer(
     ...state,
     loadingCluster: true,
   })),
-  on(getClusterSuccess, (state, { cluster }) => ({
-    ...state,
-    cluster,
-    loadingCluster: false,
-  })),
+  on(getClusterSuccess, (state, { time, cluster }) => {
+    if (!cluster.length) {
+      return state;
+    }
+    return {
+      ...state,
+      clusterMap: new Map(state.clusterMap?.set(time, cluster)),
+      loadingCluster: false,
+    };
+  }),
   on(getDepth, (state, { symbol }) => ({
     ...state,
     loadingDepth: true,

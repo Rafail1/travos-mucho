@@ -51,6 +51,7 @@ export const getDepthSuccess = createAction(
 export const getClusterSuccess = createAction(
   '[App Component] getClusterSuccess',
   props<{
+    time: Date;
     cluster: ICluster[];
     symbol: string;
   }>()

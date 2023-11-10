@@ -4,6 +4,7 @@ import { EMPTY, Observable, map, of, tap, withLatestFrom } from 'rxjs';
 import { filterNullish } from 'src/app/common/utils/filter-nullish';
 import { RootState } from 'src/app/store/app.reducer';
 import {
+  selectClusters,
   selectPricePrecision,
   selectTickSize,
 } from 'src/app/store/app.selectors';

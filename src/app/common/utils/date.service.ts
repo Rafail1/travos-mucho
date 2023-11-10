@@ -1,30 +1,25 @@
 import { Injectable } from '@angular/core';
-import { FIVE_MINUTES } from 'src/app/modules/player/player.component';
 const TIME_WINDOW = 1000 * 30;
 
 @Injectable({ providedIn: 'root' })
 export class DateService {
   public getUtcTime(date: Date) {
-    // const offset = date.getTimezoneOffset();
     return new Date(date.getTime()).toISOString();
   }
 
-  public filterTime(time: Date) {
+  public filterTime(time: Date, interval = TIME_WINDOW) {
+    return new Date(Math.floor(time.getTime() - (time.getTime() % interval)));
+  }
+
+  public nextFilterTime(time: Date, interval = TIME_WINDOW) {
     return new Date(
-      Math.floor(time.getTime() - (time.getTime() % TIME_WINDOW))
+      Math.floor(time.getTime() - (time.getTime() % interval)) + interval
     );
   }
 
-  public nextFilterTime(time: Date) {
+  public prevFilterTime(time: Date, interval = TIME_WINDOW) {
     return new Date(
-      Math.floor(time.getTime() - (time.getTime() % TIME_WINDOW)) + TIME_WINDOW
-    );
-  }
-
-  public getMin5Slot(time: Date) {
-    return (
-      Math.floor(time.getTime() - (time.getTime() % FIVE_MINUTES)) +
-      FIVE_MINUTES
+      Math.floor(time.getTime() - (time.getTime() % interval)) - interval
     );
   }
 }
