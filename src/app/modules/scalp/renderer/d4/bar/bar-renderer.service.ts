@@ -14,6 +14,9 @@ export class BarRendererService {
       this.svg.style('height', height);
     });
     this.svg.style('width', '100%');
+    this.gridService.visibleAreaChanged$.subscribe(() => {
+      this.render([]);
+    })
   }
 
   clean() {
@@ -136,8 +139,7 @@ export class BarRendererService {
             return d.volumeText;
           });
           return update;
-        },
-        (exit) => {}
+        }
       );
   }
 

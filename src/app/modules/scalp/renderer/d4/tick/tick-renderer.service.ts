@@ -102,9 +102,6 @@ export class TickRendererService {
               return d[3];
             });
           return update;
-        },
-        (exit) => {
-          exit.remove();
         }
       );
   }

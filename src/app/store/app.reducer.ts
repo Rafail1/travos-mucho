@@ -19,7 +19,7 @@ import {
   getSymbolsSuccess,
   pause,
   play,
-  putBarY,
+  setScroll,
   setSymbol,
   setTime,
   setTimeFrom,
@@ -47,6 +47,7 @@ export interface AppState {
   clusterMap: Map<Date, ICluster[]>;
   candlestickData?: Array<[number, number, number, number, number, number]>;
   barYs: Record<string, number>;
+  scroll: number;
 }
 
 export const initialState: AppState = {
@@ -56,6 +57,7 @@ export const initialState: AppState = {
   loadingAggTrades: false,
   clusterMap: new Map(),
   barYs: {},
+  scroll: 0,
 };
 
 export const appReducer = createReducer(
@@ -163,10 +165,10 @@ export const appReducer = createReducer(
     ...state,
     barYs: {},
   })),
-  on(putBarY, (state, { price, y }) => {
+  on(setScroll, (state, { scroll }) => {
     return {
       ...state,
-      barYs: { ...state.barYs, [price]: y },
+      scroll: scroll,
     };
   })
 );

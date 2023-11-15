@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store, select } from '@ngrx/store';
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, map } from 'rxjs';
 import { filterNullish } from 'src/app/common/utils/filter-nullish';
 import { ConfigService, STYLE_THEME_KEY } from 'src/app/config/config';
 import { ISnapshotFormatted } from 'src/app/modules/backend/backend.service';
@@ -8,10 +8,11 @@ import { FIVE_MINUTES } from 'src/app/modules/player/player.component';
 import { RootState } from 'src/app/store/app.reducer';
 import {
   selectPricePrecision,
+  selectScroll,
   selectSymbol,
   selectTickSize,
 } from 'src/app/store/app.selectors';
-
+const containerHeight = 600;
 @Injectable()
 export class GridService {
   private grid = new Set<number>();
@@ -20,8 +21,10 @@ export class GridService {
   private height$ = new Subject<number>();
   private tickSize: number;
   private pricePrecision: number;
-  private min: number;
-  private max: number;
+  private min: number = 0;
+  private max: number = 0;
+  private visibleGrid: Array<number> = [];
+  visibleAreaChanged$ = new Subject<void>();
   constructor(
     private store: Store<RootState>,
     private configService: ConfigService
@@ -55,6 +58,7 @@ export class GridService {
 
     const { barHeight } = this.configService.getConfig(STYLE_THEME_KEY);
     this.height$.next(((this.max - this.min) / this.tickSize) * barHeight);
+    this.setVisibleArea();
   }
 
   init() {
@@ -73,7 +77,7 @@ export class GridService {
   }
 
   getGrid() {
-    return this.grid;
+    return this.visibleGrid;
   }
 
   getBarHeight() {
@@ -90,5 +94,35 @@ export class GridService {
       Math.floor((Date.now() - min5_slot.getTime()) / FIVE_MINUTES) *
       this.configService.getConfig(STYLE_THEME_KEY).clusterWidth;
     return 300 - x;
+  }
+
+  private setVisibleArea() {
+    const { barHeight } = this.configService.getConfig(STYLE_THEME_KEY);
+
+    const showCnt = Math.ceil(containerHeight / barHeight);
+    this.store
+      .pipe(
+        select(selectScroll),
+        map((scroll) => {
+          const top = Math.floor(scroll / barHeight);
+          const max = Number(
+            (
+              this.max -
+              Number((this.tickSize * top).toFixed(this.pricePrecision))
+            ).toFixed(this.pricePrecision)
+          );
+          return Array.from({ length: showCnt }).map((_, idx) => {
+            return Number(
+              (
+                max - Number((idx * this.tickSize).toFixed(this.pricePrecision))
+              ).toFixed(this.pricePrecision)
+            );
+          });
+        })
+      )
+      .subscribe((visibleGrid) => {
+        this.visibleAreaChanged$.next();
+        this.visibleGrid = visibleGrid;
+      });
   }
 }

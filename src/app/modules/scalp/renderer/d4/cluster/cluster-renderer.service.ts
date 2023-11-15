@@ -174,8 +174,7 @@ export class ClusterRendererService {
             });
 
             return update;
-          },
-          (exit) => {}
+          }
         );
     }
   }

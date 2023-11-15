@@ -5,7 +5,10 @@ const app = (state: RootState) => state.app;
 
 export const selectSymbol = createSelector(app, (state) => state.symbol);
 export const selectTickSize = createSelector(app, (state) => state.tickSize);
-export const selectPricePrecision = createSelector(app, (state) => state.pricePrecision);
+export const selectPricePrecision = createSelector(
+  app,
+  (state) => state.pricePrecision
+);
 export const selectTime = createSelector(app, (state) => state.time);
 export const selectTimeFrom = createSelector(app, (state) => state.timeFrom);
 export const selectTimeTo = createSelector(app, (state) => state.timeTo);
@@ -32,3 +35,4 @@ export const selectLoadingAggTrades = createSelector(
 export const selectSnapshot = createSelector(app, (state) => state.snapshot);
 export const selectClusters = createSelector(app, (state) => state.clusterMap);
 export const selectBarYs = createSelector(app, (state) => state.barYs);
+export const selectScroll = createSelector(app, (state) => state.scroll);

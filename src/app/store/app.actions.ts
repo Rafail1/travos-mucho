@@ -96,3 +96,8 @@ export const putBarY = createAction(
 );
 
 export const cleanBarYs = createAction('[App Component] cleanBarYs');
+
+export const setScroll = createAction(
+  '[App Component] setScroll',
+  props<{ scroll: number }>()
+);
