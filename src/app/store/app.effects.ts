@@ -222,7 +222,8 @@ export class AppEffects {
   getSymbolsSuccess$ = createEffect(() =>
     this.actions$.pipe(
       ofType(getSymbolsSuccess),
-      switchMap(({ symbols }) => of(setSymbol({ symbol: symbols[0].symbol })))
+      // switchMap(({ symbols }) => of(setSymbol({ symbol: symbols[0].symbol })))
+      switchMap(({ symbols }) => of(setSymbol({ symbol: "BTCUSDT" })))
     )
   );
 

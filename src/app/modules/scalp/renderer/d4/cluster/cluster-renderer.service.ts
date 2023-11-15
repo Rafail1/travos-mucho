@@ -47,6 +47,7 @@ export class ClusterRendererService {
     this.svg.selectAll('*').remove();
     this.clusters.clear();
   }
+
   updateCluster(data: ICluster) {
     if (!this.clusters.get(data.min5_slot)?.has(data.p)) {
       const elementData = {
@@ -98,82 +99,84 @@ export class ClusterRendererService {
   }
 
   render() {
+    return;
     if (!this.clusters.size) {
       return;
     }
-    this.svg
-      .selectAll('.node')
-      .data(this.clusters.keys())
-      .join((enter) => {
-        const g = enter.append('g');
-        g.attr('class', 'node');
-        const dataObj = this.clusters.get(enter.datum());
-        if (!dataObj) {
-          console.error('no data object');
-          return g;
-        }
-        g.selectAll<BaseType, IClusterData>('g')
-          .data(dataObj.values(), (d) => `${d.price}${d.volume}`)
-          .join(
-            (enter) => {
-              const g = enter.append('g');
-              g.append('rect')
-                .attr('width', '20%')
-                .attr('height', this.gridService.getBarHeight())
-                .attr('y', (d) => {
-                  return this.gridService.getY(d.price);
-                })
-                .attr('x', (d) => {
-                  return this.gridService.getMin5SlotX(d.slot);
-                })
-                .attr('fill', (d) => {
-                  const max = Math.max(d.bidVolume, d.askVolume);
-                  const onePeace = max / 255;
+    for (const dataObj of this.clusters.values()) {
+      this.svg
+        .selectAll<BaseType, IClusterData>('g')
+        .data(dataObj.values(), (d) => `${d.price}${d.volume}`)
+        .join(
+          (enter) => {
+            const g = enter.append('g');
+            g.append('rect')
+              .attr('width', '20%')
+              .attr('height', this.gridService.getBarHeight())
+              .attr('y', (d) => {
+                return this.gridService.getY(d.price);
+              })
+              .attr('x', (d) => {
+                return this.gridService.getMin5SlotX(d.slot);
+              })
+              .attr('fill', (d) => {
+                const max = Math.max(d.bidVolume, d.askVolume);
+                const onePeace = max / 255;
 
-                  const red = Math.floor(d.bidVolume / onePeace)
-                    .toString(16)
-                    .padStart(2, '0')
-                    .toUpperCase();
-                  const green = Math.floor(d.askVolume / onePeace)
-                    .toString(16)
-                    .padStart(2, '0')
-                    .toUpperCase();
-                  return `#${red}${green}00`;
-                });
+                const red = Math.floor(d.bidVolume / onePeace)
+                  .toString(16)
+                  .padStart(2, '0')
+                  .toUpperCase();
+                const green = Math.floor(d.askVolume / onePeace)
+                  .toString(16)
+                  .padStart(2, '0')
+                  .toUpperCase();
 
-              g.append('text')
-                .attr('width', '20%')
-                .attr('height', this.gridService.getBarHeight())
-                .attr('y', (d) => {
-                  return this.gridService.getY(d.price);
-                })
-                .attr('x', (d) => {
-                  return this.gridService.getMin5SlotX(d.slot);
-                })
-                .text((d) => {
-                  return d.volume;
-                });
+                return `#${red}${green}00`;
+              });
 
-              return g;
-            },
-            (update) => {
-              update
-                .selectAll<BaseType, IClusterData>('rect')
-                .attr('fill', (d) => {
-                  const percent = (d.askVolume - d.bidVolume) / d.bidVolume;
-                  const red = (255 - 255 * percent).toString(16).toUpperCase();
-                  const green = (255 * percent).toString(16).toUpperCase();
-                  return `#${red}${green}00`;
-                });
-
-              update.selectAll<BaseType, IClusterData>('text').text((d) => {
+            g.append('text')
+              .attr('dominant-baseline', 'hanging')
+              .attr('width', '20%')
+              .attr('height', this.gridService.getBarHeight())
+              .attr('y', (d) => {
+                return this.gridService.getY(d.price) + 2;
+              })
+              .attr('x', (d) => {
+                return this.gridService.getMin5SlotX(d.slot);
+              })
+              .text((d) => {
                 return d.volume;
               });
 
-              return update;
-            }
-          );
-        return g;
-      });
+            return g;
+          },
+          (update) => {
+            update
+              .selectAll<BaseType, IClusterData>('rect')
+              .attr('fill', (d) => {
+                const max = Math.max(d.bidVolume, d.askVolume);
+                const onePeace = max / 255;
+
+                const red = Math.floor(d.bidVolume / onePeace)
+                  .toString(16)
+                  .padStart(2, '0')
+                  .toUpperCase();
+                const green = Math.floor(d.askVolume / onePeace)
+                  .toString(16)
+                  .padStart(2, '0')
+                  .toUpperCase();
+                return `#${red}${green}00`;
+              });
+
+            update.selectAll<BaseType, IClusterData>('text').text((d) => {
+              return d.volume;
+            });
+
+            return update;
+          },
+          (exit) => {}
+        );
+    }
   }
 }

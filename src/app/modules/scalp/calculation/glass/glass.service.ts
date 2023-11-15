@@ -58,7 +58,6 @@ export class GlassService implements OnDestroy {
 
   initSnapshotFlow() {
     this.snapshot$.subscribe((depth) => {
-      this.gridService.update(depth);
       this.data$.next(depth.data);
     });
   }

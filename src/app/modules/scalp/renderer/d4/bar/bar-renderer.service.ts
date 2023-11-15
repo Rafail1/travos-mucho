@@ -2,14 +2,10 @@ import { Injectable } from '@angular/core';
 import { BaseType, Selection, transition } from 'd3';
 import { IBar } from 'src/app/modules/backend/backend.service';
 import { GridService } from '../grid/grid.service';
-const emptyRow = {};
 @Injectable()
 export class BarRendererService {
-  init(data: IBar[]) {
-    throw new Error('Method not implemented.');
-  }
   private svg: Selection<SVGSVGElement, IBar, HTMLElement, undefined>;
-  private data = new Map<string, IBar>();
+  private data = new Map<number, IBar>();
   constructor(private gridService: GridService) {}
   setSvg(svg: Selection<SVGSVGElement, IBar, HTMLElement, undefined>) {
     this.svg = svg;
@@ -24,17 +20,21 @@ export class BarRendererService {
     this.svg.selectAll('*').remove();
     this.data.clear();
   }
-  
+
+  getData(key: number) {
+    return this.data.get(key) || this.emptyRow(key);
+  }
+
   render(data: { [key: number]: IBar }) {
     for (const [key, item] of Object.entries(data)) {
-      this.data.set(key, item);
+      this.data.set(Number(key), item);
     }
 
     this.svg
-      .selectAll<BaseType, string>('g')
-      .data(Object.keys(data), (d) => {
-        const dt = this.data.get(d)!;
-        return `${dt.depth.join()}${dt.type}`;
+      .selectAll<BaseType, number>('g')
+      .data(this.gridService.getGrid(), (d) => {
+        const dt = this.getData(d);
+        return dt.depth[0];
       })
       .join(
         (enter) => {
@@ -43,12 +43,12 @@ export class BarRendererService {
             .attr('class', 'background')
             .attr('height', this.gridService.getBarHeight())
             .attr('width', '100%')
-            .attr('y', (key: string) => {
-              const d = this.data.get(key)!;
+            .attr('y', (key: number) => {
+              const d = this.getData(key);
               return this.gridService.getY(d.depth[0]);
             })
-            .attr('fill', (key: string) => {
-              const d = this.data.get(key)!;
+            .attr('fill', (key: number) => {
+              const d = this.getData(key);
               return d.backgroundColor;
             });
 
@@ -56,16 +56,16 @@ export class BarRendererService {
             .attr('class', 'fill')
             .attr('height', this.gridService.getBarHeight())
             .attr('width', '100%')
-            .attr('y', (key: string) => {
-              const d = this.data.get(key)!;
+            .attr('y', (key: number) => {
+              const d = this.getData(key);
               return this.gridService.getY(d.depth[0])!;
             })
-            .attr('width', (key: string) => {
-              const d = this.data.get(key)!;
+            .attr('width', (key: number) => {
+              const d = this.getData(key);
               return d.fillRectWidth;
             })
-            .attr('fill', (key: string) => {
-              const d = this.data.get(key)!;
+            .attr('fill', (key: number) => {
+              const d = this.getData(key);
               return d.fillColor;
             });
 
@@ -76,16 +76,16 @@ export class BarRendererService {
             .attr('dominant-baseline', 'hanging')
             .attr('x', 300)
             .attr('text-anchor', 'end')
-            .attr('y', (key: string) => {
-              const d = this.data.get(key)!;
+            .attr('y', (key: number) => {
+              const d = this.getData(key);
               return this.gridService.getY(d.depth[0])! + 2;
             })
-            .attr('fill', (key: string) => {
-              const d = this.data.get(key)!;
+            .attr('fill', (key: number) => {
+              const d = this.getData(key);
               return d.textColor;
             })
-            .text((key: string) => {
-              const d = this.data.get(key)!;
+            .text((key: number) => {
+              const d = this.getData(key);
               return d.priceText;
             });
           g.append('text')
@@ -94,45 +94,45 @@ export class BarRendererService {
             .attr('text-anchor', 'start')
             .attr('height', this.gridService.getBarHeight())
             .attr('font-size', this.gridService.getBarHeight() - 2)
-            .attr('y', (key: string) => {
-              const d = this.data.get(key)!;
+            .attr('y', (key: number) => {
+              const d = this.getData(key);
               return this.gridService.getY(d.depth[0])! + 2;
             })
-            .attr('fill', (key: string) => {
-              const d = this.data.get(key)!;
+            .attr('fill', (key: number) => {
+              const d = this.getData(key);
               return d.textColor;
             })
-            .text((key: string) => {
-              const d = this.data.get(key)!;
+            .text((key: number) => {
+              const d = this.getData(key);
               return d.volumeText;
             });
           return g;
         },
         (update) => {
           update
-            .selectAll<BaseType, string>('.background')
-            .attr('fill', (key: string) => {
-              const d = this.data.get(key)!;
+            .selectAll<BaseType, number>('.background')
+            .attr('fill', (key: number) => {
+              const d = this.getData(key);
               return d.backgroundColor;
             });
           update
-            .selectAll<BaseType, string>('.fill')
+            .selectAll<BaseType, number>('.fill')
             .transition()
-            .attr('width', (key: string) => {
-              const d = this.data.get(key)!;
+            .attr('width', (key: number) => {
+              const d = this.getData(key);
               return d.fillRectWidth;
             })
-            .attr('fill', (key: string) => {
-              const d = this.data.get(key)!;
+            .attr('fill', (key: number) => {
+              const d = this.getData(key);
               return d.fillColor;
             });
-          update.selectAll<BaseType, string>('.price').text((key: string) => {
-            const d = this.data.get(key)!;
+          update.selectAll<BaseType, number>('.price').text((key: number) => {
+            const d = this.getData(key);
             return d.priceText;
           });
 
-          update.selectAll<BaseType, string>('.volume').text((key: string) => {
-            const d = this.data.get(key)!;
+          update.selectAll<BaseType, number>('.volume').text((key: number) => {
+            const d = this.getData(key);
             return d.volumeText;
           });
           return update;
@@ -141,7 +141,7 @@ export class BarRendererService {
       );
   }
 
-  emptyRow(key: string): IBar {
+  emptyRow(key: number): IBar {
     return {
       E: '',
       depth: [key, '0'],

@@ -44,6 +44,17 @@ export class GridService {
   setBounds(data: { min: number; max: number }) {
     this.max = data.max;
     this.min = data.min;
+
+    for (let priceN = this.max; priceN >= this.min; priceN -= this.tickSize) {
+      priceN = Number(priceN.toFixed(this.pricePrecision));
+      if (this.grid.has(priceN)) {
+        continue;
+      }
+      this.grid.add(priceN);
+    }
+
+    const { barHeight } = this.configService.getConfig(STYLE_THEME_KEY);
+    this.height$.next(((this.max - this.min) / this.tickSize) * barHeight);
   }
 
   init() {
@@ -56,13 +67,13 @@ export class GridService {
   getY(price: string | number) {
     const { barHeight } = this.configService.getConfig(STYLE_THEME_KEY);
     const idx =
-      Number((this.max - Number(price)).toPrecision(this.pricePrecision)) /
+      Number((this.max - Number(price)).toFixed(this.pricePrecision)) /
       this.tickSize;
     return Math.ceil(idx) * barHeight;
   }
 
   getGrid() {
-    return this.gridIndexes;
+    return this.grid;
   }
 
   getBarHeight() {
@@ -75,28 +86,9 @@ export class GridService {
   }
 
   getMin5SlotX(min5_slot: Date) {
-    return (
+    const x =
       Math.floor((Date.now() - min5_slot.getTime()) / FIVE_MINUTES) *
-      this.configService.getConfig(STYLE_THEME_KEY).clusterWidth
-    );
-  }
-
-  update(data: ISnapshotFormatted) {
-    const { barHeight } = this.configService.getConfig(STYLE_THEME_KEY);
-    if (this.grid.size === 0) {
-      this.height$.next(((this.max - this.min) / this.tickSize) * barHeight);
-    }
-
-    let index = 0;
-    for (let priceN = this.max; priceN >= this.min; priceN -= this.tickSize) {
-      priceN = Number(priceN.toFixed(this.pricePrecision));
-      if (this.grid.has(priceN)) {
-        continue;
-      }
-      this.grid.add(priceN);
-      const y = index * barHeight;
-      this.gridIndexes.set(priceN, y);
-      index++;
-    }
+      this.configService.getConfig(STYLE_THEME_KEY).clusterWidth;
+    return 300 - x;
   }
 }

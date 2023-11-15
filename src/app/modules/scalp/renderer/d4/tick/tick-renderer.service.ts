@@ -37,6 +37,7 @@ export class TickRendererService {
     this.data = [];
   }
   renderCircles() {
+    return
     this.svg
       .selectAll<BaseType, string>('g')
       .data(this.data, (d) => {

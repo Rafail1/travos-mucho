@@ -84,7 +84,7 @@ export class LoaderService {
         const formattedSnapshot = [
           ...data.snapshot.asks.map((item) => ({
             E: data.snapshot.E,
-            depth: item,
+            depth: [Number(item[0]), item[1]],
             type: 'ask' as IBarType,
             ...this.barService.calculateOptions({
               type: 'ask',
@@ -94,7 +94,7 @@ export class LoaderService {
           })),
           ...data.snapshot.bids.map((item) => ({
             E: data.snapshot.E,
-            depth: item,
+            depth: [Number(item[0]), item[1]],
             type: 'bid' as IBarType,
             ...this.barService.calculateOptions({
               type: 'bid',
@@ -102,17 +102,17 @@ export class LoaderService {
               value: Number(item[1]),
             }),
           })),
-        ].reduce((acc, item) => {
-          acc[Number(item.depth[0])] = item;
+        ].reduce((acc: any, item) => {
+          acc[item.depth[0]] = item;
           return acc;
         }, {} as { [key: number]: IBar });
 
-        const formattedDepth = [];
+        const formattedDepth: IBar[] = [];
         for (let index = 0; index < data.depth.length; index++) {
           for (const item of data.depth[index].a) {
             formattedDepth.push({
               E: data.depth[index].E,
-              depth: item,
+              depth: [Number(item[0]), item[1]],
               type: 'ask' as IBarType,
               ...this.barService.calculateOptions({
                 type: 'ask',
@@ -124,7 +124,7 @@ export class LoaderService {
           for (const item of data.depth[index].b) {
             formattedDepth.push({
               E: data.depth[index].E,
-              depth: item,
+              depth: [Number(item[0]), item[1]],
               type: 'bid' as IBarType,
               ...this.barService.calculateOptions({
                 type: 'bid',
@@ -140,14 +140,22 @@ export class LoaderService {
         const max = Number(
           (
             middleAsk +
-            Number((Number(tickSize) * data.snapshot.asks.length).toPrecision(pricePrecision))
-          ).toPrecision(Number(pricePrecision))
+            Number(
+              (Number(tickSize) * data.snapshot.asks.length).toFixed(
+                pricePrecision
+              )
+            )
+          ).toFixed(Number(pricePrecision))
         );
         const min = Number(
           (
             middleBid -
-            Number((Number(tickSize) * data.snapshot.bids.length).toPrecision(pricePrecision))
-          ).toPrecision(Number(pricePrecision))
+            Number(
+              (Number(tickSize) * data.snapshot.bids.length).toFixed(
+                pricePrecision
+              )
+            )
+          ).toFixed(Number(pricePrecision))
         );
 
         const result = {

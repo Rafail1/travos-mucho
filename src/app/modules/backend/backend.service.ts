@@ -6,7 +6,7 @@ import { response } from './mock-trades';
 import { IBarType } from '../scalp/calculation/bar/bar.interface';
 import { BarService } from '../scalp/calculation/bar/bar.service';
 export interface IBar {
-  depth: [string, string];
+  depth: [number, string];
   backgroundColor: string;
   fillRectWidth: string;
   fillColor: string;
