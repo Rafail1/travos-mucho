@@ -48,13 +48,13 @@ export class GridService {
     this.max = data.max;
     this.min = data.min;
 
-    for (let priceN = this.max; priceN >= this.min; priceN -= this.tickSize) {
-      priceN = Number(priceN.toFixed(this.pricePrecision));
-      if (this.grid.has(priceN)) {
-        continue;
-      }
-      this.grid.add(priceN);
-    }
+    // for (let priceN = this.max; priceN >= this.min; priceN -= this.tickSize) {
+    //   priceN = Number(priceN.toFixed(this.pricePrecision));
+    //   if (this.grid.has(priceN)) {
+    //     continue;
+    //   }
+    //   this.grid.add(priceN);
+    // }
 
     const { barHeight } = this.configService.getConfig(STYLE_THEME_KEY);
     this.height$.next(((this.max - this.min) / this.tickSize) * barHeight);
@@ -63,8 +63,8 @@ export class GridService {
 
   init() {
     this.symbol$.subscribe(() => {
-      this.grid.clear();
-      this.gridIndexes.clear();
+      // this.grid.clear();
+      // this.gridIndexes.clear();
     });
   }
 
@@ -99,30 +99,33 @@ export class GridService {
   private setVisibleArea() {
     const { barHeight } = this.configService.getConfig(STYLE_THEME_KEY);
 
-    const showCnt = Math.ceil(containerHeight / barHeight);
+    const showCnt = Math.ceil(containerHeight / barHeight) * 2;
     this.store
       .pipe(
         select(selectScroll),
         map((scroll) => {
-          const top = Math.floor(scroll / barHeight);
+          const offsetTop = Math.floor(scroll / barHeight);
+          const top = Math.floor(Math.max(offsetTop - showCnt / 3, 0));
           const max = Number(
             (
               this.max -
               Number((this.tickSize * top).toFixed(this.pricePrecision))
             ).toFixed(this.pricePrecision)
           );
-          return Array.from({ length: showCnt }).map((_, idx) => {
-            return Number(
+          const res = Array.from({ length: showCnt }).map((_, idx) => {
+            const tmp = Number(
               (
                 max - Number((idx * this.tickSize).toFixed(this.pricePrecision))
               ).toFixed(this.pricePrecision)
             );
+            return tmp;
           });
+          return res;
         })
       )
       .subscribe((visibleGrid) => {
-        this.visibleAreaChanged$.next();
         this.visibleGrid = visibleGrid;
+        this.visibleAreaChanged$.next();
       });
   }
 }

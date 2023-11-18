@@ -12,7 +12,7 @@ export class ScalpComponent implements OnInit {
   private scrollSubject = new Subject();
   constructor(private store: Store<RootState>) {}
   ngOnInit(): void {
-    this.scrollSubject.pipe(debounceTime(30)).subscribe((event: any) => {
+    this.scrollSubject.pipe(debounceTime(10)).subscribe((event: any) => {
       this.store.dispatch(setScroll({ scroll: event.target.scrollTop }));
     });
   }

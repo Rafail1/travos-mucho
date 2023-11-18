@@ -99,7 +99,6 @@ export class ClusterRendererService {
   }
 
   render() {
-    return;
     if (!this.clusters.size) {
       return;
     }
