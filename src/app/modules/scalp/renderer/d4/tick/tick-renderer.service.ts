@@ -54,7 +54,7 @@ export class TickRendererService {
               return this.width - (this.data.length - d[4]) * RADIUS;
             })
             .attr('cy', (d) => {
-              return d[1];
+              return d[1] + RADIUS / 2;
             })
             .attr('fill', (d) => {
               return d[2];
@@ -67,7 +67,7 @@ export class TickRendererService {
               return this.width - (this.data.length - d[4]) * RADIUS;
             })
             .attr('y', (d) => {
-              return d[1] + RADIUS / 2 - 2;
+              return d[1] + RADIUS - 2;
             })
             .text((d) => {
               return d[3];
@@ -83,7 +83,7 @@ export class TickRendererService {
               return this.width - (this.data.length - d[4]) * RADIUS;
             })
             .attr('cy', (d) => {
-              return d[1];
+              return d[1] + RADIUS / 2;
             })
             .attr('fill', (d) => {
               return d[2];
@@ -95,7 +95,7 @@ export class TickRendererService {
               return this.width - (this.data.length - d[4]) * RADIUS;
             })
             .attr('y', (d) => {
-              return d[1] + RADIUS / 2 - 2;
+              return d[1] + RADIUS - 2;
             })
             .text((d) => {
               return d[3];

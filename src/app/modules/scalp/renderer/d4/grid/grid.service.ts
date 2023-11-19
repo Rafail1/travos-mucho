@@ -1,35 +1,35 @@
 import { Injectable } from '@angular/core';
 import { Store, select } from '@ngrx/store';
-import { Observable, Subject, map } from 'rxjs';
+import { Subject, map } from 'rxjs';
 import { filterNullish } from 'src/app/common/utils/filter-nullish';
 import { ConfigService, STYLE_THEME_KEY } from 'src/app/config/config';
-import { ISnapshotFormatted } from 'src/app/modules/backend/backend.service';
 import { FIVE_MINUTES } from 'src/app/modules/player/player.component';
 import { RootState } from 'src/app/store/app.reducer';
 import {
   selectPricePrecision,
   selectScroll,
-  selectSymbol,
   selectTickSize,
+  selectTime,
 } from 'src/app/store/app.selectors';
 const containerHeight = 600;
 @Injectable()
 export class GridService {
-  private grid = new Set<number>();
-  private gridIndexes = new Map<number, number>();
-  private symbol$: Observable<string>;
+  public visibleAreaChanged$ = new Subject<void>();
   private height$ = new Subject<number>();
   private tickSize: number;
   private pricePrecision: number;
   private min: number = 0;
   private max: number = 0;
   private visibleGrid: Array<number> = [];
-  visibleAreaChanged$ = new Subject<void>();
+  private time = new Date();
   constructor(
     private store: Store<RootState>,
     private configService: ConfigService
   ) {
-    this.symbol$ = this.store.pipe(select(selectSymbol), filterNullish());
+    this.store.pipe(select(selectTime), filterNullish()).subscribe((time) => {
+      this.time = time;
+    });
+
     this.store
       .pipe(select(selectTickSize), filterNullish())
       .subscribe((tickSize) => {
@@ -41,7 +41,6 @@ export class GridService {
       .subscribe((pricePrecision) => {
         this.pricePrecision = pricePrecision;
       });
-    this.init();
   }
 
   setBounds(data: { min: number; max: number }) {
@@ -59,13 +58,6 @@ export class GridService {
     const { barHeight } = this.configService.getConfig(STYLE_THEME_KEY);
     this.height$.next(((this.max - this.min) / this.tickSize) * barHeight);
     this.setVisibleArea();
-  }
-
-  init() {
-    this.symbol$.subscribe(() => {
-      // this.grid.clear();
-      // this.gridIndexes.clear();
-    });
   }
 
   getY(price: string | number) {
@@ -91,9 +83,9 @@ export class GridService {
 
   getMin5SlotX(min5_slot: Date) {
     const x =
-      Math.floor((Date.now() - min5_slot.getTime()) / FIVE_MINUTES) *
+      Math.floor((this.time.getTime() - min5_slot.getTime()) / FIVE_MINUTES) *
       this.configService.getConfig(STYLE_THEME_KEY).clusterWidth;
-    return 300 - x;
+    return 240 - x;
   }
 
   private setVisibleArea() {

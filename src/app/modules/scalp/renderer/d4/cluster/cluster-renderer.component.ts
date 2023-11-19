@@ -9,13 +9,14 @@ import {
 import { Store, select } from '@ngrx/store';
 import * as d3 from 'd3';
 import { Subject, takeUntil } from 'rxjs';
-import { ConfigService } from 'src/app/config/config';
+import { DateService } from 'src/app/common/utils/date.service';
+import { filterNullish } from 'src/app/common/utils/filter-nullish';
 import { IAggTrade, ICluster } from 'src/app/modules/backend/backend.service';
+import { FIVE_MINUTES } from 'src/app/modules/player/player.component';
 import { RootState } from 'src/app/store/app.reducer';
+import { selectClusters, selectSymbol } from 'src/app/store/app.selectors';
 import { TradesService } from '../../../calculation/trades/trades.service';
 import { ClusterRendererService } from './cluster-renderer.service';
-import { selectClusters, selectSymbol } from 'src/app/store/app.selectors';
-import { filterNullish } from 'src/app/common/utils/filter-nullish';
 
 @Component({
   selector: 'app-cluster-renderer',
@@ -31,7 +32,7 @@ export class ClusterRendererComponent implements OnInit, OnDestroy {
     private clusterRendererService: ClusterRendererService,
     private tickService: TradesService,
     private store: Store<RootState>,
-    private configService: ConfigService,
+    private dateService: DateService,
     private renderer: Renderer2
   ) {}
 
@@ -47,7 +48,7 @@ export class ClusterRendererComponent implements OnInit, OnDestroy {
         m: data.m,
         volume: Number(data.q),
         p: data.p,
-        min5_slot: new Date(data.E),
+        min5_slot: this.dateService.filterTime(new Date(data.E), FIVE_MINUTES),
       });
     });
     this.store

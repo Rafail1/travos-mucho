@@ -16,7 +16,7 @@ export class BarRendererService {
     this.svg.style('width', '100%');
     this.gridService.visibleAreaChanged$.subscribe(() => {
       this.render([]);
-    })
+    });
   }
 
   clean() {
@@ -25,12 +25,20 @@ export class BarRendererService {
   }
 
   getData(key: number) {
-    return this.data.get(key) || this.emptyRow(key);
+    const item = this.data.get(key);
+    if (!item) {
+      return this.emptyRow(key);
+    }
+    return item;
   }
 
   render(data: { [key: number]: IBar }) {
     for (const [key, item] of Object.entries(data)) {
-      this.data.set(Number(key), item);
+      if (Number(item.depth[1]) === 0) {
+        this.data.set(Number(key), this.emptyRow(Number(key)));
+      } else {
+        this.data.set(Number(key), item);
+      }
     }
 
     this.svg
@@ -129,15 +137,27 @@ export class BarRendererService {
               const d = this.getData(key);
               return d.fillColor;
             });
-          update.selectAll<BaseType, number>('.price').text((key: number) => {
-            const d = this.getData(key);
-            return d.priceText;
-          });
+          update
+            .selectAll<BaseType, number>('.price')
+            .text((key: number) => {
+              const d = this.getData(key);
+              return d.priceText;
+            })
+            .attr('fill', (key: number) => {
+              const d = this.getData(key);
+              return d.textColor;
+            });
 
-          update.selectAll<BaseType, number>('.volume').text((key: number) => {
-            const d = this.getData(key);
-            return d.volumeText;
-          });
+          update
+            .selectAll<BaseType, number>('.volume')
+            .attr('fill', (key: number) => {
+              const d = this.getData(key);
+              return d.textColor;
+            })
+            .text((key: number) => {
+              const d = this.getData(key);
+              return d.volumeText;
+            });
           return update;
         }
       );
@@ -148,10 +168,10 @@ export class BarRendererService {
       E: '',
       depth: [key, '0'],
       backgroundColor: 'gray',
-      fillColor: 'gray',
+      fillColor: 'blue',
       fillRectWidth: '0',
       priceText: '',
-      textColor: '',
+      textColor: 'blue',
       type: 'ask',
       volumeText: '',
     };
