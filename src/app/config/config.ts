@@ -36,7 +36,6 @@ export class ConfigService {
     [
       'default',
       {
-        squiz: 10,
         glass: {
           width: 300,
           height: 700,
@@ -63,6 +62,12 @@ export class ConfigService {
           height: 700,
           x: 300,
           y: 0,
+        },
+        cluster: {
+          volumeFormat: {
+            decPlaces: 3,
+            shorten: true,
+          },
         },
       },
     ],

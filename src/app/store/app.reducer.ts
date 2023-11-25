@@ -86,17 +86,21 @@ export const appReducer = createReducer(
     ...state,
     loadingAggTrades: true,
   })),
-  on(getAggTradesSuccess, (state, { trades }) => ({
-    ...state,
-    aggTrades: trades,
-    loadingAggTrades: false,
-  })),
-  on(getDepthSuccess, (state, { depth }) => ({
-    ...state,
-    depth: depth?.depth,
-    snapshot: depth?.snapshot,
-    loadingDepth: false,
-  })),
+  on(getAggTradesSuccess, (state, { trades }) => {
+    return {
+      ...state,
+      aggTrades: trades,
+      loadingAggTrades: false,
+    };
+  }),
+  on(getDepthSuccess, (state, { depth }) => {
+    return {
+      ...state,
+      depth: depth?.depth,
+      snapshot: depth?.snapshot,
+      loadingDepth: false,
+    };
+  }),
   on(getCluster, (state) => ({
     ...state,
     loadingCluster: true,

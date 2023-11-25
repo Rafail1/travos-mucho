@@ -3,6 +3,7 @@ import { Store, select } from '@ngrx/store';
 import { Observable, Subject, combineLatest, map } from 'rxjs';
 import { filterNullish } from 'src/app/common/utils/filter-nullish';
 import { ConfigService, STYLE_THEME_KEY } from 'src/app/config/config';
+import { CalculationService } from 'src/app/modules/loader/calculation.service';
 import { FIVE_MINUTES } from 'src/app/modules/player/player.component';
 import { IBounds, RootState } from 'src/app/store/app.reducer';
 import {
@@ -30,7 +31,8 @@ export class GridService {
   private squiz: number;
   constructor(
     private store: Store<RootState>,
-    private configService: ConfigService
+    private configService: ConfigService,
+    private calculationService: CalculationService
   ) {
     this.bounds$ = this.store.pipe(select(selectBounds), filterNullish());
     this.squiz$ = this.store.pipe(select(selectSquiz), filterNullish());
@@ -55,8 +57,8 @@ export class GridService {
 
   setBounds() {
     combineLatest([this.bounds$, this.squiz$]).subscribe(([data, squiz]) => {
-      this.max = data.max;
-      this.min = data.min;
+      this.max = this.calculationService.getSquizedPrice(data.max);
+      this.min = this.calculationService.getSquizedPrice(data.min);
       this.squiz = squiz;
       this.tickSize = this.originalTickSize * squiz;
       const { barHeight } = this.configService.getConfig(STYLE_THEME_KEY);

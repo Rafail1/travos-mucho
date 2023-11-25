@@ -5,6 +5,10 @@ import { DateService } from 'src/app/common/utils/date.service';
 import { response } from './mock-trades';
 import { IBarType } from '../scalp/calculation/bar/bar.interface';
 import { BarService } from '../scalp/calculation/bar/bar.service';
+import { IBounds, RootState } from 'src/app/store/app.reducer';
+import { Store, select } from '@ngrx/store';
+import { filterNullish } from 'src/app/common/utils/filter-nullish';
+import { selectBounds } from 'src/app/store/app.selectors';
 export interface IBar {
   depth: [number, number];
   backgroundColor: string;
@@ -18,8 +22,8 @@ export interface IBar {
 }
 
 export interface ISnapshotFormatted {
-  min: number;
-  max: number;
+  // min: number;
+  // max: number;
   E: string;
   data: { [key: number]: IBar };
 }
@@ -39,7 +43,7 @@ export interface IAggTrade {
   /**  ex: '29550.20'; // Price */
   p: string;
   /**  ex: '0.018'; // Quantity */
-  q: string;
+  q: number;
   /**  ex: 'BTCUSDT'; // Symbol */
   s: string;
   /**  ex: 1691652205944; // Trade time */
@@ -82,25 +86,50 @@ export interface IDepth {
 @Injectable()
 export class BackendService {
   private api = 'http://localhost:3000';
+  bounds: IBounds;
+
   constructor(
     private httpService: HttpClient,
     private dateService: DateService,
-    private barService: BarService
-  ) {}
+    private store: Store<RootState>
+  ) {
+    this.store.pipe(select(selectBounds), filterNullish()).subscribe((data) => {
+      this.bounds = data;
+    });
+  }
 
   public getDepth(symbol: string, time: Date) {
     // return of(response);
-    return this.httpService.get<{ depth: Array<IDepth>; snapshot: ISnapshot }>(
-      `${this.api}/depth`,
-      {
+    return this.httpService
+      .get<{ depth: Array<IDepth>; snapshot: ISnapshot }>(`${this.api}/depth`, {
         params: new HttpParams({
           fromObject: {
             time: this.dateService.getUtcTime(time),
             symbol,
           },
         }),
-      }
-    );
+      })
+      .pipe(
+        filterNullish(),
+        map((data) => {
+          data.depth = data.depth?.filter((item) => {
+            item.a = item.a.filter(
+              ([price]) =>
+                Number(price) > this.bounds.min &&
+                Number(price) < this.bounds.max
+            );
+
+            item.b = item.b.filter(
+              ([price]) =>
+                Number(price) > this.bounds.min &&
+                Number(price) < this.bounds.max
+            );
+
+            return item.b.length + item.a.length > 0;
+          });
+          return data;
+        })
+      );
   }
 
   public getAggTrades(symbol: string, time: Date): Observable<IAggTrade[]> {

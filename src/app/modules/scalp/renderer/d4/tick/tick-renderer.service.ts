@@ -41,7 +41,7 @@ export class TickRendererService {
       .selectAll<BaseType, string>('g')
       .data(this.data, (d) => {
         if (!d) {
-          debugger;
+          console.error('d is undefined');
         }
         return d[4];
       })

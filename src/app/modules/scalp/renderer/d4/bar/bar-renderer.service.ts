@@ -41,7 +41,7 @@ export class BarRendererService {
       .selectAll<BaseType, number>('g')
       .data(this.gridService.getGrid(), (d) => {
         const dt = this.getData(d);
-        return dt.depth[0];
+        return `${dt.depth[0]}${dt.depth[1]}${dt.type}`;
       })
       .join(
         (enter) => {

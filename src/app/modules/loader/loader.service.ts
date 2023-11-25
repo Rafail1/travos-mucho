@@ -42,14 +42,21 @@ export class LoaderService {
       this.aggTradesCache.delete(this.currentSymbol);
       this.currentSymbol = symbol;
     }
+    let getTrades;
     const key = `${time.getTime()}`;
     if (this.aggTradesCache.get(symbol)?.has(key)) {
-      return of(this.aggTradesCache.get(symbol)?.get(key));
+      getTrades = of(this.aggTradesCache.get(symbol)?.get(key));
+    } else {
+      getTrades = this.backendService.getAggTrades(symbol, time).pipe(
+        tap((data) => {
+          this.aggTradesCache.get(symbol)?.set(key, data);
+        })
+      );
     }
-    return this.backendService.getAggTrades(symbol, time).pipe(
-      tap((data) => {
-        this.aggTradesCache.get(symbol)?.set(key, data);
-      })
+
+    return getTrades.pipe(
+      filterNullish(),
+      map((data) => this.calculationService.getFormattedAggTrades(data))
     );
   }
 
@@ -79,11 +86,7 @@ export class LoaderService {
 
     return data$.pipe(
       filterNullish(),
-      withLatestFrom(
-        this.store.pipe(select(selectTickSize), filterNullish()),
-        this.store.pipe(select(selectPricePrecision), filterNullish())
-      ),
-      map(([data, tickSize, pricePrecision]) => {
+      map((data) => {
         if (!data.snapshot) {
           return;
         }
@@ -97,32 +100,12 @@ export class LoaderService {
           data.depth
         );
 
-        const middleAsk = Number(data.snapshot.asks[0][0]);
-        const middleBid = Number(data.snapshot.bids[0][0]);
-        const max = Number(
-          (
-            middleAsk +
-            Number(
-              (Number(tickSize) * data.snapshot.asks.length).toFixed(
-                pricePrecision
-              )
-            )
-          ).toFixed(Number(pricePrecision))
-        );
-        const min = Number(
-          (
-            middleBid -
-            Number(
-              (Number(tickSize) * data.snapshot.bids.length).toFixed(
-                pricePrecision
-              )
-            )
-          ).toFixed(Number(pricePrecision))
-        );
-
         const result = {
           depth: formattedDepth,
-          snapshot: { E: data.snapshot.E, data: formattedSnapshot, max, min },
+          snapshot: {
+            E: data.snapshot.E,
+            data: formattedSnapshot,
+          },
         };
 
         return result;
@@ -137,17 +120,20 @@ export class LoaderService {
       this.clusterCache.delete(this.currentSymbol);
       this.currentSymbol = symbol;
     }
-
+    let dataPipe;
     const key = `${time.getTime()}`;
     if (this.clusterCache.get(symbol)?.has(key)) {
       const data = this.clusterCache.get(symbol)?.get(key);
-      if (data !== undefined) {
-        return of(data);
-      }
+      dataPipe = of(data);
+    } else {
+      dataPipe = this.backendService
+        .getCluster(symbol, time)
+        .pipe(tap((data) => this.clusterCache.get(symbol)?.set(key, data)));
     }
 
-    return this.backendService
-      .getCluster(symbol, time)
-      .pipe(tap((data) => this.clusterCache.get(symbol)?.set(key, data)));
+    return dataPipe.pipe(
+      filterNullish(),
+      map((data) => this.calculationService.getFormattedClusters(data))
+    );
   }
 }
