@@ -6,7 +6,7 @@ import { response } from './mock-trades';
 import { IBarType } from '../scalp/calculation/bar/bar.interface';
 import { BarService } from '../scalp/calculation/bar/bar.service';
 export interface IBar {
-  depth: [number, string];
+  depth: [number, number];
   backgroundColor: string;
   fillRectWidth: string;
   fillColor: string;
@@ -104,7 +104,6 @@ export class BackendService {
   }
 
   public getAggTrades(symbol: string, time: Date): Observable<IAggTrade[]> {
-    // return of([]);
     return this.httpService.get<Array<IAggTrade>>(`${this.api}/agg-trades`, {
       params: new HttpParams({
         fromObject: {

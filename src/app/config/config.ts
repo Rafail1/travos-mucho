@@ -36,6 +36,7 @@ export class ConfigService {
     [
       'default',
       {
+        squiz: 10,
         glass: {
           width: 300,
           height: 700,
@@ -68,6 +69,10 @@ export class ConfigService {
   ]);
 
   public getConfig(key: string) {
-    return this.configMap.get(key);
+    if (this.configMap.has(key)) {
+      return this.configMap.get(key);
+    } else {
+      return this.configMap.get('default');
+    }
   }
 }

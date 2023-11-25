@@ -1,7 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Store } from '@ngrx/store';
 import { map, tap } from 'rxjs';
 import { GridService } from 'src/app/modules/scalp/renderer/d4/grid/grid.service';
+import { setBounds } from 'src/app/store/app.actions';
+import { RootState } from 'src/app/store/app.reducer';
 
 export interface IExchangeInfo {
   symbol: string;
@@ -15,7 +18,8 @@ export class MarketDataService {
 
   constructor(
     private httpClient: HttpClient,
-    private gridService: GridService
+    private gridService: GridService,
+    private store: Store<RootState>
   ) {}
 
   getSymbols() {
@@ -89,7 +93,8 @@ export class MarketDataService {
               Number(volume),
             ]);
           }
-          this.gridService.setBounds({ min, max });
+
+          this.store.dispatch(setBounds({ min, max }));
 
           return result;
         })

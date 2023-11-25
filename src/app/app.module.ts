@@ -13,6 +13,8 @@ import { PlayerModule } from './modules/player/player.module';
 import { ScalpModule } from './modules/scalp/scalp.module';
 import { AppEffects } from './store/app.effects';
 import { appReducer } from './store/app.reducer';
+import { configReducer } from './store/config/config.reducer';
+import { ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [AppComponent],
@@ -21,12 +23,13 @@ import { appReducer } from './store/app.reducer';
     AppRoutingModule,
     BackendModule,
     ScalpModule,
+    ReactiveFormsModule,
     ChartModule,
     SymbolSelectModule,
     MarketDataModule,
     PlayerModule,
     LoaderModule,
-    StoreModule.forRoot({ app: appReducer }),
+    StoreModule.forRoot({ app: appReducer, config: configReducer }),
     EffectsModule.forRoot([AppEffects]),
   ],
   bootstrap: [AppComponent],

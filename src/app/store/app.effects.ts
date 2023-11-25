@@ -40,6 +40,7 @@ import { selectClusters, selectSymbol, selectTime } from './app.selectors';
 import { filterNullish } from '../common/utils/filter-nullish';
 import { DateService } from '../common/utils/date.service';
 import { FIVE_MINUTES } from '../modules/player/player.component';
+import { setSquiz } from './config/config.actions';
 
 @Injectable()
 export class AppEffects {
@@ -50,11 +51,32 @@ export class AppEffects {
       map(({ time }) => this.dateService.filterTime(time)),
       distinctUntilChanged((prev, crt) => prev.getTime() === crt.getTime()),
       withLatestFrom(
-        this.store
-          .select(selectSymbol)
-          .pipe(filter((symbol) => symbol !== undefined)) as Observable<string>
+        this.store.pipe(
+          select(selectSymbol),
+          filter((symbol) => symbol !== undefined)
+        ) as Observable<string>
       ),
       switchMap(([time, symbol]) => {
+        return [getAggTrades({ symbol, time }), getDepth({ symbol, time })];
+      })
+    )
+  );
+
+  setSquiz$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(setSquiz),
+      withLatestFrom(
+        this.store.pipe(
+          select(selectSymbol),
+          filter((symbol) => symbol !== undefined)
+        ) as Observable<string>,
+        this.store.pipe(
+          select(selectTime),
+          filterNullish(),
+          map((time) => this.dateService.filterTime(time))
+        )
+      ),
+      switchMap(([, symbol, time]) => {
         return [getAggTrades({ symbol, time }), getDepth({ symbol, time })];
       })
     )
@@ -223,7 +245,7 @@ export class AppEffects {
     this.actions$.pipe(
       ofType(getSymbolsSuccess),
       // switchMap(({ symbols }) => of(setSymbol({ symbol: symbols[0].symbol })))
-      switchMap(({ symbols }) => of(setSymbol({ symbol: "BTCUSDT" })))
+      switchMap(({ symbols }) => of(setSymbol({ symbol: 'BTCUSDT' })))
     )
   );
 

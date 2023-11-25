@@ -1,39 +1,49 @@
 import { Injectable } from '@angular/core';
 import { Store, select } from '@ngrx/store';
-import { Subject, map } from 'rxjs';
+import { Observable, Subject, combineLatest, map } from 'rxjs';
 import { filterNullish } from 'src/app/common/utils/filter-nullish';
 import { ConfigService, STYLE_THEME_KEY } from 'src/app/config/config';
 import { FIVE_MINUTES } from 'src/app/modules/player/player.component';
-import { RootState } from 'src/app/store/app.reducer';
+import { IBounds, RootState } from 'src/app/store/app.reducer';
 import {
+  selectBounds,
   selectPricePrecision,
   selectScroll,
   selectTickSize,
   selectTime,
 } from 'src/app/store/app.selectors';
+import { selectSquiz } from 'src/app/store/config/config.selectors';
 const containerHeight = 600;
 @Injectable()
 export class GridService {
   public visibleAreaChanged$ = new Subject<void>();
   private height$ = new Subject<number>();
+  private originalTickSize: number;
   private tickSize: number;
   private pricePrecision: number;
   private min: number = 0;
   private max: number = 0;
   private visibleGrid: Array<number> = [];
   private time = new Date();
+  private squiz$: Observable<number>;
+  private bounds$: Observable<IBounds>;
+  private squiz: number;
   constructor(
     private store: Store<RootState>,
     private configService: ConfigService
   ) {
+    this.bounds$ = this.store.pipe(select(selectBounds), filterNullish());
+    this.squiz$ = this.store.pipe(select(selectSquiz), filterNullish());
+    this.setBounds();
+
     this.store.pipe(select(selectTime), filterNullish()).subscribe((time) => {
       this.time = time;
     });
-
     this.store
       .pipe(select(selectTickSize), filterNullish())
       .subscribe((tickSize) => {
         this.tickSize = Number(tickSize);
+        this.originalTickSize = this.tickSize;
       });
 
     this.store
@@ -43,24 +53,21 @@ export class GridService {
       });
   }
 
-  setBounds(data: { min: number; max: number }) {
-    this.max = data.max;
-    this.min = data.min;
-
-    // for (let priceN = this.max; priceN >= this.min; priceN -= this.tickSize) {
-    //   priceN = Number(priceN.toFixed(this.pricePrecision));
-    //   if (this.grid.has(priceN)) {
-    //     continue;
-    //   }
-    //   this.grid.add(priceN);
-    // }
-
-    const { barHeight } = this.configService.getConfig(STYLE_THEME_KEY);
-    this.height$.next(((this.max - this.min) / this.tickSize) * barHeight);
-    this.setVisibleArea();
+  setBounds() {
+    combineLatest([this.bounds$, this.squiz$]).subscribe(([data, squiz]) => {
+      this.max = data.max;
+      this.min = data.min;
+      this.squiz = squiz;
+      this.tickSize = this.originalTickSize * squiz;
+      const { barHeight } = this.configService.getConfig(STYLE_THEME_KEY);
+      this.height$.next(
+        Math.ceil(((this.max - this.min) / this.tickSize) * barHeight)
+      );
+      this.setVisibleArea();
+    });
   }
 
-  getY(price: string | number) {
+  getY(price: number) {
     const { barHeight } = this.configService.getConfig(STYLE_THEME_KEY);
     const idx =
       Number((this.max - Number(price)).toFixed(this.pricePrecision)) /
@@ -104,6 +111,7 @@ export class GridService {
               Number((this.tickSize * top).toFixed(this.pricePrecision))
             ).toFixed(this.pricePrecision)
           );
+
           const res = Array.from({ length: showCnt }).map((_, idx) => {
             const tmp = Number(
               (

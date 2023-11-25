@@ -5,6 +5,8 @@ import { init, setSymbol } from './store/app.actions';
 import { RootState } from './store/app.reducer';
 import { selectAllSymbols, selectSymbol } from './store/app.selectors';
 import { IExchangeInfo } from './common/market-data/market-data.service';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { setSquiz } from './store/config/config.actions';
 
 @Component({
   selector: 'app-root',
@@ -13,9 +15,7 @@ import { IExchangeInfo } from './common/market-data/market-data.service';
 })
 export class AppComponent implements OnInit {
   public symbol$: Observable<string | undefined>;
-  public options$: Observable<
-    Array<IExchangeInfo> | undefined
-  >;
+  public options$: Observable<Array<IExchangeInfo> | undefined>;
   constructor(private store: Store<RootState>) {}
   ngOnInit(): void {
     this.symbol$ = this.store.pipe(select(selectSymbol));
@@ -28,6 +28,10 @@ export class AppComponent implements OnInit {
 
   public symbolChanged(symbol: any) {
     this.store.dispatch(setSymbol({ symbol: symbol.target.value }));
+  }
+
+  public setVal($event: any) {
+    this.store.dispatch(setSquiz({ squiz: Number($event.value) }));
   }
 
   private init() {

@@ -6,6 +6,7 @@ import {
   ICluster,
   ISnapshotFormatted,
 } from '../modules/backend/backend.service';
+import { IBounds } from './app.reducer';
 
 export const setSymbol = createAction(
   '[App Component] setSymbol',
@@ -100,4 +101,9 @@ export const cleanBarYs = createAction('[App Component] cleanBarYs');
 export const setScroll = createAction(
   '[App Component] setScroll',
   props<{ scroll: number }>()
+);
+
+export const setBounds = createAction(
+  '[App Component] setBounds',
+  props<IBounds>()
 );

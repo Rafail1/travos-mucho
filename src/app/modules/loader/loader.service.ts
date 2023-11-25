@@ -13,23 +13,27 @@ import {
   IAggTrade,
   IBar,
   ICluster,
+  IDepth,
+  ISnapshot,
   ISnapshotFormatted,
 } from '../backend/backend.service';
 import { IBarType } from '../scalp/calculation/bar/bar.interface';
 import { BarService } from '../scalp/calculation/bar/bar.service';
+import { CalculationService } from './calculation.service';
 @Injectable()
 export class LoaderService {
   private currentSymbol: string;
   private depthCache = new Map<
     string,
-    Map<string, { depth: Array<IBar>; snapshot: ISnapshotFormatted }>
+    Map<string, { depth: IDepth[]; snapshot: ISnapshot }>
   >();
   private clusterCache = new Map<string, Map<string, Array<ICluster>>>();
   private aggTradesCache = new Map<string, Map<string, Array<IAggTrade>>>();
   constructor(
     private backendService: BackendService,
     private barService: BarService,
-    private store: Store<RootState>
+    private store: Store<RootState>,
+    private calculationService: CalculationService
   ) {}
 
   loadAggTrades({ symbol, time }: { symbol: string; time: Date }) {
@@ -65,14 +69,16 @@ export class LoaderService {
     }
 
     const key = `${time.getTime()}`;
+    let data$;
     if (this.depthCache.get(symbol)?.has(key)) {
       const data = this.depthCache.get(symbol)?.get(key);
-      if (data !== undefined) {
-        return of(data);
-      }
+      data$ = of(data);
+    } else {
+      data$ = this.backendService.getDepth(symbol, time);
     }
 
-    return this.backendService.getDepth(symbol, time).pipe(
+    return data$.pipe(
+      filterNullish(),
       withLatestFrom(
         this.store.pipe(select(selectTickSize), filterNullish()),
         this.store.pipe(select(selectPricePrecision), filterNullish())
@@ -81,59 +87,15 @@ export class LoaderService {
         if (!data.snapshot) {
           return;
         }
-        const formattedSnapshot = [
-          ...data.snapshot.asks.map((item) => ({
-            E: data.snapshot.E,
-            depth: [Number(item[0]), item[1]],
-            type: 'ask' as IBarType,
-            ...this.barService.calculateOptions({
-              type: 'ask',
-              price: Number(item[0]),
-              value: Number(item[1]),
-            }),
-          })),
-          ...data.snapshot.bids.map((item) => ({
-            E: data.snapshot.E,
-            depth: [Number(item[0]), item[1]],
-            type: 'bid' as IBarType,
-            ...this.barService.calculateOptions({
-              type: 'bid',
-              price: Number(item[0]),
-              value: Number(item[1]),
-            }),
-          })),
-        ].reduce((acc: any, item) => {
-          acc[item.depth[0]] = item;
-          return acc;
-        }, {} as { [key: number]: IBar });
+        this.depthCache.get(symbol)?.set(key, data);
 
-        const formattedDepth: IBar[] = [];
-        for (let index = 0; index < data.depth.length; index++) {
-          for (const item of data.depth[index].a) {
-            formattedDepth.push({
-              E: data.depth[index].E,
-              depth: [Number(item[0]), item[1]],
-              type: 'ask' as IBarType,
-              ...this.barService.calculateOptions({
-                type: 'ask',
-                price: Number(item[0]),
-                value: Number(item[1]),
-              }),
-            });
-          }
-          for (const item of data.depth[index].b) {
-            formattedDepth.push({
-              E: data.depth[index].E,
-              depth: [Number(item[0]), item[1]],
-              type: 'bid' as IBarType,
-              ...this.barService.calculateOptions({
-                type: 'bid',
-                price: Number(item[0]),
-                value: Number(item[1]),
-              }),
-            });
-          }
-        }
+        const formattedSnapshot = this.calculationService.getFormattedSnapshot(
+          data.snapshot
+        );
+
+        const formattedDepth = this.calculationService.getFormattedDepth(
+          data.depth
+        );
 
         const middleAsk = Number(data.snapshot.asks[0][0]);
         const middleBid = Number(data.snapshot.bids[0][0]);
@@ -162,7 +124,6 @@ export class LoaderService {
           depth: formattedDepth,
           snapshot: { E: data.snapshot.E, data: formattedSnapshot, max, min },
         };
-        this.depthCache.get(symbol)?.set(key, result);
 
         return result;
       })

@@ -25,11 +25,7 @@ export class BarRendererService {
   }
 
   getData(key: number) {
-    const item = this.data.get(key);
-    if (!item) {
-      return this.emptyRow(key);
-    }
-    return item;
+    return this.data.get(key) || this.emptyRow(key);
   }
 
   render(data: { [key: number]: IBar }) {
@@ -166,7 +162,7 @@ export class BarRendererService {
   emptyRow(key: number): IBar {
     return {
       E: '',
-      depth: [key, '0'],
+      depth: [key, 0],
       backgroundColor: 'gray',
       fillColor: 'blue',
       fillRectWidth: '0',

@@ -115,7 +115,7 @@ export class TickRendererService {
     if (!this.svg) {
       return;
     }
-    const y = this.gridService.getY(data.p);
+    const y = this.gridService.getY(Number(data.p));
     if (!y) {
       return;
     }

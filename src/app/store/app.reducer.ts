@@ -19,15 +19,23 @@ import {
   getSymbolsSuccess,
   pause,
   play,
+  setBounds,
   setScroll,
   setSymbol,
   setTime,
   setTimeFrom,
   setTimeTo,
 } from './app.actions';
+import { ConfigState } from './config/config.reducer';
+
+export interface IBounds {
+  min: number;
+  max: number;
+}
 
 export interface RootState {
   app: AppState;
+  config: ConfigState;
 }
 export interface AppState {
   pricePrecision?: number;
@@ -48,6 +56,7 @@ export interface AppState {
   candlestickData?: Array<[number, number, number, number, number, number]>;
   barYs: Record<string, number>;
   scroll: number;
+  bounds?: IBounds;
 }
 
 export const initialState: AppState = {
@@ -169,6 +178,12 @@ export const appReducer = createReducer(
     return {
       ...state,
       scroll: scroll,
+    };
+  }),
+  on(setBounds, (state, { min, max }) => {
+    return {
+      ...state,
+      bounds: { min, max },
     };
   })
 );
