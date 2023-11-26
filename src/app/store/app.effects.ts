@@ -48,15 +48,20 @@ export class AppEffects {
     this.actions$.pipe(
       ofType(setTime),
       filterNullish(),
-      map(({ time }) => this.dateService.filterTime(time)),
-      distinctUntilChanged((prev, crt) => prev.getTime() === crt.getTime()),
+      map(({ time, redraw }) => {
+        return { time: this.dateService.filterTime(time), redraw };
+      }),
+      distinctUntilChanged(
+        (prev, crt) =>
+          crt.redraw === false && prev.time.getTime() === crt.time.getTime()
+      ),
       withLatestFrom(
         this.store.pipe(
           select(selectSymbol),
           filter((symbol) => symbol !== undefined)
         ) as Observable<string>
       ),
-      switchMap(([time, symbol]) => {
+      switchMap(([{ time }, symbol]) => {
         return [getAggTrades({ symbol, time }), getDepth({ symbol, time })];
       })
     )
@@ -173,17 +178,23 @@ export class AppEffects {
   getClusterTimes$ = createEffect(() =>
     this.actions$.pipe(
       ofType(setTime),
-      map(({ time }) => this.dateService.filterTime(time, FIVE_MINUTES)),
-      distinctUntilChanged((prev, crt) => prev.getTime() === crt.getTime()),
+      map(({ time, redraw }) => {
+        return { time: this.dateService.filterTime(time), redraw };
+      }),
+      distinctUntilChanged(
+        (prev, crt) =>
+          crt.redraw === false && prev.time.getTime() === crt.time.getTime()
+      ),
       withLatestFrom(
         this.store.pipe(select(selectClusters)),
         this.store.pipe(select(selectSymbol), filterNullish())
       ),
       switchMap(([action, clusters, symbol]) => {
-        let time = action;
+        let time = action.time;
+        const redraw = action.redraw;
         const times = [];
         for (let i = 0; i < 5; i++) {
-          if (!clusters.has(time)) {
+          if (redraw || !clusters.has(time)) {
             times.push(time);
           }
           time = this.dateService.prevFilterTime(time, FIVE_MINUTES);
@@ -202,17 +213,7 @@ export class AppEffects {
   getCluster$ = createEffect(() =>
     this.actions$.pipe(
       ofType(getCluster),
-      withLatestFrom(this.store.pipe(select(selectClusters), filterNullish())),
-      mergeMap(([action, clusters]) => {
-        if (clusters.has(action.time)) {
-          return EMPTY;
-        }
-
-        const times = [action.time];
-        for (let i = 0; i < 5; i++) {
-          times.push(this.dateService.prevFilterTime(times[i], FIVE_MINUTES));
-        }
-
+      mergeMap((action) => {
         return this.loaderService.loadCluster(action).pipe(
           map((payload) =>
             getClusterSuccess({
@@ -252,7 +253,9 @@ export class AppEffects {
   setTimeFrom$ = createEffect(() =>
     this.actions$.pipe(
       ofType(setTimeFrom),
-      switchMap(({ time }) => of(setTime({ time: new Date(time.getTime()) })))
+      switchMap(({ time }) =>
+        of(setTime({ time: new Date(time.getTime()), redraw: false }))
+      )
     )
   );
 
@@ -260,11 +263,16 @@ export class AppEffects {
     this.actions$.pipe(
       ofType(forward),
       withLatestFrom(this.store.pipe(select(selectTime))),
-      switchMap(([{ step }, time]) => {
+      switchMap(([{ step, redraw }, time]) => {
         if (!time) {
           return EMPTY;
         }
-        return of(setTime({ time: new Date(time.getTime() + step) }));
+        return of(
+          setTime({
+            time: new Date(time.getTime() + step),
+            redraw: Boolean(redraw),
+          })
+        );
       })
     )
   );
@@ -273,11 +281,16 @@ export class AppEffects {
     this.actions$.pipe(
       ofType(rewind),
       withLatestFrom(this.store.pipe(select(selectTime))),
-      switchMap(([{ step }, time]) => {
+      switchMap(([{ step, redraw }, time]) => {
         if (!time) {
           return EMPTY;
         }
-        return of(setTime({ time: new Date(time.getTime() - step) }));
+        return of(
+          setTime({
+            time: new Date(time.getTime() - step),
+            redraw: Boolean(redraw),
+          })
+        );
       })
     )
   );

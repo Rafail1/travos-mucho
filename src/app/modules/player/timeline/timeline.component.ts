@@ -56,6 +56,7 @@ export class TimelineComponent implements OnInit, AfterViewInit {
       }
     });
   }
+
   ngAfterViewInit() {
     combineLatest([this.selectTime$, this.selectTimeFrom$, this.selectTimeTo$])
       .pipe(
@@ -74,6 +75,7 @@ export class TimelineComponent implements OnInit, AfterViewInit {
       )
       .subscribe();
   }
+
   public changeTimeline(event: MouseEvent) {
     if (!this.from || !this.to) {
       return;
@@ -83,7 +85,7 @@ export class TimelineComponent implements OnInit, AfterViewInit {
     const percentage = event.offsetX / this.line.nativeElement.clientWidth;
     const time = (this.to.getTime() - this.from.getTime()) * percentage;
     this.store.dispatch(
-      setTime({ time: new Date(this.from.getTime() + time) })
+      setTime({ time: new Date(this.from.getTime() + time), redraw: true })
     );
   }
 }

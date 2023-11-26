@@ -17,7 +17,7 @@ export class ButtonsComponent {
     this.playing$ = this.store.pipe(select(selectPlaying));
   }
   public rewind() {
-    this.store.dispatch(rewind({ step: REWIND_SECONDS }));
+    this.store.dispatch(rewind({ step: REWIND_SECONDS, redraw: true }));
   }
   public play() {
     this.store.dispatch(play());
@@ -26,6 +26,6 @@ export class ButtonsComponent {
     this.store.dispatch(pause());
   }
   public forward() {
-    this.store.dispatch(forward({ step: FORWARD_SECONDS }));
+    this.store.dispatch(forward({ step: FORWARD_SECONDS, redraw: true }));
   }
 }

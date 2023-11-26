@@ -1,13 +1,8 @@
 import { Injectable } from '@angular/core';
-import { Store, select } from '@ngrx/store';
-import { EMPTY, Observable, map, of, tap, withLatestFrom } from 'rxjs';
+import { Store } from '@ngrx/store';
+import { Observable, map, of, tap } from 'rxjs';
 import { filterNullish } from 'src/app/common/utils/filter-nullish';
 import { RootState } from 'src/app/store/app.reducer';
-import {
-  selectClusters,
-  selectPricePrecision,
-  selectTickSize,
-} from 'src/app/store/app.selectors';
 import {
   BackendService,
   IAggTrade,
@@ -17,7 +12,6 @@ import {
   ISnapshot,
   ISnapshotFormatted,
 } from '../backend/backend.service';
-import { IBarType } from '../scalp/calculation/bar/bar.interface';
 import { BarService } from '../scalp/calculation/bar/bar.service';
 import { CalculationService } from './calculation.service';
 @Injectable()
@@ -42,14 +36,21 @@ export class LoaderService {
       this.aggTradesCache.delete(this.currentSymbol);
       this.currentSymbol = symbol;
     }
+    let getFromCache = false;
     let getTrades;
     const key = `${time.getTime()}`;
     if (this.aggTradesCache.get(symbol)?.has(key)) {
       getTrades = of(this.aggTradesCache.get(symbol)?.get(key));
+      getFromCache = true;
     } else {
       getTrades = this.backendService.getAggTrades(symbol, time).pipe(
         tap((data) => {
-          this.aggTradesCache.get(symbol)?.set(key, data);
+          if (!getFromCache) {
+            if (!this.aggTradesCache.has(symbol)) {
+              this.aggTradesCache.set(symbol, new Map());
+            }
+            this.aggTradesCache.get(symbol)?.set(key, data);
+          }
         })
       );
     }
@@ -77,9 +78,11 @@ export class LoaderService {
 
     const key = `${time.getTime()}`;
     let data$;
+    let getFromCache = false;
     if (this.depthCache.get(symbol)?.has(key)) {
       const data = this.depthCache.get(symbol)?.get(key);
       data$ = of(data);
+      getFromCache = true;
     } else {
       data$ = this.backendService.getDepth(symbol, time);
     }
@@ -90,7 +93,13 @@ export class LoaderService {
         if (!data.snapshot) {
           return;
         }
-        this.depthCache.get(symbol)?.set(key, data);
+        if (!getFromCache) {
+          if (!this.depthCache.has(symbol)) {
+            this.depthCache.set(symbol, new Map());
+          }
+
+          this.depthCache.get(symbol)?.set(key, data);
+        }
 
         const formattedSnapshot = this.calculationService.getFormattedSnapshot(
           data.snapshot
@@ -120,15 +129,25 @@ export class LoaderService {
       this.clusterCache.delete(this.currentSymbol);
       this.currentSymbol = symbol;
     }
+    let getFromCache = false;
     let dataPipe;
     const key = `${time.getTime()}`;
     if (this.clusterCache.get(symbol)?.has(key)) {
       const data = this.clusterCache.get(symbol)?.get(key);
       dataPipe = of(data);
+      getFromCache = true;
     } else {
-      dataPipe = this.backendService
-        .getCluster(symbol, time)
-        .pipe(tap((data) => this.clusterCache.get(symbol)?.set(key, data)));
+      dataPipe = this.backendService.getCluster(symbol, time).pipe(
+        tap((data) => {
+          if (!getFromCache) {
+            if (!this.clusterCache.has(symbol)) {
+              this.clusterCache.set(symbol, new Map());
+            }
+
+            this.clusterCache.get(symbol)?.set(key, data);
+          }
+        })
+      );
     }
 
     return dataPipe.pipe(

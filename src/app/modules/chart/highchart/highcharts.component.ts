@@ -33,7 +33,7 @@ export class HighchartsComponent implements OnDestroy, OnInit {
           if (this.chart.hoverPoint?.category) {
             this.drawPlotLine(Number(this.chart.hoverPoint.category));
             const time = new Date(this.chart.hoverPoint.category);
-            this.store.dispatch(setTime({ time }));
+            this.store.dispatch(setTime({ time, redraw: true }));
           }
         },
       },
@@ -56,7 +56,7 @@ export class HighchartsComponent implements OnDestroy, OnInit {
             }
             this.drawPlotLine(Number(this.chart.hoverPoint.category));
             const time = new Date(event.point.category);
-            this.store.dispatch(setTime({ time }));
+            this.store.dispatch(setTime({ time, redraw: true }));
           },
         },
       },

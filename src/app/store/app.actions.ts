@@ -14,7 +14,7 @@ export const setSymbol = createAction(
 );
 export const setTime = createAction(
   '[App Component] setTime',
-  props<{ time: Date }>()
+  props<{ time: Date; redraw: boolean }>()
 );
 export const setTimeFrom = createAction(
   '[App Component] setTimeFrom',
@@ -73,13 +73,13 @@ export const cleanCandlestickData = createAction(
 
 export const rewind = createAction(
   '[App Component] rewind',
-  props<{ step: number }>()
+  props<{ step: number; redraw?: boolean }>()
 );
 export const play = createAction('[App Component] play');
 export const pause = createAction('[App Component] pause');
 export const forward = createAction(
   '[App Component] forward',
-  props<{ step: number }>()
+  props<{ step: number; redraw?: boolean }>()
 );
 
 export const setSnapshot = createAction(

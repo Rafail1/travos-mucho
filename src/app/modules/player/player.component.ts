@@ -6,8 +6,8 @@ import { RootState } from 'src/app/store/app.reducer';
 import { selectPlaying } from 'src/app/store/app.selectors';
 export const FIVE_MINUTES = 1000 * 60 * 5;
 export const STEP = 100;
-export const REWIND_SECONDS = 1000 * 30;
-export const FORWARD_SECONDS = 1000 * 30;
+export const REWIND_SECONDS = 1000;
+export const FORWARD_SECONDS = 1000;
 @Component({
   selector: 'app-player',
   templateUrl: './player.component.html',
@@ -35,7 +35,7 @@ export class PlayerComponent implements OnInit {
     interval(STEP)
       .pipe(takeUntil(this.playing$.pipe(filter((playing) => !playing))))
       .subscribe(() => {
-        this.store.dispatch(forward({ step: STEP }));
+        this.store.dispatch(forward({ step: STEP, redraw: false }));
       });
   }
 }
