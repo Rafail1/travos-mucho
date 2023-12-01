@@ -7,6 +7,7 @@ import { D4RendererModule } from './renderer/d4/d4-renderer.module';
 import { ScalpComponent } from './scalp.component';
 import { GlassModule } from './calculation/glass/glass.module';
 import { TradesModule } from './calculation/trades/trades.module';
+import { SettingsModule } from './settings/settings.module';
 
 @NgModule({
   declarations: [ScalpComponent],
@@ -17,6 +18,7 @@ import { TradesModule } from './calculation/trades/trades.module';
     TradesModule,
     GlassModule,
     D4RendererModule,
+    SettingsModule,
   ],
   exports: [ScalpComponent],
 })
