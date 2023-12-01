@@ -12,17 +12,13 @@ export class BarService {
   public calculateOptions({ value, type, price }: IBarData) {
     const {
       fillRectWidth,
-      shortValue,
+      volumeText,
       backgroundColor,
-      shortPrice,
+      priceText,
       textColor,
-      abbrev,
       fillAskColor,
       fillBidColor,
     } = this.calculate({ price, value });
-    const volumeText = `${shortValue}${abbrev}`;
-
-    const priceText = `${shortPrice.value}${shortPrice.abbrev}`;
 
     return {
       fillRectWidth,
@@ -56,22 +52,22 @@ export class BarService {
       backgroundColor,
     };
 
-    let shortPrice;
+    let priceText;
     if (priceFormat.shorten) {
-      shortPrice = shortNumber(price, priceFormat.decPlaces);
+      priceText = shortNumber(price, priceFormat.decPlaces);
     } else {
-      shortPrice = { value: price, abbrev: '' };
+      priceText = price;
     }
-    const { value: shortValue, abbrev } = volumeFormat.shorten
+
+    const volumeText = volumeFormat.shorten
       ? shortNumber(value, volumeFormat.decPlaces)
-      : { value, abbrev: '' };
+      : value;
 
     return {
       fillRectWidth,
       ...currentThreshold,
-      shortValue,
-      abbrev,
-      shortPrice,
+      volumeText,
+      priceText,
     };
   }
 

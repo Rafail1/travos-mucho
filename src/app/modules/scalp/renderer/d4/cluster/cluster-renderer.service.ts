@@ -6,6 +6,7 @@ import { ICluster } from 'src/app/modules/backend/backend.service';
 import { RootState } from 'src/app/store/app.reducer';
 import { IClusterData } from '../d4-renderer.service';
 import { GridService } from '../grid/grid.service';
+import { shortNumber } from 'src/app/common/utils/short-number.util';
 const MAX_LENGTH = 20;
 @Injectable()
 export class ClusterRendererService {
@@ -110,7 +111,7 @@ export class ClusterRendererService {
         () => {
           const data = [];
           const grid = this.gridService.getGrid();
-          for (const [slot, clusters] of this.clusters.entries()) {
+          for (const [, clusters] of this.clusters.entries()) {
             for (const [price, cluster] of clusters.entries()) {
               if (grid.includes(price)) {
                 data.push(cluster);
@@ -172,7 +173,7 @@ export class ClusterRendererService {
             })
             .text((dt) => {
               // const dt = this.getData(d);
-              return dt.volume;
+              return shortNumber(dt.volume);
             });
 
           return g;
@@ -198,7 +199,7 @@ export class ClusterRendererService {
 
           update.selectAll<BaseType, IClusterData>('text').text((dt) => {
             // const dt = this.getData(d);
-            return dt.volume;
+            return shortNumber(dt.volume);
           });
 
           return update;

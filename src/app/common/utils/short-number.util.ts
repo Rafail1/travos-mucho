@@ -1,9 +1,6 @@
 const abbrev = ['k', 'm', 'b', 't'];
 
-export function shortNumber(
-  value: number,
-  decPlaces: number = 2
-): { value: number; abbrev?: string } {
+export function shortNumber(value: number, decPlaces: number = 2): string {
   decPlaces = Math.pow(10, decPlaces);
 
   for (let i = abbrev.length - 1; i >= 0; i--) {
@@ -14,10 +11,9 @@ export function shortNumber(
         value = 1;
         i++;
       }
-
-      return { value, abbrev: abbrev[i] };
+      return `${value}${abbrev[i]}`;
     }
   }
 
-  return { value, abbrev: '' };
+  return String(value);
 }
