@@ -166,8 +166,8 @@ export class BarRendererService {
       backgroundColor: 'gray',
       fillColor: 'blue',
       fillRectWidth: '0',
-      priceText: '',
-      textColor: 'blue',
+      priceText: key.toString(),
+      textColor: 'white',
       type: 'ask',
       volumeText: '',
     };
