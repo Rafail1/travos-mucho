@@ -62,10 +62,14 @@ export class ConfigService {
           height: 700,
           x: 300,
           y: 0,
+          volumeFormat: {
+            decPlaces: 5,
+            shorten: true,
+          },
         },
         cluster: {
           volumeFormat: {
-            decPlaces: 3,
+            decPlaces: 5,
             shorten: true,
           },
         },

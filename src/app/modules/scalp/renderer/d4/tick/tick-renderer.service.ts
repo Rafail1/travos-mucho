@@ -3,6 +3,7 @@ import { BaseType, Selection } from 'd3';
 import { IAggTrade } from 'src/app/modules/backend/backend.service';
 import { GridService } from '../grid/grid.service';
 import { ConfigService, STYLE_THEME_KEY } from 'src/app/config/config';
+import { shortNumber } from 'src/app/common/utils/short-number.util';
 const MAX_LENGTH = 20;
 const RADIUS = 16;
 @Injectable()
@@ -70,7 +71,10 @@ export class TickRendererService {
               return d[1] + RADIUS - 2;
             })
             .text((d) => {
-              return d[3];
+              const decPlaces =
+                this.configService.getConfig('default')?.tick.volumeFormat
+                  .decPlaces;
+              return shortNumber(d[3], decPlaces);
             });
           return g;
         },
@@ -98,7 +102,10 @@ export class TickRendererService {
               return d[1] + RADIUS - 2;
             })
             .text((d) => {
-              return d[3];
+              const decPlaces =
+                this.configService.getConfig('default')?.tick.volumeFormat
+                  .decPlaces;
+              return shortNumber(d[3], decPlaces);
             });
           return update;
         }

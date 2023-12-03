@@ -6,7 +6,6 @@ import { IBarData, IBarPosition } from './bar.interface';
 const formatter = new Intl.NumberFormat(undefined);
 @Injectable({ providedIn: 'root' })
 export class BarService {
-  private thresholdSubject = new Subject();
   constructor(private configService: ConfigService) {}
 
   public calculateOptions({ value, type, price }: IBarData) {

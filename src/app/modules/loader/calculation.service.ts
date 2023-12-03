@@ -22,17 +22,10 @@ import { ConfigService } from 'src/app/config/config';
 export class CalculationService {
   private squiz: number;
   private pricePrecision: number;
-  private clusterVolumePrecision: number;
-  constructor(
-    private store: Store<RootState>,
-    private barService: BarService,
-    private configService: ConfigService
-  ) {
+  constructor(private store: Store<RootState>, private barService: BarService) {
     this.store.pipe(select(selectSquiz)).subscribe((data) => {
       this.squiz = data;
     });
-    this.clusterVolumePrecision =
-      this.configService.getConfig('default')?.cluster.volumeFormat.decPlaces;
     this.store
       .pipe(select(selectPricePrecision), filterNullish())
       .subscribe((data) => {
@@ -98,16 +91,9 @@ export class CalculationService {
       const key = `${price}_${item.m}__${item.min5_slot}`;
       const existsCluster = result.get(key);
       if (!existsCluster) {
-        const volume = Number(
-          Number(item.volume).toFixed(this.clusterVolumePrecision)
-        );
-        result.set(key, { ...item, volume });
+        result.set(key, item);
       } else {
-        const volume = Number(
-          (Number(item.volume) + Number(existsCluster.volume)).toFixed(
-            this.clusterVolumePrecision
-          )
-        );
+        const volume = Number(item.volume) + Number(existsCluster.volume);
         result.set(key, { ...item, volume });
       }
     }
@@ -142,10 +128,7 @@ export class CalculationService {
       if (existsVolume === undefined) {
         result.set(priceSquized, volumeN);
       } else {
-        result.set(
-          priceSquized,
-          Number((existsVolume + volumeN).toFixed(this.pricePrecision))
-        );
+        result.set(priceSquized, existsVolume + volumeN);
       }
     }
 

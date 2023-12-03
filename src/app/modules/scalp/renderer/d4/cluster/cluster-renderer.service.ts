@@ -7,6 +7,7 @@ import { RootState } from 'src/app/store/app.reducer';
 import { IClusterData } from '../d4-renderer.service';
 import { GridService } from '../grid/grid.service';
 import { shortNumber } from 'src/app/common/utils/short-number.util';
+import { ConfigService } from 'src/app/config/config';
 const MAX_LENGTH = 20;
 @Injectable()
 export class ClusterRendererService {
@@ -15,8 +16,7 @@ export class ClusterRendererService {
   private currentCluster = new Date().getTime();
   constructor(
     private gridService: GridService,
-    private store: Store<RootState>,
-    private dateService: DateService
+    private configService: ConfigService
   ) {
     // store
     //   .pipe(
@@ -172,8 +172,10 @@ export class ClusterRendererService {
               return this.gridService.getMin5SlotX(dt.slot);
             })
             .text((dt) => {
-              // const dt = this.getData(d);
-              return shortNumber(dt.volume);
+              const clusterVolumePrecision =
+                this.configService.getConfig('default')?.cluster.volumeFormat
+                  .decPlaces;
+              return shortNumber(dt.volume, clusterVolumePrecision);
             });
 
           return g;
@@ -198,8 +200,10 @@ export class ClusterRendererService {
             });
 
           update.selectAll<BaseType, IClusterData>('text').text((dt) => {
-            // const dt = this.getData(d);
-            return shortNumber(dt.volume);
+            const clusterVolumePrecision =
+              this.configService.getConfig('default')?.cluster.volumeFormat
+                .decPlaces;
+            return shortNumber(dt.volume, clusterVolumePrecision);
           });
 
           return update;
