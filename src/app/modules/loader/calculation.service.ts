@@ -1,6 +1,12 @@
 import { Injectable } from '@angular/core';
 import { Store, select } from '@ngrx/store';
-import { IBounds, RootState } from 'src/app/store/app.reducer';
+import { filterNullish } from 'src/app/common/utils/filter-nullish';
+import { RootState } from 'src/app/store/app.reducer';
+import {
+  selectPricePrecision,
+  selectTickSize,
+} from 'src/app/store/app.selectors';
+import { selectSquiz } from 'src/app/store/config/config.selectors';
 import {
   IAggTrade,
   IBar,
@@ -10,18 +16,12 @@ import {
 } from '../backend/backend.service';
 import { IBarType } from '../scalp/calculation/bar/bar.interface';
 import { BarService } from '../scalp/calculation/bar/bar.service';
-import { selectSquiz } from 'src/app/store/config/config.selectors';
-import {
-  selectBounds,
-  selectPricePrecision,
-} from 'src/app/store/app.selectors';
-import { filterNullish } from 'src/app/common/utils/filter-nullish';
-import { ConfigService } from 'src/app/config/config';
 
 @Injectable({ providedIn: 'root' })
 export class CalculationService {
   private squiz: number;
   private pricePrecision: number;
+  private tickSize: number;
   constructor(private store: Store<RootState>, private barService: BarService) {
     this.store.pipe(select(selectSquiz)).subscribe((data) => {
       this.squiz = data;
@@ -30,6 +30,12 @@ export class CalculationService {
       .pipe(select(selectPricePrecision), filterNullish())
       .subscribe((data) => {
         this.pricePrecision = data;
+      });
+
+    this.store
+      .pipe(select(selectTickSize), filterNullish())
+      .subscribe((data) => {
+        this.tickSize = Number(data);
       });
   }
 
@@ -101,15 +107,14 @@ export class CalculationService {
   }
 
   public getSquizedPrice(price: number) {
+    if (this.squiz === 1) {
+      return price;
+    }
     return Number(
       (
         price -
         (price %
-          Number(
-            (this.squiz * (10 / Math.pow(10, this.pricePrecision))).toFixed(
-              this.pricePrecision
-            )
-          ))
+          Number((this.squiz * this.tickSize).toFixed(this.pricePrecision)))
       ).toFixed(this.pricePrecision)
     );
   }
