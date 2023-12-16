@@ -15,6 +15,7 @@ import { AppEffects } from './store/app.effects';
 import { appReducer } from './store/app.reducer';
 import { configReducer } from './store/config/config.reducer';
 import { ReactiveFormsModule } from '@angular/forms';
+import { SettingsModule } from './modules/scalp/settings/settings.module';
 
 @NgModule({
   declarations: [AppComponent],
@@ -31,6 +32,7 @@ import { ReactiveFormsModule } from '@angular/forms';
     LoaderModule,
     StoreModule.forRoot({ app: appReducer, config: configReducer }),
     EffectsModule.forRoot([AppEffects]),
+    SettingsModule
   ],
   bootstrap: [AppComponent],
 })

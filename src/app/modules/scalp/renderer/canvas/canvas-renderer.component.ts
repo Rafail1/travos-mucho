@@ -6,9 +6,9 @@ import {
   OnInit,
   Renderer2,
 } from '@angular/core';
-import { ConfigService } from 'src/app/config/config';
 import { GlassService } from '../../calculation/glass/glass.service';
 import { TradesService } from '../../calculation/trades/trades.service';
+import { SettingsService } from '../../settings/settings.service';
 const fullHeight = 16000;
 let tradesCtx: CanvasRenderingContext2D;
 export const TRADES_CANVAS_CTX = new InjectionToken<
@@ -35,7 +35,7 @@ export class CanvasRendererComponent implements OnInit {
   @Input() width: number;
   constructor(
     private elRef: ElementRef,
-    private configService: ConfigService,
+    private settingsService: SettingsService,
     private renderer: Renderer2,
     private tradesService: TradesService,
     private glassService: GlassService
@@ -51,7 +51,7 @@ export class CanvasRendererComponent implements OnInit {
   initGlassCtx(): void {
     const {
       glass: { width },
-    } = this.configService.getConfig('default');
+    } = this.settingsService.getStyle();
 
     const canvas = this.renderer.createElement('canvas');
     canvas.setAttribute('width', width);
@@ -63,7 +63,7 @@ export class CanvasRendererComponent implements OnInit {
   initTradesCtx(): void {
     const {
       tick: { width },
-    } = this.configService.getConfig('default');
+    } = this.settingsService.getStyle();
 
     const canvas = this.renderer.createElement('canvas');
     canvas.setAttribute('width', width);

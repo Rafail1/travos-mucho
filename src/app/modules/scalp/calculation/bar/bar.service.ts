@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
 import { shortNumber } from 'src/app/common/utils/short-number.util';
-import { ConfigService, STYLE_THEME_KEY } from 'src/app/config/config';
 import { IBarData, IBarPosition } from './bar.interface';
+import { SettingsService } from '../../settings/settings.service';
 const formatter = new Intl.NumberFormat(undefined);
 @Injectable({ providedIn: 'root' })
 export class BarService {
-  constructor(private configService: ConfigService) {}
+  constructor(private settingsService: SettingsService) {}
 
   public calculateOptions({ value, type, price }: IBarData) {
     const {
@@ -31,17 +31,24 @@ export class BarService {
 
   private calculate({ value, price }: Omit<IBarData, 'y' | 'type'>) {
     const {
-      glass: { width },
+      maxBarVolume,
       bars: { volumeFormat, priceFormat },
-      thresholds,
-    } = this.configService.getConfig('default');
-    const { fillAskColor, fillBidColor, textColor, backgroundColor } =
-      this.configService.getConfig(STYLE_THEME_KEY);
+      bigVolume,
+      hugeVolume,
+    } = this.settingsService.getSettings();
+    const {
+      glass: { width },
+      fillAskColor,
+      fillBidColor,
+      textColor,
+      backgroundColor,
+    } = this.settingsService.getStyle();
 
-    const fillRectWidth = Math.min(width * (value / volumeFormat.max), width);
+    const fillRectWidth = Math.min(width * (value / maxBarVolume), width);
 
     const currentThreshold = this.calculateThreshold(
-      thresholds,
+      bigVolume,
+      hugeVolume,
       price,
       value
     ) || {
@@ -71,14 +78,15 @@ export class BarService {
   }
 
   private calculateThreshold(
-    thresholds: Record<string, number> = {},
+    bigVolume: number,
+    hugeVolume: number,
     price: number,
     value: number = 0
   ) {
     let currentThresholdTheme;
-    if (thresholds['huge'] <= value) {
+    if (hugeVolume <= value) {
       currentThresholdTheme = 'huge';
-    } else if (thresholds['big'] <= value) {
+    } else if (bigVolume <= value) {
       currentThresholdTheme = 'big';
     }
 
@@ -91,9 +99,7 @@ export class BarService {
     // }
 
     return currentThresholdTheme
-      ? this.configService.getConfig(STYLE_THEME_KEY).thresholds[
-          currentThresholdTheme
-        ]
+      ? this.settingsService.getStyle().thresholds[currentThresholdTheme]
       : null;
   }
 }

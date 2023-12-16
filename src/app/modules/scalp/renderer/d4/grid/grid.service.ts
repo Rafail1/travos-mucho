@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { Store, select } from '@ngrx/store';
 import { Observable, Subject, combineLatest, map } from 'rxjs';
 import { filterNullish } from 'src/app/common/utils/filter-nullish';
-import { ConfigService, STYLE_THEME_KEY } from 'src/app/config/config';
 import { CalculationService } from 'src/app/modules/loader/calculation.service';
 import { FIVE_MINUTES } from 'src/app/modules/player/player.component';
 import { IBounds, RootState } from 'src/app/store/app.reducer';
@@ -14,6 +13,7 @@ import {
   selectTime,
 } from 'src/app/store/app.selectors';
 import { selectSquiz } from 'src/app/store/config/config.selectors';
+import { SettingsService } from '../../../settings/settings.service';
 const containerHeight = 600;
 @Injectable()
 export class GridService {
@@ -31,7 +31,7 @@ export class GridService {
   private squiz: number;
   constructor(
     private store: Store<RootState>,
-    private configService: ConfigService,
+    private settingsService: SettingsService,
     private calculationService: CalculationService
   ) {
     this.bounds$ = this.store.pipe(select(selectBounds), filterNullish());
@@ -61,7 +61,7 @@ export class GridService {
       this.min = this.calculationService.getSquizedPrice(data.min);
       this.squiz = squiz;
       this.tickSize = this.originalTickSize * squiz;
-      const { barHeight } = this.configService.getConfig(STYLE_THEME_KEY);
+      const { barHeight } = this.settingsService.getStyle();
       this.height$.next(
         Math.ceil(((this.max - this.min) / this.tickSize) * barHeight)
       );
@@ -70,7 +70,7 @@ export class GridService {
   }
 
   getY(price: number) {
-    const { barHeight } = this.configService.getConfig(STYLE_THEME_KEY);
+    const { barHeight } = this.settingsService.getStyle();
     const idx =
       Number((this.max - Number(price)).toFixed(this.pricePrecision)) /
       this.tickSize;
@@ -82,7 +82,7 @@ export class GridService {
   }
 
   getBarHeight() {
-    const { barHeight } = this.configService.getConfig(STYLE_THEME_KEY);
+    const { barHeight } = this.settingsService.getStyle();
     return barHeight;
   }
 
@@ -93,12 +93,12 @@ export class GridService {
   getMin5SlotX(min5_slot: Date) {
     const x =
       Math.floor((this.time.getTime() - min5_slot.getTime()) / FIVE_MINUTES) *
-      this.configService.getConfig(STYLE_THEME_KEY).clusterWidth;
+      this.settingsService.getStyle().clusterWidth;
     return 240 - x;
   }
 
   private setVisibleArea() {
-    const { barHeight } = this.configService.getConfig(STYLE_THEME_KEY);
+    const { barHeight } = this.settingsService.getStyle();
 
     const showCnt = Math.ceil(containerHeight / barHeight) * 2;
     this.store

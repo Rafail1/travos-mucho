@@ -40,7 +40,8 @@ import { selectClusters, selectSymbol, selectTime } from './app.selectors';
 import { filterNullish } from '../common/utils/filter-nullish';
 import { DateService } from '../common/utils/date.service';
 import { FIVE_MINUTES } from '../modules/player/player.component';
-import { setSquiz } from './config/config.actions';
+import { fillSettings, setConfig, setSquiz } from './config/config.actions';
+import { SettingsService } from '../modules/scalp/settings/settings.service';
 
 @Injectable()
 export class AppEffects {
@@ -71,10 +72,7 @@ export class AppEffects {
     this.actions$.pipe(
       ofType(setSquiz),
       withLatestFrom(
-        this.store.pipe(
-          select(selectSymbol),
-          filter((symbol) => symbol !== undefined)
-        ) as Observable<string>,
+        this.store.pipe(select(selectSymbol), filterNullish()),
         this.store.pipe(
           select(selectTime),
           filterNullish(),
@@ -107,8 +105,18 @@ export class AppEffects {
   setSymbolHood$ = createEffect(() =>
     this.actions$.pipe(
       ofType(setSymbol),
-      switchMap(() => {
-        return [cleanCandlestickData(), cleanBarYs()];
+      switchMap((action) => {
+        return [cleanCandlestickData(), cleanBarYs(), fillSettings(action)];
+      })
+    )
+  );
+
+  fillSettings$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(fillSettings),
+      switchMap((action) => {
+        const config = this.settingsService.getSettings(action.symbol);
+        return of(setConfig({ config }));
       })
     )
   );
@@ -300,6 +308,7 @@ export class AppEffects {
     private dateService: DateService,
     private store: Store<RootState>,
     private loaderService: LoaderService,
-    private marketDataService: MarketDataService
+    private marketDataService: MarketDataService,
+    private settingsService: SettingsService
   ) {}
 }

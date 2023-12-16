@@ -1,20 +1,12 @@
-import {
-  Component,
-  ElementRef,
-  Input,
-  OnDestroy,
-  OnInit,
-  Renderer2,
-} from '@angular/core';
-import * as d3 from 'd3';
-import { ConfigService } from 'src/app/config/config';
-import { IAggTrade } from 'src/app/modules/backend/backend.service';
-import { TradesService } from '../../../calculation/trades/trades.service';
-import { Subject, takeUntil } from 'rxjs';
-import { TickRendererService } from './tick-renderer.service';
+import { Component, ElementRef, Input, OnDestroy, OnInit } from '@angular/core';
 import { Store, select } from '@ngrx/store';
+import * as d3 from 'd3';
+import { Subject, takeUntil } from 'rxjs';
+import { IAggTrade } from 'src/app/modules/backend/backend.service';
 import { RootState } from 'src/app/store/app.reducer';
 import { selectSymbol } from 'src/app/store/app.selectors';
+import { TradesService } from '../../../calculation/trades/trades.service';
+import { TickRendererService } from './tick-renderer.service';
 
 @Component({
   selector: 'app-tick-renderer',
@@ -24,13 +16,11 @@ import { selectSymbol } from 'src/app/store/app.selectors';
 export class TickRendererComponent implements OnInit, OnDestroy {
   @Input() data: IAggTrade;
   private destroy$ = new Subject<void>();
-  private ticks: Array<IAggTrade> = [];
   constructor(
     private tickService: TradesService,
     private elRef: ElementRef,
     private tickRendererService: TickRendererService,
-    private store: Store<RootState>,
-    private renderer: Renderer2
+    private store: Store<RootState>
   ) {}
 
   ngOnInit(): void {

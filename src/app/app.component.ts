@@ -30,10 +30,6 @@ export class AppComponent implements OnInit {
     this.store.dispatch(setSymbol({ symbol: symbol.target.value }));
   }
 
-  public setVal($event: any) {
-    this.store.dispatch(setSquiz({ squiz: Number($event.value) }));
-  }
-
   private init() {
     this.store.dispatch(init());
   }

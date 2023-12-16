@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { BaseType, Selection } from 'd3';
-import { IAggTrade } from 'src/app/modules/backend/backend.service';
-import { GridService } from '../grid/grid.service';
-import { ConfigService, STYLE_THEME_KEY } from 'src/app/config/config';
 import { shortNumber } from 'src/app/common/utils/short-number.util';
+import { IAggTrade } from 'src/app/modules/backend/backend.service';
+import { SettingsService } from '../../../settings/settings.service';
+import { GridService } from '../grid/grid.service';
 const MAX_LENGTH = 20;
 const RADIUS = 16;
 @Injectable()
@@ -18,10 +18,10 @@ export class TickRendererService {
   private width: number;
   constructor(
     private gridService: GridService,
-    private configService: ConfigService
+    private settingsService: SettingsService
   ) {
-    this.askColor = configService.getConfig(STYLE_THEME_KEY).fillAskColor;
-    this.bidColor = configService.getConfig(STYLE_THEME_KEY).fillBidColor;
+    this.askColor = settingsService.getStyle().fillAskColor;
+    this.bidColor = settingsService.getStyle().fillBidColor;
   }
 
   setSvg(svg: Selection<SVGSVGElement, unknown, null, undefined>) {
@@ -72,8 +72,7 @@ export class TickRendererService {
             })
             .text((d) => {
               const decPlaces =
-                this.configService.getConfig('default')?.tick.volumeFormat
-                  .decPlaces;
+                this.settingsService.getSettings().tick.volumeFormat.decPlaces;
               return shortNumber(d[3], decPlaces);
             });
           return g;
@@ -103,8 +102,7 @@ export class TickRendererService {
             })
             .text((d) => {
               const decPlaces =
-                this.configService.getConfig('default')?.tick.volumeFormat
-                  .decPlaces;
+                this.settingsService.getSettings().tick.volumeFormat.decPlaces;
               return shortNumber(d[3], decPlaces);
             });
           return update;

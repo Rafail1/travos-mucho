@@ -1,13 +1,10 @@
 import { Injectable } from '@angular/core';
-import { Store } from '@ngrx/store';
 import { BaseType, Selection } from 'd3';
-import { DateService } from 'src/app/common/utils/date.service';
+import { shortNumber } from 'src/app/common/utils/short-number.util';
 import { ICluster } from 'src/app/modules/backend/backend.service';
-import { RootState } from 'src/app/store/app.reducer';
+import { SettingsService } from '../../../settings/settings.service';
 import { IClusterData } from '../d4-renderer.service';
 import { GridService } from '../grid/grid.service';
-import { shortNumber } from 'src/app/common/utils/short-number.util';
-import { ConfigService } from 'src/app/config/config';
 const MAX_LENGTH = 20;
 @Injectable()
 export class ClusterRendererService {
@@ -16,7 +13,7 @@ export class ClusterRendererService {
   private currentCluster = new Date().getTime();
   constructor(
     private gridService: GridService,
-    private configService: ConfigService
+    private settingsService: SettingsService
   ) {
     // store
     //   .pipe(
@@ -173,7 +170,7 @@ export class ClusterRendererService {
             })
             .text((dt) => {
               const clusterVolumePrecision =
-                this.configService.getConfig('default')?.cluster.volumeFormat
+                this.settingsService.getSettings().cluster.volumeFormat
                   .decPlaces;
               return shortNumber(dt.volume, clusterVolumePrecision);
             });
@@ -201,8 +198,8 @@ export class ClusterRendererService {
 
           update.selectAll<BaseType, IClusterData>('text').text((dt) => {
             const clusterVolumePrecision =
-              this.configService.getConfig('default')?.cluster.volumeFormat
-                .decPlaces;
+              this.settingsService.getSettings().cluster.volumeFormat.decPlaces;
+            console.log(dt.price, dt.volume);
             return shortNumber(dt.volume, clusterVolumePrecision);
           });
 

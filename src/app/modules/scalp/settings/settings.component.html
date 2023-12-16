@@ -1,1 +1,124 @@
-settings
+<form [formGroup]="form">
+  <p>
+    <label for="maxBarVolume">Squiz</label>
+    <input type="number" id="squiz" name="squiz" formControlName="squiz" />
+  </p>
+  <p>
+    <label for="maxBarVolume">Max Bar Volume</label>
+    <input
+      type="number"
+      id="maxBarVolume"
+      name="maxBarVolume"
+      formControlName="maxBarVolume"
+    />
+  </p>
+
+  <p>
+    <label for="bigVolume">Big Volume</label>
+    <input
+      type="number"
+      id="bigVolume"
+      name="bigVolume"
+      formControlName="bigVolume"
+    />
+  </p>
+
+  <p>
+    <label for="hugeVolume">Huge Volume</label>
+    <input
+      type="number"
+      id="hugeVolume"
+      name="hugeVolume"
+      formControlName="hugeVolume"
+    />
+  </p>
+</form>
+<form [formGroup]="barsPriceFormat">
+  <h5>Bars Price format</h5>
+  <p>
+    <label for="bars.priceFormat.decPlaces">Dec Places</label>
+    <input
+      type="number"
+      id="bars.priceFormat.decPlaces"
+      name="decPlaces"
+      formControlName="decPlaces"
+    />
+  </p>
+
+  <p>
+    <label for="bars.priceFormat.shorten">shorten</label>
+    <input
+      type="checkbox"
+      id="bars.priceFormat.shorten"
+      name="shorten"
+      formControlName="shorten"
+    />
+  </p>
+</form>
+
+<form [formGroup]="barsVolumeFormat">
+  <h5>Bars Volume format</h5>
+  <p>
+    <label for="bars.volumeFormat.decPlaces">Dec Places</label>
+    <input
+      type="number"
+      id="bars.volumeFormat.decPlaces"
+      name="decPlaces"
+      formControlName="decPlaces"
+    />
+  </p>
+
+  <p>
+    <label for="bars.volumeFormat.shorten">shorten</label>
+    <input
+      type="checkbox"
+      id="bars.volumeFormat.shorten"
+      name="shorten"
+      formControlName="shorten"
+    />
+  </p>
+</form>
+<form [formGroup]="tickVolumeFormat">
+  <h4 class="form-sector-header">Tick Volume Format</h4>
+  <p>
+    <label for="tick.volumeFormat.decPlaces">Dec Places</label>
+    <input
+      type="number"
+      id="tick.volumeFormat.decPlaces"
+      name="decPlaces"
+      formControlName="decPlaces"
+    />
+  </p>
+
+  <p>
+    <label for="tick.volumeFormat.shorten">shorten</label>
+    <input
+      type="checkbox"
+      id="tick.volumeFormat.shorten"
+      name="shorten"
+      formControlName="shorten"
+    />
+  </p>
+</form>
+<form [formGroup]="clusterVolumeFormat">
+  <h4 class="form-sector-header">Cluster volume format</h4>
+  <p>
+    <label for="cluster.volumeFormat.decPlaces">Dec Places</label>
+    <input
+      type="number"
+      id="cluster.volumeFormat.decPlaces"
+      name="decPlaces"
+      formControlName="decPlaces"
+    />
+  </p>
+
+  <p>
+    <label for="cluster.volumeFormat.shorten">shorten</label>
+    <input
+      type="checkbox"
+      id="cluster.volumeFormat.shorten"
+      name="shorten"
+      formControlName="shorten"
+    />
+  </p>
+</form>
