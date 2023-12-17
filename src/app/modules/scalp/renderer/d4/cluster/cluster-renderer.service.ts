@@ -199,7 +199,6 @@ export class ClusterRendererService {
           update.selectAll<BaseType, IClusterData>('text').text((dt) => {
             const clusterVolumePrecision =
               this.settingsService.getSettings().cluster.volumeFormat.decPlaces;
-            console.log(dt.price, dt.volume);
             return shortNumber(dt.volume, clusterVolumePrecision);
           });
 

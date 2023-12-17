@@ -68,10 +68,10 @@ export class CalculationService {
   public getFormattedAggTrades(data: IAggTrade[]) {
     const result = new Map<string, IAggTrade>();
     for (const item of data) {
-      const price = this.getSquizedPrice(Number(item.p));
+      item.p = String(this.getSquizedPrice(Number(item.p)));
       const time = item.E;
       const type = item.m;
-      const key = `${price}_${time}_${type}`;
+      const key = `${item.p}_${time}_${type}`;
       const existsAggTrade = result.get(key);
 
       if (!existsAggTrade) {
@@ -93,8 +93,8 @@ export class CalculationService {
   public getFormattedClusters(data: ICluster[]) {
     const result = new Map<string, ICluster>();
     for (const item of data) {
-      const price = this.getSquizedPrice(Number(item.p));
-      const key = `${price}_${item.m}__${item.min5_slot}`;
+      item.p = String(this.getSquizedPrice(Number(item.p)));
+      const key = `${item.p}_${item.m}__${item.min5_slot}`;
       const existsCluster = result.get(key);
       if (!existsCluster) {
         result.set(key, item);
