@@ -1,4 +1,5 @@
 <form [formGroup]="form">
+  <h4>General</h4>
   <p>
     <label for="maxBarVolume">Squiz</label>
     <input type="number" id="squiz" name="squiz" formControlName="squiz" />
@@ -34,7 +35,7 @@
   </p>
 </form>
 <form [formGroup]="barsPriceFormat">
-  <h5>Bars Price format</h5>
+  <h4>Bars Price format</h4>
   <p>
     <label for="bars.priceFormat.decPlaces">Dec Places</label>
     <input
@@ -46,7 +47,7 @@
   </p>
 
   <p>
-    <label for="bars.priceFormat.shorten">shorten</label>
+    <label for="bars.priceFormat.shorten">Shorten</label>
     <input
       type="checkbox"
       id="bars.priceFormat.shorten"
@@ -57,7 +58,7 @@
 </form>
 
 <form [formGroup]="barsVolumeFormat">
-  <h5>Bars Volume format</h5>
+  <h4>Bars Volume format</h4>
   <p>
     <label for="bars.volumeFormat.decPlaces">Dec Places</label>
     <input
@@ -69,7 +70,7 @@
   </p>
 
   <p>
-    <label for="bars.volumeFormat.shorten">shorten</label>
+    <label for="bars.volumeFormat.shorten">Shorten</label>
     <input
       type="checkbox"
       id="bars.volumeFormat.shorten"
@@ -91,7 +92,7 @@
   </p>
 
   <p>
-    <label for="tick.volumeFormat.shorten">shorten</label>
+    <label for="tick.volumeFormat.shorten">Shorten</label>
     <input
       type="checkbox"
       id="tick.volumeFormat.shorten"
@@ -113,7 +114,7 @@
   </p>
 
   <p>
-    <label for="cluster.volumeFormat.shorten">shorten</label>
+    <label for="cluster.volumeFormat.shorten">Shorten</label>
     <input
       type="checkbox"
       id="cluster.volumeFormat.shorten"

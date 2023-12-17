@@ -142,6 +142,7 @@ export class SettingsComponent implements OnInit {
           ?.setValue(config?.bars.volumeFormat.shorten);
       });
   }
+
   private getFormatFormGroup() {
     return this.fb.group({
       decPlaces: [],

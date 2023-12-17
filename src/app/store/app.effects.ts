@@ -40,7 +40,7 @@ import { selectClusters, selectSymbol, selectTime } from './app.selectors';
 import { filterNullish } from '../common/utils/filter-nullish';
 import { DateService } from '../common/utils/date.service';
 import { FIVE_MINUTES } from '../modules/player/player.component';
-import { fillSettings, setConfig, setSquiz } from './config/config.actions';
+import { setConfig, setSquiz } from './config/config.actions';
 import { SettingsService } from '../modules/scalp/settings/settings.service';
 
 @Injectable()
@@ -106,17 +106,24 @@ export class AppEffects {
     this.actions$.pipe(
       ofType(setSymbol),
       switchMap((action) => {
-        return [cleanCandlestickData(), cleanBarYs(), fillSettings(action)];
+        return [cleanCandlestickData(), cleanBarYs()];
       })
     )
   );
 
-  fillSettings$ = createEffect(() =>
+  setConfig$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(fillSettings),
-      switchMap((action) => {
-        const config = this.settingsService.getSettings(action.symbol);
-        return of(setConfig({ config }));
+      ofType(setConfig),
+      withLatestFrom(
+        this.store.pipe(select(selectSymbol), filterNullish()),
+        this.store.pipe(
+          select(selectTime),
+          filterNullish(),
+          map((time) => this.dateService.filterTime(time))
+        )
+      ),
+      switchMap(([, symbol, time]) => {
+        return [getAggTrades({ symbol, time }), getDepth({ symbol, time })];
       })
     )
   );
