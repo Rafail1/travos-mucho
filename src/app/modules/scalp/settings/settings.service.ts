@@ -24,7 +24,9 @@ export class SettingsService {
 
   public getSettings(symbol?: string): ConfigState {
     try {
-      const storedItem = localStorage.getItem(`config:${symbol || this.symbol}`);
+      const storedItem = localStorage.getItem(
+        `config:${symbol || this.symbol}`
+      );
       if (storedItem) {
         return JSON.parse(storedItem);
       } else {
@@ -79,5 +81,6 @@ export class SettingsService {
 
   public setSettings(config: ConfigState) {
     localStorage.setItem(`config:${this.symbol}`, JSON.stringify(config));
+    this.store.dispatch(setConfig({ config }));
   }
 }
