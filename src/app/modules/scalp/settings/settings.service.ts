@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { filterNullish } from 'src/app/common/utils/filter-nullish';
 import { RootState } from 'src/app/store/app.reducer';
 import { selectSymbol } from 'src/app/store/app.selectors';
@@ -10,16 +10,17 @@ import { selectConfig } from 'src/app/store/config/config.selectors';
 
 @Injectable()
 export class SettingsService {
-  private config$: Observable<ConfigState>;
   private symbol: string;
+  private _setConfig = new Subject<void>();
+  public setConfig$: Observable<void>;
   constructor(private store: Store<RootState>) {
+    this.setConfig$ = this._setConfig.asObservable();
     this.store
       .select(selectSymbol)
       .pipe(filterNullish())
       .subscribe((symbol) => {
         this.symbol = symbol;
       });
-    this.config$ = this.store.select(selectConfig);
   }
 
   public getSettings(symbol?: string): ConfigState {
@@ -50,6 +51,9 @@ export class SettingsService {
         height: 700,
         x: 300,
         y: 0,
+      },
+      cluster: {
+        backgroundColor: '#ffff00',
       },
       thresholds: {
         big: {
@@ -82,5 +86,6 @@ export class SettingsService {
   public setSettings(config: ConfigState) {
     localStorage.setItem(`config:${this.symbol}`, JSON.stringify(config));
     this.store.dispatch(setConfig({ config }));
+    this._setConfig.next();
   }
 }

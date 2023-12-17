@@ -5,7 +5,9 @@ import { ICluster } from 'src/app/modules/backend/backend.service';
 import { SettingsService } from '../../../settings/settings.service';
 import { IClusterData } from '../d4-renderer.service';
 import { GridService } from '../grid/grid.service';
-const MAX_LENGTH = 20;
+import { Store } from '@ngrx/store';
+import { RootState } from 'src/app/store/app.reducer';
+const rectSizePercent = 20;
 @Injectable()
 export class ClusterRendererService {
   private svg: Selection<SVGSVGElement, unknown, null, undefined>;
@@ -15,19 +17,10 @@ export class ClusterRendererService {
     private gridService: GridService,
     private settingsService: SettingsService
   ) {
-    // store
-    //   .pipe(
-    //     select(selectTime),
-    //     filterNullish(),
-    //     map((time) => this.dateService.nextFilterTime(time, FIVE_MINUTES)),
-    //     distinctUntilChanged((prev, crt) => prev === crt)
-    //   )
-    //   .subscribe(() => {
-    //     for (const [time, group] of this.groupIndexes.entries()) {
-    //       const x = gridService.getMin5SlotX(new Date(time));
-    //       group.attr('x', x);
-    //     }
-    //   });
+    settingsService.setConfig$.subscribe(() => {
+      this.svg.selectAll('*').remove();
+      this.render();
+    });
   }
 
   setSvg(svg: Selection<SVGSVGElement, unknown, null, undefined>) {
@@ -128,19 +121,29 @@ export class ClusterRendererService {
         (enter) => {
           const g = enter.append('g');
           g.append('rect')
-            .attr('width', '20%')
+            .attr('class', 'background')
+            .attr('width', `${rectSizePercent}%`)
             .attr('height', this.gridService.getBarHeight())
             .attr('y', (dt) => {
-              // const dt = this.getData(d);
               return this.gridService.getY(dt.price);
             })
             .attr('x', (dt) => {
-              // const dt = this.getData(d);
+              return this.gridService.getMin5SlotX(dt.slot);
+            })
+            .attr('fill', 'none')
+            .attr('stroke-width', '2')
+            .attr('stroke', 'gray');
+          g.append('rect')
+            .attr('class', 'fill')
+            .attr('width', `${rectSizePercent}%`)
+            .attr('height', this.gridService.getBarHeight())
+            .attr('y', (dt) => {
+              return this.gridService.getY(dt.price);
+            })
+            .attr('x', (dt) => {
               return this.gridService.getMin5SlotX(dt.slot);
             })
             .attr('fill', (dt) => {
-              // const dt = this.getData(d);
-
               const max = Math.max(dt.bidVolume, dt.askVolume);
               const onePeace = max / 255;
 
@@ -154,11 +157,27 @@ export class ClusterRendererService {
                 .toUpperCase();
 
               return `#${red}${green}00`;
+            })
+            .attr('width', (dt) => {
+              const volume = dt.volume;
+
+              const maxClusterVolume =
+                this.settingsService.getSettings().maxClusterVolume || volume;
+
+              if (volume >= maxClusterVolume) {
+                return `${rectSizePercent}%`;
+              }
+
+              const percent = (volume / maxClusterVolume) * rectSizePercent;
+              if (percent > 20) {
+                debugger;
+              }
+              return `${percent}%`;
             });
 
           g.append('text')
             .attr('dominant-baseline', 'hanging')
-            .attr('width', '20%')
+            .attr('width', `${rectSizePercent}%`)
             .attr('height', this.gridService.getBarHeight())
             .attr('y', (dt) => {
               // const dt = this.getData(d);
@@ -179,7 +198,7 @@ export class ClusterRendererService {
         },
         (update) => {
           update
-            .selectAll<BaseType, IClusterData>('rect')
+            .selectAll<BaseType, IClusterData>('rect.fill')
             .attr('fill', (dt) => {
               // const dt = this.getData(d);
               const max = Math.max(dt.bidVolume, dt.askVolume);
@@ -194,6 +213,22 @@ export class ClusterRendererService {
                 .padStart(2, '0')
                 .toUpperCase();
               return `#${red}${green}00`;
+            })
+            .attr('width', (dt) => {
+              const volume = dt.volume;
+
+              const maxClusterVolume =
+                this.settingsService.getSettings().maxClusterVolume || volume;
+
+              if (volume >= maxClusterVolume) {
+                return `${rectSizePercent}%`;
+              }
+
+              const percent = (volume / maxClusterVolume) * rectSizePercent;
+              if (percent > 20) {
+                debugger;
+              }
+              return `${percent}%`;
             });
 
           update.selectAll<BaseType, IClusterData>('text').text((dt) => {

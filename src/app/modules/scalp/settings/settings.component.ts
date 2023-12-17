@@ -31,6 +31,7 @@ export class SettingsComponent implements OnInit {
       maxBarVolume: [],
       bigVolume: [],
       hugeVolume: [],
+      maxClusterVolume: [],
     });
 
     this.barsPriceFormat = this.getFormatFormGroup();
@@ -77,6 +78,7 @@ export class SettingsComponent implements OnInit {
           clusterVolumeFormat,
         ]) => {
           const config: ConfigState = {
+            maxClusterVolume: form.maxClusterVolume,
             squiz: form.squiz,
             maxBarVolume: form.maxBarVolume,
             bigVolume: form.bigVolume,
@@ -108,6 +110,7 @@ export class SettingsComponent implements OnInit {
         this.form.get('maxBarVolume')?.setValue(config.maxBarVolume);
         this.form.get('bigVolume')?.setValue(config.bigVolume);
         this.form.get('hugeVolume')?.setValue(config.hugeVolume);
+        this.form.get('maxClusterVolume')?.setValue(config.maxClusterVolume);
 
         this.clusterVolumeFormat
           .get('decPlaces')

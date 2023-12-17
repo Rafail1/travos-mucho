@@ -9,6 +9,7 @@ export interface ConfigState {
   maxBarVolume: number;
   bigVolume: number;
   hugeVolume: number;
+  maxClusterVolume: number;
   bars: {
     volumeFormat: FormatNumber;
     priceFormat: FormatNumber;
@@ -26,6 +27,7 @@ export const initialState: ConfigState = {
   maxBarVolume: 1000000,
   bigVolume: 200000,
   hugeVolume: 800000,
+  maxClusterVolume: 20,
   bars: {
     volumeFormat: {
       decPlaces: 2,
