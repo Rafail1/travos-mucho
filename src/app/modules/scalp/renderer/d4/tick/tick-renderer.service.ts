@@ -4,6 +4,9 @@ import { shortNumber } from 'src/app/common/utils/short-number.util';
 import { IAggTrade } from 'src/app/modules/backend/backend.service';
 import { SettingsService } from '../../../settings/settings.service';
 import { GridService } from '../grid/grid.service';
+import { Store, select } from '@ngrx/store';
+import { RootState } from 'src/app/store/app.reducer';
+import { selectRecalculateAndRedraw } from 'src/app/store/app.selectors';
 const MAX_LENGTH = 20;
 const RADIUS = 16;
 @Injectable()
@@ -18,10 +21,18 @@ export class TickRendererService {
   private width: number;
   constructor(
     private gridService: GridService,
-    private settingsService: SettingsService
+    private settingsService: SettingsService,
+    private store: Store<RootState>
   ) {
     this.askColor = settingsService.getStyle().fillAskColor;
     this.bidColor = settingsService.getStyle().fillBidColor;
+    settingsService.setConfig$.subscribe(() => {
+      this.clean();
+    });
+
+    this.store.pipe(select(selectRecalculateAndRedraw)).subscribe(() => {
+      this.clean();
+    });
   }
 
   setSvg(svg: Selection<SVGSVGElement, unknown, null, undefined>) {
@@ -111,7 +122,7 @@ export class TickRendererService {
   }
 
   clean() {
-    this.svg.selectAll('*').remove();
+    this.svg?.selectAll('*').remove();
     this.circlesIndexes.splice(0);
     this.initCircles();
   }

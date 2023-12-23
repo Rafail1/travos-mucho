@@ -2,11 +2,28 @@ import { Injectable } from '@angular/core';
 import { BaseType, Selection, transition } from 'd3';
 import { IBar } from 'src/app/modules/backend/backend.service';
 import { GridService } from '../grid/grid.service';
+import { SettingsService } from '../../../settings/settings.service';
+import { RootState } from 'src/app/store/app.reducer';
+import { Store, select } from '@ngrx/store';
+import { selectRecalculateAndRedraw } from 'src/app/store/app.selectors';
 @Injectable()
 export class BarRendererService {
   private svg: Selection<SVGSVGElement, IBar, HTMLElement, undefined>;
   private data = new Map<number, IBar>();
-  constructor(private gridService: GridService) {}
+  constructor(
+    private gridService: GridService,
+    private settingsService: SettingsService,
+    private store: Store<RootState>
+  ) {
+    settingsService.setConfig$.subscribe(() => {
+      this.svg?.selectAll('*').remove();
+      this.render([]);
+    });
+
+    this.store.pipe(select(selectRecalculateAndRedraw)).subscribe(() => {
+      this.clean();
+    });
+  }
   setSvg(svg: Selection<SVGSVGElement, IBar, HTMLElement, undefined>) {
     this.svg = svg;
 
@@ -20,8 +37,8 @@ export class BarRendererService {
   }
 
   clean() {
-    this.svg.selectAll('*').remove();
-    this.data.clear();
+    this.svg?.selectAll('*').remove();
+    this.data?.clear();
   }
 
   getData(key: number) {
