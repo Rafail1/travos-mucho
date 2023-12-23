@@ -187,11 +187,14 @@ export class AppEffects {
       ofType(recalculateAndRedraw),
       debounceTime(500),
       withLatestFrom(
-        this.store.pipe(select(selectTime), filterNullish()),
-        this.store.pipe(select(selectClusters)),
+        this.store.pipe(
+          select(selectTime),
+          filterNullish(),
+          map((time) => this.dateService.filterTime(time))
+        ),
         this.store.pipe(select(selectSymbol), filterNullish())
       ),
-      switchMap(([, time, clusters, symbol]) => {
+      switchMap(([, time, symbol]) => {
         const times = [];
         const actions: Array<Action> = [
           getAggTrades({ symbol, time }),
@@ -202,9 +205,7 @@ export class AppEffects {
           if (i === 0) {
             time = this.dateService.filterTime(time, FIVE_MINUTES);
           }
-          if (!clusters?.has(time)) {
-            times.push(time);
-          }
+          times.push(time);
           time = this.dateService.prevFilterTime(time, FIVE_MINUTES);
         }
 
@@ -224,16 +225,11 @@ export class AppEffects {
       ofType(setTime),
       map(({ time }) => this.dateService.filterTime(time, FIVE_MINUTES)),
       distinctUntilChanged((prev, crt) => prev.getTime() === crt.getTime()),
-      withLatestFrom(
-        this.store.pipe(select(selectClusters)),
-        this.store.pipe(select(selectSymbol), filterNullish())
-      ),
-      switchMap(([time, clusters, symbol]) => {
+      withLatestFrom(this.store.pipe(select(selectSymbol), filterNullish())),
+      switchMap(([time, symbol]) => {
         const times = [];
         for (let i = 0; i < 5; i++) {
-          if (!clusters.has(time)) {
-            times.push(time);
-          }
+          times.push(time);
           time = this.dateService.prevFilterTime(time, FIVE_MINUTES);
         }
         if (times.length) {
@@ -259,7 +255,10 @@ export class AppEffects {
               symbol: action.symbol,
             })
           ),
-          catchError(() => EMPTY)
+          catchError((e) => {
+            console.error(e);
+            return EMPTY
+          })
         );
       })
     )
