@@ -4,7 +4,12 @@ import * as Highcharts from 'highcharts/highstock';
 import HC_draggable from 'highcharts/modules/draggable-points';
 import HC_hollowcandlestick from 'highcharts/modules/hollowcandlestick';
 import { Subject, takeUntil, map, Observable } from 'rxjs';
-import { setTime, setTimeFrom, setTimeTo } from 'src/app/store/app.actions';
+import {
+  recalculateAndRedraw,
+  setTime,
+  setTimeFrom,
+  setTimeTo,
+} from 'src/app/store/app.actions';
 import { RootState } from 'src/app/store/app.reducer';
 import {
   selectCandlestickData,
@@ -33,7 +38,8 @@ export class HighchartsComponent implements OnDestroy, OnInit {
           if (this.chart.hoverPoint?.category) {
             this.drawPlotLine(Number(this.chart.hoverPoint.category));
             const time = new Date(this.chart.hoverPoint.category);
-            this.store.dispatch(setTime({ time, redraw: true }));
+            this.store.dispatch(setTime({ time }));
+            this.store.dispatch(recalculateAndRedraw());
           }
         },
       },
@@ -56,7 +62,8 @@ export class HighchartsComponent implements OnDestroy, OnInit {
             }
             this.drawPlotLine(Number(this.chart.hoverPoint.category));
             const time = new Date(event.point.category);
-            this.store.dispatch(setTime({ time, redraw: true }));
+            this.store.dispatch(setTime({ time }));
+            this.store.dispatch(recalculateAndRedraw());
           },
         },
       },

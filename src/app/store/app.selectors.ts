@@ -37,3 +37,4 @@ export const selectClusters = createSelector(app, (state) => state.clusterMap);
 export const selectBarYs = createSelector(app, (state) => state.barYs);
 export const selectScroll = createSelector(app, (state) => state.scroll);
 export const selectBounds = createSelector(app, (state) => state.bounds);
+export const selectRecalculateAndRedraw = createSelector(app, (state) => state.recalculateAndRedraw);

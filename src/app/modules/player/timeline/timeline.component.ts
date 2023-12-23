@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { Store, select } from '@ngrx/store';
 import { Observable, combineLatest, filter, map, tap } from 'rxjs';
-import { setTime } from 'src/app/store/app.actions';
+import { recalculateAndRedraw, setTime } from 'src/app/store/app.actions';
 import { RootState } from 'src/app/store/app.reducer';
 import {
   selectTime,
@@ -85,7 +85,8 @@ export class TimelineComponent implements OnInit, AfterViewInit {
     const percentage = event.offsetX / this.line.nativeElement.clientWidth;
     const time = (this.to.getTime() - this.from.getTime()) * percentage;
     this.store.dispatch(
-      setTime({ time: new Date(this.from.getTime() + time), redraw: true })
+      setTime({ time: new Date(this.from.getTime() + time) })
     );
+    this.store.dispatch(recalculateAndRedraw());
   }
 }

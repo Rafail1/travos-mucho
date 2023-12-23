@@ -14,7 +14,7 @@ export const setSymbol = createAction(
 );
 export const setTime = createAction(
   '[App Component] setTime',
-  props<{ time: Date; redraw: boolean }>()
+  props<{ time: Date }>()
 );
 export const setTimeFrom = createAction(
   '[App Component] setTimeFrom',
@@ -106,4 +106,8 @@ export const setScroll = createAction(
 export const setBounds = createAction(
   '[App Component] setBounds',
   props<IBounds>()
+);
+
+export const recalculateAndRedraw = createAction(
+  '[App component] recalculateAndRedraw'
 );

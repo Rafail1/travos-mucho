@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { Store, select } from '@ngrx/store';
+import { Action, Store, select } from '@ngrx/store';
 import { EMPTY, Observable, of } from 'rxjs';
 import {
   catchError,
+  debounceTime,
   distinctUntilChanged,
   exhaustMap,
   filter,
@@ -30,6 +31,7 @@ import {
   getDepthSuccess,
   getSymbolsSuccess,
   init,
+  recalculateAndRedraw,
   rewind,
   setSymbol,
   setTime,
@@ -49,20 +51,10 @@ export class AppEffects {
     this.actions$.pipe(
       ofType(setTime),
       filterNullish(),
-      map(({ time, redraw }) => {
-        return { time: this.dateService.filterTime(time), redraw };
-      }),
-      distinctUntilChanged(
-        (prev, crt) =>
-          crt.redraw === false && prev.time.getTime() === crt.time.getTime()
-      ),
-      withLatestFrom(
-        this.store.pipe(
-          select(selectSymbol),
-          filter((symbol) => symbol !== undefined)
-        ) as Observable<string>
-      ),
-      switchMap(([{ time }, symbol]) => {
+      map(({ time }) => this.dateService.filterTime(time)),
+      distinctUntilChanged((prev, crt) => prev.getTime() === crt.getTime()),
+      withLatestFrom(this.store.pipe(select(selectSymbol), filterNullish())),
+      switchMap(([time, symbol]) => {
         return [getAggTrades({ symbol, time }), getDepth({ symbol, time })];
       })
     )
@@ -190,26 +182,56 @@ export class AppEffects {
     )
   );
 
+  recalculateAndRedraw$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(recalculateAndRedraw),
+      debounceTime(500),
+      withLatestFrom(
+        this.store.pipe(select(selectTime), filterNullish()),
+        this.store.pipe(select(selectClusters)),
+        this.store.pipe(select(selectSymbol), filterNullish())
+      ),
+      switchMap(([, time, clusters, symbol]) => {
+        const times = [];
+        const actions: Array<Action> = [
+          getAggTrades({ symbol, time }),
+          getDepth({ symbol, time }),
+        ];
+
+        for (let i = 0; i < 5; i++) {
+          if (i === 0) {
+            time = this.dateService.filterTime(time, FIVE_MINUTES);
+          }
+          if (!clusters?.has(time)) {
+            times.push(time);
+          }
+          time = this.dateService.prevFilterTime(time, FIVE_MINUTES);
+        }
+
+        if (times.length) {
+          times.forEach((item) => {
+            actions.push(getCluster({ time: item, symbol }));
+          });
+        }
+
+        return actions;
+      })
+    )
+  );
+
   getClusterTimes$ = createEffect(() =>
     this.actions$.pipe(
       ofType(setTime),
-      map(({ time, redraw }) => {
-        return { time: this.dateService.filterTime(time), redraw };
-      }),
-      distinctUntilChanged(
-        (prev, crt) =>
-          crt.redraw === false && prev.time.getTime() === crt.time.getTime()
-      ),
+      map(({ time }) => this.dateService.filterTime(time, FIVE_MINUTES)),
+      distinctUntilChanged((prev, crt) => prev.getTime() === crt.getTime()),
       withLatestFrom(
         this.store.pipe(select(selectClusters)),
         this.store.pipe(select(selectSymbol), filterNullish())
       ),
-      switchMap(([action, clusters, symbol]) => {
-        let time = action.time;
-        const redraw = action.redraw;
+      switchMap(([time, clusters, symbol]) => {
         const times = [];
         for (let i = 0; i < 5; i++) {
-          if (redraw || !clusters.has(time)) {
+          if (!clusters.has(time)) {
             times.push(time);
           }
           time = this.dateService.prevFilterTime(time, FIVE_MINUTES);
@@ -268,9 +290,7 @@ export class AppEffects {
   setTimeFrom$ = createEffect(() =>
     this.actions$.pipe(
       ofType(setTimeFrom),
-      switchMap(({ time }) =>
-        of(setTime({ time: new Date(time.getTime()), redraw: false }))
-      )
+      switchMap(({ time }) => of(setTime({ time: new Date(time.getTime()) })))
     )
   );
 
@@ -282,12 +302,18 @@ export class AppEffects {
         if (!time) {
           return EMPTY;
         }
-        return of(
+
+        const actions: Array<Action> = [
           setTime({
             time: new Date(time.getTime() + step),
-            redraw: Boolean(redraw),
-          })
-        );
+          }),
+        ];
+
+        if (redraw) {
+          actions.push(recalculateAndRedraw());
+        }
+
+        return actions;
       })
     )
   );
@@ -300,12 +326,17 @@ export class AppEffects {
         if (!time) {
           return EMPTY;
         }
-        return of(
+        const actions: Array<Action> = [
           setTime({
             time: new Date(time.getTime() - step),
-            redraw: Boolean(redraw),
-          })
-        );
+          }),
+        ];
+
+        if (redraw) {
+          actions.push(recalculateAndRedraw());
+        }
+
+        return actions;
       })
     )
   );
@@ -315,7 +346,6 @@ export class AppEffects {
     private dateService: DateService,
     private store: Store<RootState>,
     private loaderService: LoaderService,
-    private marketDataService: MarketDataService,
-    private settingsService: SettingsService
+    private marketDataService: MarketDataService
   ) {}
 }

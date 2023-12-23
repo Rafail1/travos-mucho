@@ -5,8 +5,9 @@ import { ICluster } from 'src/app/modules/backend/backend.service';
 import { SettingsService } from '../../../settings/settings.service';
 import { IClusterData } from '../d4-renderer.service';
 import { GridService } from '../grid/grid.service';
-import { Store } from '@ngrx/store';
+import { Store, select } from '@ngrx/store';
 import { RootState } from 'src/app/store/app.reducer';
+import { selectRecalculateAndRedraw } from 'src/app/store/app.selectors';
 const rectSizePercent = 20;
 @Injectable()
 export class ClusterRendererService {
@@ -15,11 +16,15 @@ export class ClusterRendererService {
   private currentCluster = new Date().getTime();
   constructor(
     private gridService: GridService,
-    private settingsService: SettingsService
+    private settingsService: SettingsService,
+    private store: Store<RootState>
   ) {
     settingsService.setConfig$.subscribe(() => {
-      this.svg.selectAll('*').remove();
+      this.svg?.selectAll('*').remove();
       this.render();
+    });
+    this.store.pipe(select(selectRecalculateAndRedraw)).subscribe(() => {
+      this.clean();
     });
   }
 
@@ -35,8 +40,8 @@ export class ClusterRendererService {
   }
 
   clean() {
-    this.svg.selectAll('*').remove();
-    this.clusters.clear();
+    this.svg?.selectAll('*').remove();
+    this.clusters?.clear();
   }
 
   updateCluster(data: ICluster) {

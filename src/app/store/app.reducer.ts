@@ -19,6 +19,7 @@ import {
   getSymbolsSuccess,
   pause,
   play,
+  recalculateAndRedraw,
   setBounds,
   setScroll,
   setSymbol,
@@ -38,6 +39,7 @@ export interface RootState {
   config: ConfigState;
 }
 export interface AppState {
+  recalculateAndRedraw: number;
   pricePrecision?: number;
   symbol?: string;
   tickSize?: string;
@@ -67,6 +69,7 @@ export const initialState: AppState = {
   clusterMap: new Map(),
   barYs: {},
   scroll: 0,
+  recalculateAndRedraw: 0,
 };
 
 export const appReducer = createReducer(
@@ -188,6 +191,12 @@ export const appReducer = createReducer(
     return {
       ...state,
       bounds: { min, max },
+    };
+  }),
+  on(recalculateAndRedraw, (state) => {
+    return {
+      ...state,
+      recalculateAndRedraw: state.recalculateAndRedraw + 1,
     };
   })
 );
