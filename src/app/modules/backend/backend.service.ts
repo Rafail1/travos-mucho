@@ -85,7 +85,7 @@ export interface IDepth {
 
 @Injectable()
 export class BackendService {
-  private api = '/rest/api';
+  private api = 'https://scalp24.store/rest/api';
   bounds: IBounds;
 
   constructor(
@@ -101,7 +101,7 @@ export class BackendService {
   public getDepth(symbol: string, time: Date) {
     // return of(response);
     return this.httpService
-      .get<{ depth: Array<IDepth>; snapshot: ISnapshot }>(`${this.api}/depth`, {
+      .get<{ depth: Array<IDepth>; snapshot: ISnapshot }>(`${this.api}/depth/`, {
         params: new HttpParams({
           fromObject: {
             time: this.dateService.getUtcTime(time),
@@ -133,7 +133,7 @@ export class BackendService {
   }
 
   public getAggTrades(symbol: string, time: Date): Observable<IAggTrade[]> {
-    return this.httpService.get<Array<IAggTrade>>(`${this.api}/agg-trades`, {
+    return this.httpService.get<Array<IAggTrade>>(`${this.api}/agg-trades/`, {
       params: new HttpParams({
         fromObject: {
           time: this.dateService.getUtcTime(time),
@@ -146,7 +146,7 @@ export class BackendService {
   getCluster(symbol: string, time: Date) {
     // return of([]);
 
-    return this.httpService.get<Array<ICluster>>(`${this.api}/cluster`, {
+    return this.httpService.get<Array<ICluster>>(`${this.api}/cluster/`, {
       params: new HttpParams({
         fromObject: {
           time: this.dateService.getUtcTime(time),
