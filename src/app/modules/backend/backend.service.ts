@@ -85,7 +85,7 @@ export interface IDepth {
 
 @Injectable()
 export class BackendService {
-  private api = 'http://localhost:3000';
+  private api = '/rest/api';
   bounds: IBounds;
 
   constructor(
