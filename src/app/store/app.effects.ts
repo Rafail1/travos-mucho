@@ -286,13 +286,6 @@ export class AppEffects {
     )
   );
 
-  setTimeFrom$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(setTimeFrom),
-      switchMap(({ time }) => of(setTime({ time: new Date(time.getTime()) })))
-    )
-  );
-
   forward$ = createEffect(() =>
     this.actions$.pipe(
       ofType(forward),

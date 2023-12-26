@@ -184,6 +184,7 @@ export class HighchartsComponent implements OnDestroy, OnInit {
         }
 
         this.store.dispatch(setTimeFrom({ time: new Date(data[0][0]) }));
+        this.store.dispatch(setTime({ time: new Date(data[data.length - 3][0]) }));
         this.store.dispatch(
           setTimeTo({ time: new Date(data[data.length - 1][0]) })
         );
@@ -214,7 +215,7 @@ export class HighchartsComponent implements OnDestroy, OnInit {
           },
           name: 'Volume',
         });
-        this.drawPlotLine(data[0][0]);
+        this.drawPlotLine(data[data.length - 3][0]);
       });
   }
 
