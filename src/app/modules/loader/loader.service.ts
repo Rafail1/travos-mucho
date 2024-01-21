@@ -43,7 +43,7 @@ export class LoaderService {
       getTrades = of(this.aggTradesCache.get(symbol)?.get(key));
       getFromCache = true;
     } else {
-      getTrades = this.backendService.getAggTrades(symbol, time).pipe(
+      getTrades = this.backendService.getAggTrades(symbol, time.getTime()).pipe(
         tap((data) => {
           if (!getFromCache) {
             if (!this.aggTradesCache.has(symbol)) {

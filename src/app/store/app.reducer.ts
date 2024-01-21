@@ -54,7 +54,7 @@ export interface AppState {
   depth?: Array<IBar>;
   aggTrades?: Array<IAggTrade>;
   snapshot?: ISnapshotFormatted;
-  clusterMap: Map<Date, ICluster[]>;
+  clusterMap: Map<number, ICluster[]>;
   candlestickData?: Array<[number, number, number, number, number, number]>;
   barYs: Record<string, number>;
   scroll: number;
@@ -114,7 +114,7 @@ export const appReducer = createReducer(
     }
     return {
       ...state,
-      clusterMap: new Map(state.clusterMap?.set(time, cluster)),
+      clusterMap: new Map(state.clusterMap?.set(time.getTime(), cluster)),
       loadingCluster: false,
     };
   }),

@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, map, of } from 'rxjs';
-import { DateService } from 'src/app/common/utils/date.service';
+import { EMPTY, Observable, Subject, catchError, map, of, tap } from 'rxjs';
+import { DateService, TIME_WINDOW } from 'src/app/common/utils/date.service';
 import { response } from './mock-trades';
 import { IBarType } from '../scalp/calculation/bar/bar.interface';
 import { BarService } from '../scalp/calculation/bar/bar.service';
@@ -9,6 +9,7 @@ import { IBounds, RootState } from 'src/app/store/app.reducer';
 import { Store, select } from '@ngrx/store';
 import { filterNullish } from 'src/app/common/utils/filter-nullish';
 import { selectBounds } from 'src/app/store/app.selectors';
+import { FIVE_MINUTES } from '../player/player.component';
 export interface IBar {
   depth: [number, number];
   backgroundColor: string;
@@ -21,6 +22,11 @@ export interface IBar {
   E: string;
 }
 
+export interface IClusterParams {
+  symbol: string;
+  startTime: number;
+  endTime: number;
+}
 export interface ISnapshotFormatted {
   // min: number;
   // max: number;
@@ -53,7 +59,7 @@ export interface ICluster {
   p: string;
   volume: number;
   m: boolean;
-  min5_slot: Date;
+  min5_slot: number;
 }
 export interface ISnapshot {
   lastUpdateId: string;
@@ -145,31 +151,91 @@ export class BackendService {
       );
   }
 
-  public getAggTrades(symbol: string, time: Date): Observable<IAggTrade[]> {
-    return this.httpService.get<Array<IAggTrade>>(
-      `https://fapi.binance.com/fapi/v1/aggTrades`,
-      {
-        params: new HttpParams({
-          fromObject: {
-            startTime: time.getTime(),
-            endTime: time.getTime() + 30 * 1000,
-            symbol,
-          },
-        }),
+  public getAggTrades(
+    symbol: string,
+    startTime: number,
+    _endTime?: number
+  ): Observable<IAggTrade[]> {
+    const endTime = _endTime ?? startTime + TIME_WINDOW;
+    const resultSubject = new Subject<IClusterParams>();
+    const result = new Subject<IAggTrade[]>();
+    let aggTrades: IAggTrade[] = [];
+    let latestTs: number;
+
+    resultSubject.subscribe(
+      ({ symbol, startTime, endTime }: IClusterParams) => {
+        this.httpService
+          .get<Array<IAggTrade>>(`https://fapi.binance.com/fapi/v1/aggTrades`, {
+            params: new HttpParams({
+              fromObject: {
+                startTime,
+                endTime,
+                symbol,
+              },
+            }),
+          })
+          .pipe(
+            tap((response) => {
+              latestTs = response[response.length - 1].E;
+              aggTrades = [...aggTrades, ...response];
+            }),
+            catchError((e) => {
+              console.error(e);
+              resultSubject.complete();
+              result.next(aggTrades);
+              result.complete();
+              return EMPTY;
+            })
+          )
+          .subscribe(() => {
+            if (latestTs < endTime) {
+              resultSubject.next({ symbol, startTime: latestTs, endTime });
+            } else {
+              resultSubject.complete();
+              result.next(aggTrades);
+              result.complete();
+            }
+          });
       }
     );
+
+    resultSubject.next({ symbol, startTime, endTime });
+    return result;
   }
 
   getCluster(symbol: string, time: Date) {
-    // return of([]);
-
-    return this.httpService.get<Array<ICluster>>(`${this.api}/cluster/`, {
-      params: new HttpParams({
-        fromObject: {
-          time: this.dateService.getUtcTime(time),
-          symbol,
-        },
-      }),
-    });
+    const startTime = time.getTime();
+    const endTime = startTime + FIVE_MINUTES;
+    return this.getAggTrades(symbol, startTime, endTime).pipe(
+      map((items) => {
+        const _result: Record<string, ICluster> = {};
+        for (const item of items) {
+          const key = `${item.p}${item.m}`;
+          const exists = _result[key];
+          if (exists) {
+            exists.volume += Number(item.q);
+          } else {
+            if (
+              Number.isNaN(
+                this.dateService
+                  .filterTime(new Date(item.T), FIVE_MINUTES)
+                  .getTime()
+              )
+            ) {
+              debugger;
+            }
+            _result[key] = {
+              p: item.p,
+              volume: Number(item.q),
+              m: item.m,
+              min5_slot: this.dateService
+                .filterTime(new Date(item.T), FIVE_MINUTES)
+                .getTime(),
+            };
+          }
+        }
+        return Object.values(_result);
+      })
+    );
   }
 }

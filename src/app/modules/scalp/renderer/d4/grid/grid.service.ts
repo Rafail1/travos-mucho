@@ -90,9 +90,9 @@ export class GridService {
     return this.height$.asObservable();
   }
 
-  getMin5SlotX(min5_slot: Date) {
+  getMin5SlotX(min5_slot: number) {
     const x =
-      Math.floor((this.time.getTime() - min5_slot.getTime()) / FIVE_MINUTES) *
+      Math.floor((this.time.getTime() - min5_slot) / FIVE_MINUTES) *
       this.settingsService.getStyle().clusterWidth;
     return 240 - x;
   }

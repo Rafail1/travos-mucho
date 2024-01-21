@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 export interface IClusterData {
-  slot: Date;
+  slot: number;
   volume: number;
   price: number;
   askVolume: number;

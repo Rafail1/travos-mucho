@@ -45,7 +45,7 @@ export class ClusterRendererService {
   }
 
   updateCluster(data: ICluster) {
-    this.currentCluster = data.min5_slot.getTime();
+    this.currentCluster = data.min5_slot;
     if (!this.clusters.get(this.currentCluster)) {
       return this.addClusters(new Map([[data.min5_slot, [data]]]));
     } else if (!this.clusters.get(this.currentCluster)?.has(Number(data.p))) {
@@ -75,9 +75,9 @@ export class ClusterRendererService {
     this.render();
   }
 
-  addClusters(clusters: Map<Date, ICluster[]>) {
+  addClusters(clusters: Map<number, ICluster[]>) {
     for (let [key, cluster] of clusters.entries()) {
-      if (!this.clusters.has(key.getTime())) {
+      if (!this.clusters.has(key)) {
         const value = new Map(
           cluster.map((item) => {
             return [
@@ -92,8 +92,8 @@ export class ClusterRendererService {
             ];
           })
         );
-        this.clusters.set(key.getTime(), value);
-        this.currentCluster = key.getTime();
+        this.clusters.set(key, value);
+        this.currentCluster = key;
         this.render();
       }
     }
@@ -257,7 +257,7 @@ export class ClusterRendererService {
       askVolume: 0,
       bidVolume: 0,
       price: d,
-      slot: new Date(this.currentCluster),
+      slot: this.currentCluster,
       volume: 0,
     };
   }

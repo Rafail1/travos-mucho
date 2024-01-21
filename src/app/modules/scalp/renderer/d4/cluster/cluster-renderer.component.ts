@@ -48,7 +48,9 @@ export class ClusterRendererComponent implements OnInit, OnDestroy {
         m: data.m,
         volume: Number(data.q),
         p: data.p,
-        min5_slot: this.dateService.filterTime(new Date(data.E), FIVE_MINUTES),
+        min5_slot: this.dateService
+          .filterTime(new Date(data.T), FIVE_MINUTES)
+          .getTime(),
       });
     });
     this.store
@@ -60,7 +62,7 @@ export class ClusterRendererComponent implements OnInit, OnDestroy {
     this.store
       .pipe(select(selectClusters), filterNullish(), takeUntil(this.destroy$))
       .subscribe((clusters) => {
-        // this.clusterRendererService.addClusters(clusters);
+        this.clusterRendererService.addClusters(clusters);
       });
   }
 
@@ -71,6 +73,6 @@ export class ClusterRendererComponent implements OnInit, OnDestroy {
   }
 
   private renderCluster(data: ICluster) {
-    // this.clusterRendererService.updateCluster(data);
+    this.clusterRendererService.updateCluster(data);
   }
 }
