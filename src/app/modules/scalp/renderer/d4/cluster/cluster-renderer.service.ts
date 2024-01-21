@@ -174,9 +174,6 @@ export class ClusterRendererService {
               }
 
               const percent = (volume / maxClusterVolume) * rectSizePercent;
-              if (percent > 20) {
-                debugger;
-              }
               return `${percent}%`;
             });
 
@@ -230,9 +227,6 @@ export class ClusterRendererService {
               }
 
               const percent = (volume / maxClusterVolume) * rectSizePercent;
-              if (percent > 20) {
-                debugger;
-              }
               return `${percent}%`;
             });
 

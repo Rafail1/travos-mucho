@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable, map, of, tap } from 'rxjs';
+import { Observable, map, of, take, tap } from 'rxjs';
 import { filterNullish } from 'src/app/common/utils/filter-nullish';
 import { RootState } from 'src/app/store/app.reducer';
 import {
@@ -81,7 +81,7 @@ export class LoaderService {
     let getFromCache = false;
     if (this.depthCache.get(symbol)?.has(key)) {
       const data = this.depthCache.get(symbol)?.get(key);
-      data$ = of(data);
+      data$ = of(data).pipe(take(1));
       getFromCache = true;
     } else {
       data$ = this.backendService.getDepth(symbol, time);

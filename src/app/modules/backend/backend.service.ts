@@ -108,7 +108,7 @@ export class BackendService {
     symbol: string,
     time: Date
   ): Observable<{ depth: Array<IDepth>; snapshot: ISnapshot }> {
-    // return of(response);
+    console.log(symbol);
     return this.httpService
       .get<{ depth: Array<IDepth>; snapshot: ISnapshot }>(
         `${this.api}/depth/`,
@@ -116,6 +116,7 @@ export class BackendService {
           params: new HttpParams({
             fromObject: {
               time: this.dateService.getUtcTime(time),
+              here: "1",
               symbol,
             },
           }),
@@ -215,15 +216,6 @@ export class BackendService {
           if (exists) {
             exists.volume += Number(item.q);
           } else {
-            if (
-              Number.isNaN(
-                this.dateService
-                  .filterTime(new Date(item.T), FIVE_MINUTES)
-                  .getTime()
-              )
-            ) {
-              debugger;
-            }
             _result[key] = {
               p: item.p,
               volume: Number(item.q),

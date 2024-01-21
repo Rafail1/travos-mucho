@@ -32,7 +32,7 @@ export class BarRendererService {
     });
     this.svg.style('width', '100%');
     this.gridService.visibleAreaChanged$.subscribe(() => {
-      this.render([]);
+      this.render({});
     });
   }
 
