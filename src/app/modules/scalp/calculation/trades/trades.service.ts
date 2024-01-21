@@ -48,7 +48,7 @@ export class TradesService implements OnDestroy {
           return this.time$.pipe(
             map((time: Date) => {
               for (; index < data.length; index++) {
-                if (new Date(data[index].E).getTime() > time.getTime()) {
+                if (new Date(data[index].T).getTime() > time.getTime()) {
                   break;
                 }
               }

@@ -60,7 +60,7 @@ export class ClusterRendererComponent implements OnInit, OnDestroy {
     this.store
       .pipe(select(selectClusters), filterNullish(), takeUntil(this.destroy$))
       .subscribe((clusters) => {
-        this.clusterRendererService.addClusters(clusters);
+        // this.clusterRendererService.addClusters(clusters);
       });
   }
 
@@ -71,6 +71,6 @@ export class ClusterRendererComponent implements OnInit, OnDestroy {
   }
 
   private renderCluster(data: ICluster) {
-    this.clusterRendererService.updateCluster(data);
+    // this.clusterRendererService.updateCluster(data);
   }
 }

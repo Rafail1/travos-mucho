@@ -69,7 +69,7 @@ export class CalculationService {
     const result = new Map<string, IAggTrade>();
     for (const item of data) {
       const p = String(this.getSquizedPrice(Number(item.p)));
-      const time = item.E;
+      const time = item.T;
       const type = item.m;
       const key = `${p}_${time}_${type}`;
       const existsAggTrade = result.get(key);

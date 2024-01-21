@@ -98,21 +98,31 @@ export class BackendService {
     });
   }
 
-  public getDepth(symbol: string, time: Date) {
+  public getDepth(
+    symbol: string,
+    time: Date
+  ): Observable<{ depth: Array<IDepth>; snapshot: ISnapshot }> {
     // return of(response);
     return this.httpService
-      .get<{ depth: Array<IDepth>; snapshot: ISnapshot }>(`${this.api}/depth/`, {
-        params: new HttpParams({
-          fromObject: {
-            time: this.dateService.getUtcTime(time),
-            symbol,
-          },
-        }),
-      })
+      .get<{ depth: Array<IDepth>; snapshot: ISnapshot }>(
+        `${this.api}/depth/`,
+        {
+          params: new HttpParams({
+            fromObject: {
+              time: this.dateService.getUtcTime(time),
+              symbol,
+            },
+          }),
+        }
+      )
       .pipe(
         filterNullish(),
-        map((data) => {
-          data.depth = data.depth?.filter((item) => {
+        map(({ snapshot, depth }) => {
+          const result: { snapshot: ISnapshot; depth: Array<IDepth> } = {
+            snapshot,
+            depth: [],
+          };
+          for (const item of depth) {
             item.a = item.a.filter(
               ([price]) =>
                 Number(price) > this.bounds.min &&
@@ -125,22 +135,29 @@ export class BackendService {
                 Number(price) < this.bounds.max
             );
 
-            return item.b.length + item.a.length > 0;
-          });
-          return data;
+            if (item.b.length + item.a.length > 0) {
+              result.depth.push(item);
+            }
+          }
+
+          return result;
         })
       );
   }
 
   public getAggTrades(symbol: string, time: Date): Observable<IAggTrade[]> {
-    return this.httpService.get<Array<IAggTrade>>(`${this.api}/agg-trades/`, {
-      params: new HttpParams({
-        fromObject: {
-          time: this.dateService.getUtcTime(time),
-          symbol,
-        },
-      }),
-    });
+    return this.httpService.get<Array<IAggTrade>>(
+      `https://fapi.binance.com/fapi/v1/aggTrades`,
+      {
+        params: new HttpParams({
+          fromObject: {
+            startTime: time.getTime(),
+            endTime: time.getTime() + 30 * 1000,
+            symbol,
+          },
+        }),
+      }
+    );
   }
 
   getCluster(symbol: string, time: Date) {

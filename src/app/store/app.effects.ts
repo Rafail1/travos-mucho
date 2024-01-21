@@ -243,26 +243,26 @@ export class AppEffects {
     )
   );
 
-  getCluster$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(getCluster),
-      mergeMap((action) => {
-        return this.loaderService.loadCluster(action).pipe(
-          map((payload) =>
-            getClusterSuccess({
-              time: action.time,
-              cluster: payload,
-              symbol: action.symbol,
-            })
-          ),
-          catchError((e) => {
-            console.error(e);
-            return EMPTY
-          })
-        );
-      })
-    )
-  );
+  // getCluster$ = createEffect(() =>
+  //   this.actions$.pipe(
+  //     ofType(getCluster),
+  //     mergeMap((action) => {
+  //       return this.loaderService.loadCluster(action).pipe(
+  //         map((payload) =>
+  //           getClusterSuccess({
+  //             time: action.time,
+  //             cluster: payload,
+  //             symbol: action.symbol,
+  //           })
+  //         ),
+  //         catchError((e) => {
+  //           console.error(e);
+  //           return EMPTY
+  //         })
+  //       );
+  //     })
+  //   )
+  // );
 
   init$ = createEffect(() =>
     this.actions$.pipe(
