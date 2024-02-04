@@ -1,15 +1,13 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { EMPTY, Observable, Subject, catchError, map, of, tap } from 'rxjs';
-import { DateService, TIME_WINDOW } from 'src/app/common/utils/date.service';
-import { response } from './mock-trades';
-import { IBarType } from '../scalp/calculation/bar/bar.interface';
-import { BarService } from '../scalp/calculation/bar/bar.service';
-import { IBounds, RootState } from 'src/app/store/app.reducer';
 import { Store, select } from '@ngrx/store';
+import { EMPTY, Observable, catchError, map, merge, of, switchMap } from 'rxjs';
+import { DateService, TIME_WINDOW } from 'src/app/common/utils/date.service';
 import { filterNullish } from 'src/app/common/utils/filter-nullish';
+import { IBounds, RootState } from 'src/app/store/app.reducer';
 import { selectBounds } from 'src/app/store/app.selectors';
 import { FIVE_MINUTES } from '../player/player.component';
+import { IBarType } from '../scalp/calculation/bar/bar.interface';
 export interface IBar {
   depth: [number, number];
   backgroundColor: string;
@@ -93,6 +91,7 @@ export interface IDepth {
 export class BackendService {
   private api = 'https://scalp24.store/rest/api';
   bounds: IBounds;
+  private getAggTradesPromiseMap = new Map<string, Observable<IAggTrade[]>>();
 
   constructor(
     private httpService: HttpClient,
@@ -108,7 +107,6 @@ export class BackendService {
     symbol: string,
     time: Date
   ): Observable<{ depth: Array<IDepth>; snapshot: ISnapshot }> {
-    console.log(symbol);
     return this.httpService
       .get<{ depth: Array<IDepth>; snapshot: ISnapshot }>(
         `${this.api}/depth/`,
@@ -116,7 +114,7 @@ export class BackendService {
           params: new HttpParams({
             fromObject: {
               time: this.dateService.getUtcTime(time),
-              here: "1",
+              here: '1',
               symbol,
             },
           }),
@@ -158,50 +156,44 @@ export class BackendService {
     _endTime?: number
   ): Observable<IAggTrade[]> {
     const endTime = _endTime ?? startTime + TIME_WINDOW;
-    const resultSubject = new Subject<IClusterParams>();
-    const result = new Subject<IAggTrade[]>();
-    let aggTrades: IAggTrade[] = [];
-    let latestTs: number;
 
-    resultSubject.subscribe(
-      ({ symbol, startTime, endTime }: IClusterParams) => {
-        this.httpService
-          .get<Array<IAggTrade>>(`https://fapi.binance.com/fapi/v1/aggTrades`, {
-            params: new HttpParams({
-              fromObject: {
-                startTime,
-                endTime,
-                symbol,
-              },
-            }),
-          })
-          .pipe(
-            tap((response) => {
-              latestTs = response[response.length - 1].E;
-              aggTrades = [...aggTrades, ...response];
-            }),
-            catchError((e) => {
-              console.error(e);
-              resultSubject.complete();
-              result.next(aggTrades);
-              result.complete();
-              return EMPTY;
-            })
-          )
-          .subscribe(() => {
-            if (latestTs < endTime) {
-              resultSubject.next({ symbol, startTime: latestTs, endTime });
-            } else {
-              resultSubject.complete();
-              result.next(aggTrades);
-              result.complete();
-            }
-          });
-      }
-    );
+    const k = `${startTime};${endTime}`;
+    const exists = this.getAggTradesPromiseMap.get(k);
+    if (exists) {
+      return exists;
+    }
 
-    resultSubject.next({ symbol, startTime, endTime });
-    return result;
+    const limit = 1000;
+    const observable = this.httpService
+      .get<Array<IAggTrade>>(`https://fapi.binance.com/fapi/v1/aggTrades`, {
+        params: new HttpParams({
+          fromObject: {
+            startTime,
+            endTime,
+            limit,
+            symbol,
+          },
+        }),
+      })
+      .pipe(
+        switchMap((response) => {
+          const latestTs = response[response.length - 1].T;
+          if (response.length === limit) {
+            return merge(
+              of(response),
+              this.getAggTrades(symbol, latestTs, endTime)
+            );
+          } else {
+            return of(response);
+          }
+        }),
+        catchError((e) => {
+          console.error(e);
+          return EMPTY;
+        })
+      );
+    this.getAggTradesPromiseMap.set(k, observable);
+    return observable;
   }
 
   getCluster(symbol: string, time: Date) {
